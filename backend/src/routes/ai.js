@@ -392,8 +392,8 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       null;
 
     let resolvedBaseUrl = 'https://api.groq.com/openai/v1';
-    let resolvedModel = 'deepseek-r1-distill-llama-70b';
-    let providerName = 'Groq (DeepSeek-R1 Gratuit)';
+    let resolvedModel = 'openai/gpt-oss-120b';
+    let providerName = 'Groq Cloud (120B Gratuit)';
 
     if (provider === 'deepseek' || (resolvedKey && resolvedKey.startsWith('sk-') && !resolvedKey.startsWith('gsk_') && !resolvedKey.startsWith('sk-or-'))) {
       resolvedBaseUrl = 'https://api.deepseek.com';
@@ -411,8 +411,8 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       providerName = 'OpenAI (ChatGPT)';
     } else if (provider === 'groq' || (resolvedKey && resolvedKey.startsWith('gsk_'))) {
       resolvedBaseUrl = 'https://api.groq.com/openai/v1';
-      resolvedModel = model || 'deepseek-r1-distill-llama-70b';
-      providerName = 'Groq (DeepSeek-R1 Gratuit)';
+      resolvedModel = model || 'openai/gpt-oss-120b';
+      providerName = 'Groq Cloud (120B Gratuit)';
     }
 
     if (process.env.AI_BASE_URL) resolvedBaseUrl = process.env.AI_BASE_URL;

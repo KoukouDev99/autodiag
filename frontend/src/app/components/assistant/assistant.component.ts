@@ -40,7 +40,10 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
   ngOnInit(): void {
     // 1. Charger les clés sauvegardées dans le navigateur
     const savedKey = localStorage.getItem('autodiag_ai_key');
-    if (savedKey) this.customApiKey = savedKey;
+    this.customApiKey = savedKey || 'GROQ_API_KEY_PLACEHOLDER';
+    if (!savedKey) {
+      localStorage.setItem('autodiag_ai_key', this.customApiKey);
+    }
 
     const savedProvider = localStorage.getItem('autodiag_ai_provider') as any;
     if (savedProvider) this.selectedProvider = savedProvider;
@@ -80,7 +83,7 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     this.messages = [
       {
         role: 'assistant',
-        content: `Bonjour ! Je suis **AutoDiag Copilote**, votre mécanicien virtuel intelligent.\n\nJe suis configuré pour répondre précisément aux spécificités de votre **${vehName}**${mileage ? ' (' + mileage + ')' : ''}.\n\nPosez-moi n'importe quelle question sur vos pannes, voyants, révisions, bruits suspects ou tarifs d'atelier !`,
+        content: `Bonjour ! Je suis **AutoDiag Copilote**, votre mécanicien virtuel intelligent.\n\nJe suis connecté à **Groq Cloud (LLM 120B / DeepSeek)** et configuré pour répondre précisément aux spécificités de votre **${vehName}**${mileage ? ' (' + mileage + ')' : ''}.\n\nPosez-moi n'importe quelle question sur vos pannes, voyants, révisions, bruits suspects ou tarifs d'atelier !`,
         timestamp: new Date(),
         provider: this.activeModelLabel
       }
@@ -97,7 +100,7 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
   updateModelLabel(): void {
     switch (this.selectedProvider) {
       case 'groq':
-        this.activeModelLabel = 'Groq (DeepSeek-R1 70B Gratuit)';
+        this.activeModelLabel = 'Groq Cloud (LLM 120B / DeepSeek Gratuit)';
         break;
       case 'deepseek':
         this.activeModelLabel = 'DeepSeek API Officielle';
