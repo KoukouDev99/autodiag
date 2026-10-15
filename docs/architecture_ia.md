@@ -67,7 +67,26 @@ flowchart TD
 
 ---
 
-## 4. Organisation des Dossiers Livrables
+## 4. Module IA #2 — Reformulation des Questions pour Débutants
+
+* **Objectif** : Traduire le jargon technique issu du diagnostic en constat sensoriel (ce que l'utilisateur entend, voit, sent ou ressent).
+* **Runtime** : `llama-cpp-python` (version 0.3.36, roues officielles Windows CPU pré-compilées).
+* **Modèle local** : `Qwen2.5-3B-Instruct Q4_K_M` (~2.09 Go GGUF).
+* **Règle absolue de Fallback** : Si le LLM n'est pas présent, met plus de 4 secondes ou échoue, le système retourne immédiatement la question originale (avec indice pédagogique si disponible) avec `fallback_applied: true`. L'application n'est jamais bloquée.
+
+### Schéma de Réponse API (`POST /api/reformulate-question`)
+```json
+{
+  "original_question": "Le démarreur entraîne-t-il le volant moteur normalement ?",
+  "reformulated_question": "Pour débutant : entendez-vous le démarreur lancer le moteur avec force ou fait-il seulement un bruit de clic ?",
+  "explanation_hint": "Le démarreur est le moteur électrique qui lance le moteur quand vous tournez la clé.",
+  "fallback_applied": true
+}
+```
+
+---
+
+## 5. Organisation des Dossiers Livrables
 
 ```
 ├── app/
@@ -78,7 +97,10 @@ flowchart TD
 │       │   ├── __init__.py
 │       │   ├── service.py           # SymptomNormalizer & FAISS
 │       │   └── router.py            # POST /api/normalize-symptom
-│       ├── reformulation/           # IA #2 : Reformulation (à venir Étape 4)
+│       ├── reformulation/           # IA #2 : Reformulation pour débutants
+│       │   ├── __init__.py
+│       │   ├── service.py           # QuestionReformulator & llama_cpp
+│       │   └── router.py            # POST /api/reformulate-question
 │       ├── rag/                     # IA #3 : RAG documentaire (à venir Étape 5)
 │       ├── explanation/             # IA #4 : Explication vulgarisée (à venir Étape 5)
 │       └── safety/                  # IA #5 : Garde-fou sécurité (à venir Étape 6)

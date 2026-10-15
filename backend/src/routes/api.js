@@ -407,6 +407,52 @@ router.post('/normalize-symptom', async (req, res) => {
   }
 });
 
+// IA #2: Beginner Question Reformulation (FastAPI microservice proxy + deterministic fallback)
+router.post('/reformulate-question', async (req, res) => {
+  const { question, context, options } = req.body;
+  if (!question || !question.trim()) {
+    return res.json({
+      original_question: '',
+      reformulated_question: '',
+      explanation_hint: null,
+      fallback_applied: true
+    });
+  }
+
+  // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  try {
+    const aiResponse = await fetch(`${aiServiceUrl}/api/reformulate-question`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, context, options }),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (aiResponse.ok) {
+      const data = await aiResponse.json();
+      return res.json(data);
+    }
+  } catch (aiErr) {
+    console.warn('[AI Service] FastAPI offline or timed out for reformulation, applying fallback:', aiErr.message);
+  }
+
+  // 2. Deterministic Fallback: return original question (requirement: si LLM échoue, retourner la question originale)
+  let hint = null;
+  const qLower = question.toLowerCase();
+  if (qLower.includes('démarreur')) hint = "Le démarreur est le moteur électrique qui lance le moteur au tour de clé.";
+  else if (qLower.includes('solénoïde')) hint = "Le solénoïde est l'interrupteur magnétique du démarreur qui fait 'clac'.";
+  else if (qLower.includes('pompe')) hint = "La pompe de gavage envoie le carburant vers le moteur.";
+  else if (qLower.includes('alternateur')) hint = "L'alternateur produit l'électricité et recharge la batterie quand le moteur tourne.";
+  else if (qLower.includes('étrier') || qLower.includes('frein')) hint = "Le système de freinage ralentit les roues via les plaquettes et disques.";
+
+  return res.json({
+    original_question: question,
+    reformulated_question: question,
+    explanation_hint: hint,
+    fallback_applied: true
+  });
+});
+
 // 4. Recent diagnostics
 router.get('/diagnostics/recent', async (req, res) => {
   try {
