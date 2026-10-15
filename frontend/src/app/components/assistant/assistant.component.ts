@@ -156,7 +156,8 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
           content: res.reply || 'Désolé, je n\'ai pas pu formuler de réponse.',
           timestamp: new Date(),
           provider: res.provider || this.activeModelLabel,
-          model: res.model
+          model: res.model,
+          db_context_applied: res.db_context_applied
         });
       },
       error: () => {

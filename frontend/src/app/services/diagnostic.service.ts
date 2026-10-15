@@ -621,6 +621,7 @@ export interface AiChatResponse {
   provider: string;
   model: string;
   vehicle_applied: boolean;
+  db_context_applied?: boolean;
   status: string;
   fallback_applied?: boolean;
 }
@@ -632,5 +633,6 @@ export interface ChatMessage {
   timestamp: Date;
   provider?: string;
   model?: string;
+  db_context_applied?: boolean;
 }
 

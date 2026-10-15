@@ -153,6 +153,12 @@
             @if (msg.role === 'assistant' && msg.provider) {
               <span class="meta-provider">{{ msg.provider }}</span>
             }
+            @if (msg.role === 'assistant' && msg.db_context_applied) {
+              <span class="meta-db-badge" title="Fiche technique certifiée extraite en direct de la base MySQL AutoDiag">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                Base MySQL
+              </span>
+            }
             <span class="meta-time">{{ msg.timestamp | date:'HH:mm' }}</span>
           </div>
         </div>

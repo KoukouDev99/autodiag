@@ -342,8 +342,65 @@ router.post('/check-safety', async (req, res) => {
   });
 });
 
-// Helper: Build tailored system prompt based on user vehicle
-function buildVehicleSystemPrompt(vehicle) {
+// Helper: Retrieve relevant knowledge from MySQL database based on user question
+async function retrieveDatabaseContext(pool, message, vehicle) {
+  let dbContext = '';
+
+  // 1. Detect DTC codes (e.g. P0420, P0300, C1234, B0001, U0100)
+  const dtcMatch = message.match(/\b([PCBU][0-9]{4})\b/i);
+  if (dtcMatch) {
+    const code = dtcMatch[1].toUpperCase();
+    try {
+      const [rows] = await pool.query('SELECT * FROM dtc_codes WHERE code = ? LIMIT 1', [code]);
+      if (rows && rows.length > 0) {
+        const dtc = rows[0];
+        let causes = [];
+        try { causes = typeof dtc.possible_causes === 'string' ? JSON.parse(dtc.possible_causes) : (dtc.possible_causes || []); } catch (_) {}
+        dbContext += `\n[FICHE OFFICIELLE DE LA BASE DE DONNÉES - CODE DÉFAUT ${dtc.code}] :
+- Définition : ${dtc.description || dtc.title}
+- Système : ${dtc.system || 'Moteur'}
+- Causes possibles répertoriées : ${causes.length > 0 ? causes.slice(0, 5).join(', ') : 'Capteur, sonde, câblage ou actionneur défectueux'}
+- Gravité : ${dtc.urgency || 'Standard'}\n`;
+      }
+    } catch (e) {
+      console.warn('[AI DB RAG] DTC lookup error:', e.message);
+    }
+  }
+
+  // 2. Search related faults & solutions in database (ex: batterie, alternateur, fap, egr, injecteur, frein, démarreur...)
+  const words = message.toLowerCase().split(/\s+/).filter(w => w.length > 3 && !['avec', 'pour', 'dans', 'cette', 'votre', 'faire', 'peux', 'quoi'].includes(w));
+  if (words.length > 0) {
+    try {
+      const [faultRows] = await pool.query(
+        `SELECT f.code, f.name, f.description, f.cost_min, f.cost_max, f.is_danger,
+                s.title as solution_title, s.est_time, s.difficulty
+         FROM faults f
+         LEFT JOIN solutions s ON f.id = s.fault_id
+         WHERE ${words.map(() => '(f.name LIKE ? OR f.description LIKE ?)').join(' OR ')}
+         LIMIT 2`,
+        words.flatMap(w => [`%${w}%`, `%${w}%`])
+      );
+      if (faultRows && faultRows.length > 0) {
+        dbContext += `\n[DONNÉES ATELIER DE LA BASE DE DONNÉES AUTODIAG] :`;
+        for (const f of faultRows) {
+          dbContext += `\n- Panne homologuée : ${f.name} (Code : ${f.code})
+  Coût moyen vérifié en base : ${f.cost_min} € à ${f.cost_max} €
+  Danger vital : ${f.is_danger ? 'OUI (Alerte rouge)' : 'Non'}`;
+          if (f.solution_title) {
+            dbContext += `\n  Solution recommandée : ${f.solution_title} (Durée estimée : ~${f.est_time || '30 min'}, Difficulté : ${f.difficulty || 'standard'})`;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AI DB RAG] Faults lookup error:', e.message);
+    }
+  }
+
+  return dbContext;
+}
+
+// Helper: Build tailored system prompt based on user vehicle and database context
+function buildVehicleSystemPrompt(vehicle, dbContext = '') {
   let vehDesc = 'Non renseigné (conseils généralistes)';
   if (vehicle && vehicle.brand) {
     vehDesc = `${vehicle.brand} ${vehicle.model || ''} (${vehicle.year || 'Année non précisée'})
@@ -351,18 +408,26 @@ function buildVehicleSystemPrompt(vehicle) {
 - Kilométrage compteur : ${vehicle.mileage ? Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : 'Non précisé'}`;
   }
 
-  return `Tu es "AutoDiag Copilote", un mécanicien automobile expert, courtois, pédagogue et bienveillant.
+  let prompt = `Tu es "AutoDiag Copilote", un mécanicien automobile expert, courtois, pédagogue et bienveillant.
 Tu réponds aux questions des automobilistes en adaptant précisément tes explications selon le profil et le véhicule de l'utilisateur.
 
-CONTEXTE DU VÉHICULE ACTIF DE L'UTILISATEUR :
-${vehDesc}
+CONTEXTE DU VÉHICULE ACTIF DE L'UTILISATEUR (ISSUS DE LA BASE DE DONNÉES) :
+${vehDesc}`;
 
-RÈGLES D'OR DE RÉPONSE :
+  if (dbContext && dbContext.trim()) {
+    prompt += `\n\nDONNÉES TECHNIQUES EXTRAITES EN TEMPS RÉEL DE LA BASE DE DONNÉES DU PROJET (MYSQL AUTODIAG) :
+${dbContext}
+(Consigne : Utilise ces données officielles de la base pour appuyer tes explications, tes prix et tes causes probables !)`;
+  }
+
+  prompt += `\n\nRÈGLES D'OR DE RÉPONSE :
 1. Personnalisation : Réponds TOUJOURS en tenant compte des spécificités du véhicule de l'utilisateur (motorisation essence vs diesel vs hybride, kilométrage d'usure, problèmes connus du modèle).
 2. Pédagogie sans jargon : Explique simplement ce qui se passe sous le capot avec des métaphores intuitives.
 3. Estimations de coûts transparentes : Donne des fourchettes tarifaires réalistes en euros (€) pour les pièces et la main d'œuvre (fourchettes garagiste indépendant vs concession).
 4. Sécurité & Urgence : Si la question concerne le freinage, la direction, la surchauffe ou une fuite inflammable, ordonne immédiatement l'arrêt en sécurité.
 5. Sois concis, structuré (utilise des listes à puces et du texte en gras) et réponds directement en français.`;
+
+  return prompt;
 }
 
 // 6. Interactive AI Chat Assistant (Compatible OpenAI / DeepSeek / Groq Gratuit / OpenRouter / Local Fallback)
@@ -381,7 +446,9 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       return res.status(400).json({ error: 'Message requis.' });
     }
 
-    const systemPrompt = buildVehicleSystemPrompt(vehicle);
+    const pool = getPool();
+    const dbContext = await retrieveDatabaseContext(pool, message, vehicle);
+    const systemPrompt = buildVehicleSystemPrompt(vehicle, dbContext);
 
     // 1. Resolve API key and Base URL
     let resolvedKey = (api_key && api_key.trim()) ||
@@ -454,6 +521,7 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
               provider: providerName,
               model: resolvedModel,
               vehicle_applied: !!(vehicle && vehicle.brand),
+              db_context_applied: !!(dbContext && dbContext.trim()),
               status: 'success',
               fallback_applied: false
             });
@@ -496,6 +564,7 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       provider: 'AutoDiag IA Locale (Mode Hors-Ligne)',
       model: 'Qwen2.5-Offline-Fallback',
       vehicle_applied: !!(vehicle && vehicle.brand),
+      db_context_applied: !!(dbContext && dbContext.trim()),
       status: 'success',
       fallback_applied: true
     });
