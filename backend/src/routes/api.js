@@ -330,6 +330,83 @@ router.get('/symptoms', async (req, res) => {
   }
 });
 
+// IA #1: Semantic Symptom Normalization (FastAPI microservice proxy + deterministic fallback)
+router.post('/normalize-symptom', async (req, res) => {
+  try {
+    const { text, threshold = 0.6, top_k = 3 } = req.body;
+    if (!text || !text.trim()) {
+      return res.json({
+        symptom_id: null,
+        code: null,
+        label: null,
+        category: null,
+        score: 0.0,
+        needs_clarification: true,
+        message: 'Veuillez saisir votre observation.',
+        threshold,
+        top_3_alternatives: [],
+        fallback_applied: false
+      });
+    }
+
+    // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
+    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+    try {
+      const aiResponse = await fetch(`${aiServiceUrl}/api/normalize-symptom`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, threshold, top_k }),
+        signal: AbortSignal.timeout(3000)
+      });
+      if (aiResponse.ok) {
+        const data = await aiResponse.json();
+        return res.json(data);
+      }
+    } catch (aiErr) {
+      console.warn('[AI Service] FastAPI offline or timed out, executing deterministic keyword fallback:', aiErr.message);
+    }
+
+    // 2. Deterministic Fallback if AI service is offline
+    const pool = getPool();
+    const [symptoms] = await pool.query('SELECT id, code, label, category, description FROM symptoms');
+    const qLower = text.toLowerCase();
+
+    const scored = symptoms.map(s => {
+      const corpus = `${s.label} ${s.category} ${s.description}`.toLowerCase();
+      const terms = qLower.split(/\s+/).filter(w => w.length > 2);
+      let matchCount = 0;
+      terms.forEach(t => { if (corpus.includes(t)) matchCount++; });
+      const score = terms.length > 0 ? Math.min(0.85, (matchCount / terms.length) * 0.7 + (matchCount > 0 ? 0.25 : 0)) : 0;
+      return {
+        symptom_id: s.id,
+        code: s.code,
+        label: s.label,
+        category: s.category,
+        score: Number(score.toFixed(4))
+      };
+    }).sort((a, b) => b.score - a.score);
+
+    const topAlternatives = scored.slice(0, top_k);
+    const best = topAlternatives[0] || { score: 0 };
+    const needsClarification = best.score < threshold;
+
+    return res.json({
+      symptom_id: needsClarification ? null : best.symptom_id,
+      code: needsClarification ? null : best.code,
+      label: needsClarification ? null : best.label,
+      category: needsClarification ? null : best.category,
+      score: best.score,
+      needs_clarification: needsClarification,
+      message: needsClarification ? 'Symptôme ambigu ou trop vague. Veuillez préciser vos observations.' : null,
+      threshold,
+      top_3_alternatives: topAlternatives,
+      fallback_applied: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message, fallback_applied: true });
+  }
+});
+
 // 4. Recent diagnostics
 router.get('/diagnostics/recent', async (req, res) => {
   try {

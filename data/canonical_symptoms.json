@@ -1,0 +1,578 @@
+[
+  {
+    "id": 1,
+    "code": "start_fail",
+    "label": "Ne démarre pas",
+    "category": "Démarrage",
+    "icon": "key",
+    "description": "Le véhicule refuse de démarrer ou cale immédiatement.",
+    "normalized_name": "demarrage_impossible"
+  },
+  {
+    "id": 2,
+    "code": "check_engine",
+    "label": "Voyant moteur",
+    "category": "Moteur",
+    "icon": "engine",
+    "description": "Voyant orange ou rouge allumé au combiné.",
+    "normalized_name": "voyant_moteur_allume"
+  },
+  {
+    "id": 3,
+    "code": "strange_noise",
+    "label": "Bruit inhabituel",
+    "category": "Mécanique",
+    "icon": "sound",
+    "description": "Claquement, grincement, sifflement ou vibration anormale.",
+    "normalized_name": "bruit_anormal_mecanique"
+  },
+  {
+    "id": 4,
+    "code": "smoke",
+    "label": "Fumée",
+    "category": "Échappement",
+    "icon": "smoke",
+    "description": "Fumée blanche, noire ou bleutée à l’échappement ou sous le capot.",
+    "normalized_name": "fumee_echappement"
+  },
+  {
+    "id": 5,
+    "code": "overheat",
+    "label": "Surchauffe",
+    "category": "Moteur",
+    "icon": "thermometer",
+    "description": "Aiguille de température trop haute ou voyant de liquide allumé.",
+    "normalized_name": "surchauffe_moteur"
+  },
+  {
+    "id": 6,
+    "code": "brakes",
+    "label": "Freins",
+    "category": "Sécurité",
+    "icon": "brakes",
+    "description": "Pédale spongieuse, couinement ou perte d’efficacité.",
+    "normalized_name": "freinage_defectueux"
+  },
+  {
+    "id": 7,
+    "code": "battery",
+    "label": "Batterie",
+    "category": "Électrique",
+    "icon": "battery",
+    "description": "Tension faible, accessoires lents ou voyant batterie.",
+    "normalized_name": "panne_batterie_charge"
+  },
+  {
+    "id": 8,
+    "code": "electric",
+    "label": "Problème électrique",
+    "category": "Électrique",
+    "icon": "zap",
+    "description": "Éclairage, vitres, fusibles ou tableau de bord capricieux.",
+    "normalized_name": "defaut_circuit_electrique"
+  },
+  {
+    "id": 9,
+    "code": "high_fuel",
+    "label": "Consommation excessive",
+    "category": "Carburant",
+    "icon": "fuel",
+    "description": "Hausse brutale de la consommation de carburant.",
+    "normalized_name": "consommation_excessive"
+  },
+  {
+    "id": 10,
+    "code": "abs_control_module",
+    "label": "ABS warning light on",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Check ABS fuse and harness connector pins for corrosion or bent terminals.",
+    "normalized_name": null
+  },
+  {
+    "id": 11,
+    "code": "abs_wheel_speed_sensor",
+    "label": "ABS light stays on",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Inspect wheel hub area for broken sensor cable or magnetic ring debris.",
+    "normalized_name": null
+  },
+  {
+    "id": 12,
+    "code": "brake_booster",
+    "label": "Hard brake pedal",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Test vacuum hose between intake manifold and booster for cracks or air leaks.",
+    "normalized_name": null
+  },
+  {
+    "id": 13,
+    "code": "brake_caliper",
+    "label": "Brake pulling to one side",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Inspect caliper for brake fluid weeping around piston seal or seized guide slide pins.",
+    "normalized_name": null
+  },
+  {
+    "id": 14,
+    "code": "brake_hose",
+    "label": "Brake fluid leak",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Visually inspect rubber hoses for cracks, bulges (aneurysms) while an assistant presses the pedal.",
+    "normalized_name": null
+  },
+  {
+    "id": 15,
+    "code": "brake_master_cylinder",
+    "label": "Spongy brake pedal",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Check reservoir fluid level and inspect rear of master cylinder where it bolts to booster.",
+    "normalized_name": null
+  },
+  {
+    "id": 16,
+    "code": "brake_pads",
+    "label": "Squealing brakes",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Check friction material thickness through wheel rim opening (minimum legal 2mm - 3mm).",
+    "normalized_name": null
+  },
+  {
+    "id": 17,
+    "code": "brake_rotor",
+    "label": "Brake pedal pulsation",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Run fingernail across rotor surface to detect ridges, or measure thickness variation with micrometer.",
+    "normalized_name": null
+  },
+  {
+    "id": 18,
+    "code": "brake_shoe_drum",
+    "label": "Spongy brake pedal",
+    "category": "ABS & Braking System",
+    "icon": "brakes",
+    "description": "Remove rear drum to inspect shoe friction lining and wheel cylinder dust boots for fluid seepage.",
+    "normalized_name": null
+  },
+  {
+    "id": 19,
+    "code": "ac_compressor",
+    "label": "No cold air from vents",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Observe compressor clutch hub with AC switched ON to see if magnetic clutch engages and spins.",
+    "normalized_name": null
+  },
+  {
+    "id": 20,
+    "code": "ac_condenser",
+    "label": "Warm air from AC vents",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Inspect aluminum condenser behind front grille for bent cooling fins, leaf blockages, or stone punctures.",
+    "normalized_name": null
+  },
+  {
+    "id": 21,
+    "code": "ac_evaporator",
+    "label": "Musty odor from vents",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Inspect evaporator drain tube under car for water discharge and check cabin filter.",
+    "normalized_name": null
+  },
+  {
+    "id": 22,
+    "code": "ac_recharge",
+    "label": "Warm air from vents",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Connect manifold pressure gauges to low and high side service ports to verify gas quantity.",
+    "normalized_name": null
+  },
+  {
+    "id": 23,
+    "code": "cabin_air_filter",
+    "label": "Musty odor from vents",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Remove glove box access hatch and pull out filter pleats to check for dead leaves and black dust.",
+    "normalized_name": null
+  },
+  {
+    "id": 24,
+    "code": "heater_blower_motor",
+    "label": "No air from vents",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Listen to blower fan under passenger glove compartment across all speeds 1 to 4.",
+    "normalized_name": null
+  },
+  {
+    "id": 25,
+    "code": "heater_blower_resistor",
+    "label": "HVAC fan only works on highest setting (Speed 4)",
+    "category": "Air Conditioning & Climate",
+    "icon": "thermometer",
+    "description": "Test continuity across resistor pack terminals and inspect thermal fuse.",
+    "normalized_name": null
+  },
+  {
+    "id": 26,
+    "code": "coolant_reservoir_level",
+    "label": "Engine overheating",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Visually check translucent expansion tank level and inspect for cracks or cap seal degradation.",
+    "normalized_name": null
+  },
+  {
+    "id": 27,
+    "code": "coolant_leak_diagnosis",
+    "label": "Visible coolant puddle under vehicle",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Pressure test cooling system to 15 PSI (1 bar) with hand pump and inspect for drips.",
+    "normalized_name": null
+  },
+  {
+    "id": 28,
+    "code": "engine_thermostat",
+    "label": "Engine overheating",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Feel upper and lower radiator hoses while engine warms up to check if thermostat valve opens.",
+    "normalized_name": null
+  },
+  {
+    "id": 29,
+    "code": "heater_core",
+    "label": "No heat from cabin vents",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Touch both heater inlet and outlet hoses at firewall; both should be equally hot when engine is at operating temperature.",
+    "normalized_name": null
+  },
+  {
+    "id": 30,
+    "code": "radiator_cooling_fan",
+    "label": "Engine overheating in traffic / at idle",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Switch AC ON to verify if radiator fan turns on automatically, and test fan relay.",
+    "normalized_name": null
+  },
+  {
+    "id": 31,
+    "code": "radiator_hoses",
+    "label": "Coolant leak under vehicle",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Squeeze upper and lower radiator hoses cold; check for spongy texture, hard brittle spots, or clamp cuts.",
+    "normalized_name": null
+  },
+  {
+    "id": 32,
+    "code": "water_pump",
+    "label": "Engine overheating",
+    "category": "Engine Cooling System",
+    "icon": "thermometer",
+    "description": "Inspect water pump shaft weep hole for coolant drips and check pulley for bearing wobble/play.",
+    "normalized_name": null
+  },
+  {
+    "id": 33,
+    "code": "fuel_injector",
+    "label": "Engine misfires",
+    "category": "Fuel & Injection System",
+    "icon": "fuel",
+    "description": "Use a mechanic stethoscope to listen for regular rhythmic clicking on each injector body.",
+    "normalized_name": null
+  },
+  {
+    "id": 34,
+    "code": "fuel_pressure_regulator",
+    "label": "Engine stalls",
+    "category": "Fuel & Injection System",
+    "icon": "fuel",
+    "description": "Pull vacuum hose off fuel pressure regulator; if raw gasoline drips out, internal diaphragm is torn.",
+    "normalized_name": null
+  },
+  {
+    "id": 35,
+    "code": "fuel_pump",
+    "label": "Engine sputters at high speeds",
+    "category": "Fuel & Injection System",
+    "icon": "fuel",
+    "description": "Listen for 2-second hum from under rear seat when turning ignition to ON (pos II), and test fuel pressure.",
+    "normalized_name": null
+  },
+  {
+    "id": 36,
+    "code": "fuel_tank_evap",
+    "label": "Fuel odor inside vehicle",
+    "category": "Fuel & Injection System",
+    "icon": "fuel",
+    "description": "Inspect plastic/metal fuel tank, filler pipe neck for rust holes, and check gas cap rubber seal gasket.",
+    "normalized_name": null
+  },
+  {
+    "id": 37,
+    "code": "fuel_filter",
+    "label": "Engine stalls at high speeds",
+    "category": "Fuel & Injection System",
+    "icon": "fuel",
+    "description": "Check maintenance history (replace every 40,000 to 60,000 km) and test fuel flow resistance.",
+    "normalized_name": null
+  },
+  {
+    "id": 38,
+    "code": "timing_belt",
+    "label": "Engine misfires",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Pull back top plastic timing cover inspection window to inspect belt teeth, tension, and fraying.",
+    "normalized_name": null
+  },
+  {
+    "id": 39,
+    "code": "serpentine_drive_belt",
+    "label": "Squealing noise from engine bay",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Inspect ribbed belt surface for micro-cracks, glazing, fraying cords, and check automatic tensioner mark.",
+    "normalized_name": null
+  },
+  {
+    "id": 40,
+    "code": "turbo_boost_pressure",
+    "label": "Loss of engine power",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Inspect intercooler rubber boost hoses for splits and check wastegate actuator vacuum movement.",
+    "normalized_name": null
+  },
+  {
+    "id": 41,
+    "code": "diesel_glow_plugs",
+    "label": "Hard starting in cold weather",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Measure electrical resistance of each glow plug with multimeter (normal: 0.5 to 1.5 ohms).",
+    "normalized_name": null
+  },
+  {
+    "id": 42,
+    "code": "engine_mounts",
+    "label": "Excessive engine movement / rocking",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Inspect hydraulic / rubber mounts for tears, hydraulic oil leaks, or excessive engine rock when revving.",
+    "normalized_name": null
+  },
+  {
+    "id": 43,
+    "code": "valve_cover_gasket",
+    "label": "Oil leak around valve cover",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Inspect seam between cylinder head and valve cover for wet oil seepage dripping onto hot exhaust manifold.",
+    "normalized_name": null
+  },
+  {
+    "id": 44,
+    "code": "oil_pump_pressure",
+    "label": "Low oil pressure warning light on",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Screw mechanical oil pressure gauge into pressure switch port to measure actual bar/PSI at idle and 3000 RPM.",
+    "normalized_name": null
+  },
+  {
+    "id": 45,
+    "code": "piston_rings_compression",
+    "label": "Blue smoke from exhaust under acceleration",
+    "category": "Engine Mechanical & Valvetrain",
+    "icon": "engine",
+    "description": "Perform dry and wet cylinder compression test across all cylinders (spec: 11-14 bar for petrol, 25-30 bar for diesel).",
+    "normalized_name": null
+  },
+  {
+    "id": 46,
+    "code": "catalytic_converter",
+    "label": "Rotten egg / sulfur smell from exhaust",
+    "category": "Emissions & Exhaust System",
+    "icon": "smoke",
+    "description": "Measure inlet and outlet temperature using an infrared thermometer (outlet should be 20°C - 50°C hotter than inlet when functioning).",
+    "normalized_name": null
+  },
+  {
+    "id": 47,
+    "code": "oxygen_sensor_lambda",
+    "label": "Check engine light on (P0130 - P0167)",
+    "category": "Emissions & Exhaust System",
+    "icon": "smoke",
+    "description": "Read live O2 sensor voltage (0.1V to 0.9V switching response) and check internal heater circuit resistance.",
+    "normalized_name": null
+  },
+  {
+    "id": 48,
+    "code": "canister_purge_valve",
+    "label": "Check engine light on (P0441 / P0444)",
+    "category": "Emissions & Exhaust System",
+    "icon": "smoke",
+    "description": "Unplug vacuum hose and blow through valve; with no 12V power applied, valve must be closed and airtight.",
+    "normalized_name": null
+  },
+  {
+    "id": 49,
+    "code": "exhaust_manifold_gasket",
+    "label": "Loud ticking or puffing exhaust noise on cold start",
+    "category": "Emissions & Exhaust System",
+    "icon": "smoke",
+    "description": "Inspect cylinder head exhaust flange with mirror for black soot streaks and check for broken manifold studs.",
+    "normalized_name": null
+  },
+  {
+    "id": 50,
+    "code": "map_sensor",
+    "label": "Check engine light on (P0105 - P0109)",
+    "category": "Emissions & Exhaust System",
+    "icon": "smoke",
+    "description": "Read live MAP voltage with ignition ON engine OFF (should read ~4.8V / 100 kPa ambient) and check vacuum hose.",
+    "normalized_name": null
+  },
+  {
+    "id": 51,
+    "code": "battery_terminals",
+    "label": "Engine cranks slowly",
+    "category": "Electrical & Starting System",
+    "icon": "battery",
+    "description": "Test resting battery voltage with multimeter (12.6V = 100%, 12.0V = discharged) and check for white/blue terminal corrosion.",
+    "normalized_name": null
+  },
+  {
+    "id": 52,
+    "code": "alternator_charging_system",
+    "label": "Battery warning light on while driving",
+    "category": "Electrical & Starting System",
+    "icon": "zap",
+    "description": "Measure voltage across battery terminals while engine idles with headlights and heater blower turned ON (should read 13.8V to 14.5V).",
+    "normalized_name": null
+  },
+  {
+    "id": 53,
+    "code": "starter_motor",
+    "label": "Engine does not crank",
+    "category": "Electrical & Starting System",
+    "icon": "key",
+    "description": "Check for 12V signal on small ignition wire at starter solenoid while turning key to START.",
+    "normalized_name": null
+  },
+  {
+    "id": 54,
+    "code": "ignition_distributor_coils",
+    "label": "Engine misfires under load",
+    "category": "Electrical & Starting System",
+    "icon": "zap",
+    "description": "Mist ignition wires with a water spray bottle in darkness while engine idles; look for blue sparks jumping to ground.",
+    "normalized_name": null
+  },
+  {
+    "id": 55,
+    "code": "door_window_regulator_motor",
+    "label": "Window does not move",
+    "category": "Electrical & Starting System",
+    "icon": "zap",
+    "description": "Listen at door panel while pressing switch for motor hum, and test power at motor connector.",
+    "normalized_name": null
+  },
+  {
+    "id": 56,
+    "code": "headlamp_bulb_socket",
+    "label": "Headlight not working on one side",
+    "category": "Electrical & Starting System",
+    "icon": "zap",
+    "description": "Inspect bulb halogen filament for breakage and check plastic socket connector for heat melting.",
+    "normalized_name": null
+  },
+  {
+    "id": 57,
+    "code": "wiper_motor_linkage",
+    "label": "Wipers not working at all",
+    "category": "Electrical & Starting System",
+    "icon": "zap",
+    "description": "Check wiper fuse, listen for motor hum under cowl, and check if linkage ball joints have popped off.",
+    "normalized_name": null
+  },
+  {
+    "id": 58,
+    "code": "clutch_hydraulics",
+    "label": "Clutch pedal feels spongy or stays on floor",
+    "category": "Transmission & Drivetrain",
+    "icon": "rotate",
+    "description": "Check brake/clutch shared fluid reservoir level and inspect carpet above clutch pedal for damp oily residue.",
+    "normalized_name": null
+  },
+  {
+    "id": 59,
+    "code": "automatic_transmission_fluid_filter",
+    "label": "Transmission slipping (engine revs but car doesn't accelerate)",
+    "category": "Transmission & Drivetrain",
+    "icon": "rotate",
+    "description": "Check ATF fluid level and color on dipstick (or overflow plug at 40°C): should be clear red, not black or smelling burned.",
+    "normalized_name": null
+  },
+  {
+    "id": 60,
+    "code": "universal_joint_driveshaft",
+    "label": "Driveline vibration through floorboard at 80-110 km/h",
+    "category": "Transmission & Drivetrain",
+    "icon": "rotate",
+    "description": "Grab driveshaft / CV axle by hand and twist firmly to check for rotational free play in U-joint caps or torn rubber boots.",
+    "normalized_name": null
+  },
+  {
+    "id": 61,
+    "code": "differential_gears",
+    "label": "Whining noise from rear end under acceleration",
+    "category": "Transmission & Drivetrain",
+    "icon": "rotate",
+    "description": "Check differential gear oil level and inspect magnetic drain plug for metal shards or low fluid.",
+    "normalized_name": null
+  },
+  {
+    "id": 62,
+    "code": "power_steering_system",
+    "label": "Whining / groaning noise when turning steering wheel",
+    "category": "Steering System",
+    "icon": "sound",
+    "description": "Check power steering reservoir fluid dipstick level and check for bubbles / foaming while engine runs.",
+    "normalized_name": null
+  },
+  {
+    "id": 63,
+    "code": "wheel_bearing_hub",
+    "label": "Grinding / roaring humming noise that gets louder with speed",
+    "category": "Wheels & Tires",
+    "icon": "rotate",
+    "description": "Jack up wheel and grasp tire at 12 o'clock and 6 o'clock positions, rock firmly back and forth to detect bearing play.",
+    "normalized_name": null
+  },
+  {
+    "id": 64,
+    "code": "tpms_tire_pressure",
+    "label": "TPMS warning light on dashboard",
+    "category": "Wheels & Tires",
+    "icon": "rotate",
+    "description": "Check cold tire pressure on all 4 tires (and spare) with gauge against door jamb sticker spec (e.g., 2.3 bar / 33 PSI).",
+    "normalized_name": null
+  }
+]
