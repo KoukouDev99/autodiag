@@ -7,9 +7,12 @@ import { RepairGuideComponent } from './components/guide/repair-guide.component'
 import { GarageHistoryComponent } from './components/garage/garage-history.component';
 import { DesignSystemComponent } from './components/design-system/design-system.component';
 import { ProfileComponent } from './components/profile/profile.component';
+import { AssistantComponent } from './components/assistant/assistant.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, title: 'AutoDiag · Accueil' },
+  { path: 'assistant', component: AssistantComponent, title: 'AutoDiag · Copilote IA & Assistant Mécanique' },
+  { path: 'chat', redirectTo: 'assistant' },
   { path: 'vehicle', component: VehicleComponent, title: 'AutoDiag · Mon Véhicule' },
   { path: 'diagnostic/:sessionId', component: DiagnosticQuizComponent, title: 'AutoDiag · Diagnostic Guidé' },
   { path: 'results/:sessionId', component: DiagnosticResultsComponent, title: 'AutoDiag · Vos Pistes de Diagnostic' },

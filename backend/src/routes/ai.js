@@ -342,4 +342,167 @@ router.post('/check-safety', async (req, res) => {
   });
 });
 
+// Helper: Build tailored system prompt based on user vehicle
+function buildVehicleSystemPrompt(vehicle) {
+  let vehDesc = 'Non renseigné (conseils généralistes)';
+  if (vehicle && vehicle.brand) {
+    vehDesc = `${vehicle.brand} ${vehicle.model || ''} (${vehicle.year || 'Année non précisée'})
+- Motorisation : ${vehicle.engine || 'Standard'} (${vehicle.fuel || 'Non spécifié'})
+- Kilométrage compteur : ${vehicle.mileage ? Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : 'Non précisé'}`;
+  }
+
+  return `Tu es "AutoDiag Copilote", un mécanicien automobile expert, courtois, pédagogue et bienveillant.
+Tu réponds aux questions des automobilistes en adaptant précisément tes explications selon le profil et le véhicule de l'utilisateur.
+
+CONTEXTE DU VÉHICULE ACTIF DE L'UTILISATEUR :
+${vehDesc}
+
+RÈGLES D'OR DE RÉPONSE :
+1. Personnalisation : Réponds TOUJOURS en tenant compte des spécificités du véhicule de l'utilisateur (motorisation essence vs diesel vs hybride, kilométrage d'usure, problèmes connus du modèle).
+2. Pédagogie sans jargon : Explique simplement ce qui se passe sous le capot avec des métaphores intuitives.
+3. Estimations de coûts transparentes : Donne des fourchettes tarifaires réalistes en euros (€) pour les pièces et la main d'œuvre (fourchettes garagiste indépendant vs concession).
+4. Sécurité & Urgence : Si la question concerne le freinage, la direction, la surchauffe ou une fuite inflammable, ordonne immédiatement l'arrêt en sécurité.
+5. Sois concis, structuré (utilise des listes à puces et du texte en gras) et réponds directement en français.`;
+}
+
+// 6. Interactive AI Chat Assistant (Compatible OpenAI / DeepSeek / Groq Gratuit / OpenRouter / Local Fallback)
+router.post(['/chat', '/ai/chat'], async (req, res) => {
+  try {
+    const {
+      message,
+      vehicle,
+      history = [],
+      api_key = null,
+      provider = null,
+      model = null
+    } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Message requis.' });
+    }
+
+    const systemPrompt = buildVehicleSystemPrompt(vehicle);
+
+    // 1. Resolve API key and Base URL
+    let resolvedKey = (api_key && api_key.trim()) ||
+      process.env.AI_API_KEY ||
+      process.env.GROQ_API_KEY ||
+      process.env.DEEPSEEK_API_KEY ||
+      process.env.OPENAI_API_KEY ||
+      null;
+
+    let resolvedBaseUrl = 'https://api.groq.com/openai/v1';
+    let resolvedModel = 'deepseek-r1-distill-llama-70b';
+    let providerName = 'Groq (DeepSeek-R1 Gratuit)';
+
+    if (provider === 'deepseek' || (resolvedKey && resolvedKey.startsWith('sk-') && !resolvedKey.startsWith('gsk_') && !resolvedKey.startsWith('sk-or-'))) {
+      resolvedBaseUrl = 'https://api.deepseek.com';
+      resolvedModel = model || 'deepseek-chat';
+      providerName = 'DeepSeek API';
+    }
+
+    if (provider === 'openrouter' || (resolvedKey && resolvedKey.startsWith('sk-or-'))) {
+      resolvedBaseUrl = 'https://openrouter.ai/api/v1';
+      resolvedModel = model || 'deepseek/deepseek-r1:free';
+      providerName = 'OpenRouter (DeepSeek R1 Free)';
+    } else if (provider === 'openai') {
+      resolvedBaseUrl = 'https://api.openai.com/v1';
+      resolvedModel = model || 'gpt-4o-mini';
+      providerName = 'OpenAI (ChatGPT)';
+    } else if (provider === 'groq' || (resolvedKey && resolvedKey.startsWith('gsk_'))) {
+      resolvedBaseUrl = 'https://api.groq.com/openai/v1';
+      resolvedModel = model || 'deepseek-r1-distill-llama-70b';
+      providerName = 'Groq (DeepSeek-R1 Gratuit)';
+    }
+
+    if (process.env.AI_BASE_URL) resolvedBaseUrl = process.env.AI_BASE_URL;
+    if (process.env.AI_MODEL) resolvedModel = process.env.AI_MODEL;
+
+    // 2. Format conversation messages
+    const formattedMessages = [
+      { role: 'system', content: systemPrompt },
+      ...history.slice(-8).map(m => ({ role: m.role, content: m.content })),
+      { role: 'user', content: message }
+    ];
+
+    // 3. Try Cloud API if key is present
+    if (resolvedKey) {
+      try {
+        const cloudResponse = await fetch(`${resolvedBaseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${resolvedKey}`
+          },
+          body: JSON.stringify({
+            model: resolvedModel,
+            messages: formattedMessages,
+            temperature: 0.7,
+            max_tokens: 1000
+          }),
+          signal: AbortSignal.timeout(25000)
+        });
+
+        if (cloudResponse.ok) {
+          const data = await cloudResponse.json();
+          let reply = data.choices && data.choices[0] && data.choices[0].message?.content;
+          if (reply) {
+            // Remove DeepSeek-R1 <think>...</think> reasoning tags for user-friendly output
+            reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+            return res.json({
+              reply,
+              provider: providerName,
+              model: resolvedModel,
+              vehicle_applied: !!(vehicle && vehicle.brand),
+              status: 'success',
+              fallback_applied: false
+            });
+          }
+        } else {
+          const errText = await cloudResponse.text();
+          console.warn('[AI Chat] Cloud API error:', cloudResponse.status, errText);
+        }
+      } catch (cloudErr) {
+        console.warn('[AI Chat] Cloud API fetch failed:', cloudErr.message);
+      }
+    }
+
+    // 4. Intelligent Local Fallback (adapted to user vehicle)
+    const vehName = vehicle && vehicle.brand ? `${vehicle.brand} ${vehicle.model || ''}` : 'votre véhicule';
+    const qLower = message.toLowerCase();
+    let fallbackReply = `Pour **${vehName}** (${vehicle?.engine || 'motorisation standard'}, ${vehicle?.year || 'année courante'}), voici mes conseils mécaniques :\n\n`;
+
+    if (/frein|plaquette|disque/.test(qLower)) {
+      fallbackReply += `🛑 **Système de freinage :**\n- Des bruits métalliques ou une pédale molle indiquent une usure avancée des plaquettes ou un niveau de liquide de frein bas.\n- **Coût estimé :** Comptez entre **80 € et 180 €** pour un jeu de plaquettes avant, et environ **220 € à 350 €** avec les disques.\n- ⚠️ **Sécurité :** Ne roulez pas si la pédale s'enfonce anormalement.`;
+    } else if (/courroie|distribution/.test(qLower)) {
+      const isPuretech = (vehicle?.engine || '').toLowerCase().includes('puretech');
+      fallbackReply += `⚙️ **Courroie de distribution :**\n`;
+      if (isPuretech) {
+        fallbackReply += `- Sur le moteur **1.2 PureTech**, la courroie est immergée dans l'huile. Contrôlez régulièrement son état lors de chaque vidange (préconisation : remplacement tous les **6 ans ou 100 000 km**).\n`;
+      } else {
+        fallbackReply += `- La préconisation générale est un remplacement tous les **5 à 6 ans ou entre 100 000 et 160 000 km** selon constructeur.\n`;
+      }
+      fallbackReply += `- **Coût estimé :** Entre **450 € et 850 €** kit complet avec pompe à eau.`;
+    } else if (/vidange|huile|entretien/.test(qLower)) {
+      fallbackReply += `🛢️ **Entretien & Vidange :**\n- Intervalle recommandé : tous les **15 000 à 20 000 km ou 1 an** avec une huile homologuée constructeur (ex: 0W20 ou 5W30).\n- Remplacez systématiquement le filtre à huile et le joint de bouchon de carter.\n- **Coût moyen :** Entre **70 € et 140 €** en atelier indépendant.`;
+    } else if (/voyant.*moteur|voyant.*orange/.test(qLower)) {
+      fallbackReply += `⚠️ **Voyant moteur allumé :**\n- S'il est **orange fixe**, le calculateur signale une anomalie (antipollution, sonde lambda, allumage). Vous pouvez rouler prudemment jusqu'au garage le plus proche.\n- S'il **clignote**, arrêtez-vous rapidement pour ne pas endommager le pot catalytique.\n- **Diagnostic à la valise OBD-II :** entre **40 € et 80 €**.`;
+    } else {
+      fallbackReply += `🔍 **Conseil mécanique :**\n- Pour votre question sur ce véhicule, je vous recommande d'inspecter visuellement les niveaux de fluides sous le capot (huile, liquide de refroidissement, liquide de frein).\n- N'hésitez pas à lancer un **diagnostic guidé** dans l'application pour identifier précisément les causes probables et les tests à réaliser.`;
+    }
+
+    return res.json({
+      reply: fallbackReply,
+      provider: 'AutoDiag IA Locale (Mode Hors-Ligne)',
+      model: 'Qwen2.5-Offline-Fallback',
+      vehicle_applied: !!(vehicle && vehicle.brand),
+      status: 'success',
+      fallback_applied: true
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
+

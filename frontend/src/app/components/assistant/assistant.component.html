@@ -1,0 +1,219 @@
+<div class="assistant-page-container">
+
+  <!-- Header Section -->
+  <div class="assistant-header-card">
+    <div class="assistant-header-left">
+      <div class="assistant-avatar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <div class="assistant-title-group">
+        <div class="assistant-badge-row">
+          <span class="pulse-indicator"></span>
+          <span class="assistant-status">COPILOTE IA INTERACTIF</span>
+          <span class="provider-tag">{{ activeModelLabel }}</span>
+        </div>
+        <h2 class="assistant-title">Assistant Mécanique Personnel</h2>
+        <p class="assistant-subtitle">
+          @if (vehicle) {
+            Réponses adaptées à votre <strong>{{ vehicle.brand }} {{ vehicle.model }}</strong> ({{ vehicle.engine || 'Essence' }}, {{ vehicle.mileage ? (vehicle.mileage | number) + ' km' : '' }})
+          } @else {
+            Conseils d'atelier et explications mécaniques sans jargon
+          }
+        </p>
+      </div>
+    </div>
+
+    <div class="assistant-header-right">
+      <button type="button" class="settings-toggle-btn" (click)="showSettings = !showSettings" title="Configurer l'API IA (Groq / DeepSeek / OpenAI)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>Clé API / Modèle</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings Drawer / Modal (if opened) -->
+  @if (showSettings) {
+    <div class="settings-drawer-card">
+      <div class="settings-drawer-header">
+        <h3 class="settings-drawer-title">⚙️ Configuration du Fournisseur d'IA</h3>
+        <button type="button" class="drawer-close-btn" (click)="showSettings = false">✕</button>
+      </div>
+
+      <div class="settings-drawer-body">
+        <p class="settings-help-text">
+          Choisissez votre moteur d'IA. Pour une utilisation <strong>100% gratuite et ultra-rapide</strong>, nous vous recommandons <strong>Groq Cloud</strong> (DeepSeek-R1 70B sans carte bancaire).
+        </p>
+
+        <!-- Provider Radio Selection -->
+        <div class="provider-radio-group">
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'groq'">
+            <input type="radio" name="provider" value="groq" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">Groq Cloud (Recommandé)</span>
+              <span class="provider-desc">100% Gratuit · Modèle DeepSeek-R1 70B ultra-rapide (~500 tokens/sec)</span>
+            </div>
+            <span class="badge-free">GRATUIT</span>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'deepseek'">
+            <input type="radio" name="provider" value="deepseek" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">DeepSeek API Officielle</span>
+              <span class="provider-desc">Modèle deepseek-chat (platform.deepseek.com)</span>
+            </div>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'openrouter'">
+            <input type="radio" name="provider" value="openrouter" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">OpenRouter</span>
+              <span class="provider-desc">Modèle gratuit deepseek/deepseek-r1:free</span>
+            </div>
+            <span class="badge-free">GRATUIT</span>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'openai'">
+            <input type="radio" name="provider" value="openai" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">OpenAI</span>
+              <span class="provider-desc">Modèle gpt-4o-mini (api.openai.com)</span>
+            </div>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'local'">
+            <input type="radio" name="provider" value="local" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">IA Locale Hors-Ligne (Qwen2.5)</span>
+              <span class="provider-desc">Aucune clé requise · Fonctionne 100% sur votre ordinateur sans internet</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- API Key Input Field -->
+        @if (selectedProvider !== 'local') {
+          <div class="key-input-group">
+            <label class="key-input-label" for="custom-ai-key">
+              Clé d'API {{ selectedProvider === 'groq' ? 'Groq (commence par gsk_...)' : (selectedProvider === 'deepseek' ? 'DeepSeek (commence par sk-...)' : 'API Key') }} :
+            </label>
+            <div class="key-input-wrapper">
+              <input 
+                id="custom-ai-key"
+                type="password" 
+                [(ngModel)]="customApiKey" 
+                placeholder="Collez votre clé API ici..."
+                class="key-text-input"
+              />
+              @if (customApiKey) {
+                <button type="button" class="key-clear-btn" (click)="customApiKey = ''">Effacer</button>
+              }
+            </div>
+            <div class="key-help-link">
+              @if (selectedProvider === 'groq') {
+                <span>💡 Obtenez votre clé gratuite en 30 secondes sans carte bancaire sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></span>
+              } @else if (selectedProvider === 'deepseek') {
+                <span>💡 Obtenez votre clé sur <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a></span>
+              } @else if (selectedProvider === 'openrouter') {
+                <span>💡 Obtenez votre clé sur <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></span>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="settings-actions">
+          <button type="button" class="btn-primary settings-save-btn" (click)="saveSettings()">
+            Enregistrer & Appliquer
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Chat Messages Stream -->
+  <div class="chat-messages-container" #messagesScroll>
+    @for (msg of messages; track $index) {
+      <div class="message-row" [class.user-row]="msg.role === 'user'" [class.assistant-row]="msg.role === 'assistant'">
+        @if (msg.role === 'assistant') {
+          <div class="msg-avatar assistant-avatar-sm">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </div>
+        }
+
+        <div class="message-bubble" [class.user-bubble]="msg.role === 'user'" [class.assistant-bubble]="msg.role === 'assistant'">
+          <div class="message-text" [innerHTML]="formatContent(msg.content)"></div>
+          <div class="message-meta">
+            @if (msg.role === 'assistant' && msg.provider) {
+              <span class="meta-provider">{{ msg.provider }}</span>
+            }
+            <span class="meta-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Typing Indicator -->
+    @if (isThinking) {
+      <div class="message-row assistant-row">
+        <div class="msg-avatar assistant-avatar-sm">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div class="message-bubble assistant-bubble typing-bubble">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="typing-label">Le copilote mécanique formule sa réponse...</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Quick Prompts Chips Carousel -->
+  <div class="quick-prompts-bar">
+    <span class="quick-prompts-title">Questions suggérées :</span>
+    <div class="quick-prompts-scroll">
+      @for (p of quickPrompts; track p) {
+        <button type="button" class="quick-prompt-btn" (click)="selectQuickPrompt(p)">
+          {{ p }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Chat Input Footer -->
+  <div class="chat-input-bar">
+    <div class="chat-input-container">
+      <textarea 
+        rows="1" 
+        [(ngModel)]="userInput" 
+        (keydown.enter)="$event.preventDefault(); sendMessage()" 
+        placeholder="Posez votre question (ex: bruit suspect, voyant, prix de pièce...)"
+        class="chat-textarea"
+        id="assistant-user-input"
+      ></textarea>
+
+      <button 
+        type="button" 
+        class="chat-send-btn" 
+        [disabled]="!userInput.trim() || isThinking" 
+        (click)="sendMessage()"
+        title="Envoyer le message"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</div>

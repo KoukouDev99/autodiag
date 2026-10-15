@@ -560,6 +560,17 @@ export class DiagnosticService {
     return this.http.post<AiSafetyResult>(`${this.apiUrl}/check-safety`, { text });
   }
 
+  chatWithAssistant(payload: {
+    message: string;
+    vehicle?: Vehicle | null;
+    history?: Array<{ role: string; content: string }>;
+    api_key?: string | null;
+    provider?: string | null;
+    model?: string | null;
+  }): Observable<AiChatResponse> {
+    return this.http.post<AiChatResponse>(`${this.apiUrl}/chat`, payload);
+  }
+
   private fallbackLocalSearch(category?: string, query?: string): DiagnosticItem[] {
     let list = DIAGNOSTIC_DATABASE;
     if (category) {
@@ -603,5 +614,23 @@ export interface AiSafetyResult {
   immediate_action: string;
   confidence: number;
   fallback_applied?: boolean;
+}
+
+export interface AiChatResponse {
+  reply: string;
+  provider: string;
+  model: string;
+  vehicle_applied: boolean;
+  status: string;
+  fallback_applied?: boolean;
+}
+
+export interface ChatMessage {
+  id?: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  provider?: string;
+  model?: string;
 }
 
