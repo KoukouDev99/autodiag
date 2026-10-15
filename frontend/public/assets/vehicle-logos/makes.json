@@ -1,0 +1,558 @@
+[
+  {
+    "name": "Abarth",
+    "logo": "abarth",
+    "altNames": [
+      "ABARTH",
+      "Abarth/Fiat",
+      "FiatAbarth"
+    ]
+  },
+  {
+    "name": "AC",
+    "logo": "ac"
+  },
+  {
+    "name": "Aixam",
+    "logo": "aixam"
+  },
+  {
+    "name": "Alfa Romeo",
+    "logo": "alfa-romeo"
+  },
+  {
+    "name": "Alpine",
+    "logo": "alpine"
+  },
+  {
+    "name": "Alvis",
+    "logo": "alvis"
+  },
+  {
+    "name": "Aprilia",
+    "logo": "aprilia"
+  },
+  {
+    "name": "Ariel",
+    "logo": "ariel",
+    "shortLogo": "ariel-short"
+  },
+  {
+    "name": "Aston Martin",
+    "logo": "aston-martin"
+  },
+  {
+    "name": "Audi",
+    "logo": "audi",
+    "shortLogo": "audi-short"
+  },
+  {
+    "name": "Austin",
+    "logo": "austin"
+  },
+  {
+    "name": "Bentley",
+    "logo": "bentley"
+  },
+  {
+    "name": "BMW",
+    "logo": "bmw"
+  },
+  {
+    "name": "Bristol",
+    "logo": "bristol",
+    "shortLogo": "bristol-short"
+  },
+  {
+    "name": "Bugatti",
+    "logo": "bugatti"
+  },
+  {
+    "name": "BYD",
+    "logo": "byd"
+  },
+  {
+    "name": "Cadillac",
+    "logo": "cadillac"
+  },
+  {
+    "name": "Can-Am",
+    "logo": "can-am"
+  },
+  {
+    "name": "Caterham",
+    "logo": "caterham"
+  },
+  {
+    "name": "Chery",
+    "logo": "chery",
+    "shortLogo": "chery-short"
+  },
+  {
+    "name": "Chesil",
+    "logo": "chesil"
+  },
+  {
+    "name": "Chevrolet",
+    "logo": "chevrolet",
+    "shortLogo": "chevrolet-short"
+  },
+  {
+    "name": "Chrysler",
+    "logo": "chrysler"
+  },
+  {
+    "name": "Citroen",
+    "logo": "citroen",
+    "shortLogo": "citroen-short"
+  },
+  {
+    "name": "Corvette",
+    "logo": "corvette"
+  },
+  {
+    "name": "Cupra",
+    "logo": "cupra",
+    "shortLogo": "cupra-short"
+  },
+  {
+    "name": "Dacia",
+    "logo": "dacia",
+    "shortLogo": "dacia-short"
+  },
+  {
+    "name": "Daewoo",
+    "logo": "daewoo"
+  },
+  {
+    "name": "Daimler",
+    "logo": "daimler"
+  },
+  {
+    "name": "De Lorean",
+    "logo": "delorean",
+    "shortLogo": "delorean-short"
+  },
+  {
+    "name": "DFSK",
+    "logo": "dfsk"
+  },
+  {
+    "name": "Dodge",
+    "logo": "dodge",
+    "shortLogo": "dodge-short"
+  },
+  {
+    "name": "DS",
+    "logo": "ds"
+  },
+  {
+    "name": "Ducati",
+    "logo": "ducati"
+  },
+  {
+    "name": "Ferrari",
+    "logo": "ferrari",
+    "shortLogo": "ferrari-short"
+  },
+  {
+    "name": "Fiat",
+    "logo": "fiat"
+  },
+  {
+    "name": "Fisker",
+    "logo": "fisker"
+  },
+  {
+    "name": "Ford",
+    "logo": "ford"
+  },
+  {
+    "name": "Garia",
+    "logo": "garia",
+    "shortLogo": "garia-short"
+  },
+  {
+    "name": "Gas",
+    "logo": "gas",
+    "shortLogo": "gas-short"
+  },
+  {
+    "name": "Genesis",
+    "logo": "genesis"
+  },
+  {
+    "name": "Great Wall",
+    "logo": "great-wall"
+  },
+  {
+    "name": "GWM ORA",
+    "logo": "ora",
+    "shortLogo": "ora-short"
+  },
+  {
+    "name": "Harley Davidson",
+    "logo": "harley-davidson"
+  },
+  {
+    "name": "Honda",
+    "logo": "honda"
+  },
+  {
+    "name": "Hummer",
+    "logo": "hummer"
+  },
+  {
+    "name": "Hyundai",
+    "logo": "hyundai"
+  },
+  {
+    "name": "Ineos",
+    "logo": "ineos"
+  },
+  {
+    "name": "Infiniti",
+    "logo": "infiniti",
+    "shortLogo": "infiniti-short"
+  },
+  {
+    "name": "Isuzu",
+    "logo": "isuzu",
+    "shortLogo": "isuzu-short"
+  },
+  {
+    "name": "Iveco",
+    "logo": "iveco"
+  },
+  {
+    "name": "Jaecoo",
+    "logo": "jaecoo"
+  },
+  {
+    "name": "Jaguar",
+    "logo": "jaguar",
+    "shortLogo": "jaguar-short"
+  },
+  {
+    "name": "Jeep",
+    "logo": "jeep"
+  },
+  {
+    "name": "Jensen",
+    "logo": "jensen"
+  },
+  {
+    "name": "Kawasaki",
+    "logo": "kawasaki",
+    "shortLogo": "kawasaki-short"
+  },
+  {
+    "name": "KGM",
+    "logo": "kgm"
+  },
+  {
+    "name": "Kia",
+    "logo": "kia"
+  },
+  {
+    "name": "KTM",
+    "logo": "ktm"
+  },
+  {
+    "name": "Lamborghini",
+    "logo": "lamborghini"
+  },
+  {
+    "name": "Lancia",
+    "logo": "lancia"
+  },
+  {
+    "name": "Land Rover",
+    "logo": "land-rover"
+  },
+  {
+    "name": "LDV",
+    "logo": "ldv"
+  },
+  {
+    "name": "LEVC",
+    "logo": "levc",
+    "shortLogo": "levc-short"
+  },
+  {
+    "name": "Lexus",
+    "logo": "lexus"
+  },
+  {
+    "name": "Lister",
+    "logo": "lister"
+  },
+  {
+    "name": "London Taxi Intl",
+    "logo": "levc",
+    "shortLogo": "levc-short"
+  },
+  {
+    "name": "Lotus",
+    "logo": "lotus"
+  },
+  {
+    "name": "MAN",
+    "logo": "man"
+  },
+  {
+    "name": "Marlin",
+    "logo": "marlin"
+  },
+  {
+    "name": "Maserati",
+    "logo": "maserati",
+    "shortLogo": "maserati-short"
+  },
+  {
+    "name": "Maxus",
+    "logo": "maxus",
+    "shortLogo": "maxus-short"
+  },
+  {
+    "name": "Maybach",
+    "logo": "maybach"
+  },
+  {
+    "name": "Mazda",
+    "logo": "mazda"
+  },
+  {
+    "name": "McLaren",
+    "logo": "mclaren"
+  },
+  {
+    "name": "Mercedes-Benz",
+    "logo": "mercedes-benz",
+    "altNames": [
+      "MB",
+      "MERCEDES",
+      "MERCEDES-BENZ"
+    ]
+  },
+  {
+    "name": "MG Motor",
+    "logo": "mg",
+    "altNames": [
+      "MG MOTOR UK"
+    ]
+  },
+  {
+    "name": "MG Rover",
+    "logo": "mg",
+    "altNames": [
+      "MG",
+      "MG Rover"
+    ]
+  },
+  {
+    "name": "Mia",
+    "logo": "mia",
+    "shortLogo": "mia-short"
+  },
+  {
+    "name": "Microcar",
+    "logo": "microcar"
+  },
+  {
+    "name": "Mini",
+    "logo": "mini"
+  },
+  {
+    "name": "Mitsubishi",
+    "logo": "mitsubishi"
+  },
+  {
+    "name": "MK Sportscars",
+    "logo": "mk-sportscars",
+    "shortLogo": "mk-sportscars-short",
+    "altNames": [
+      "MK"
+    ]
+  },
+  {
+    "name": "Morgan",
+    "logo": "morgan"
+  },
+  {
+    "name": "Moke",
+    "logo": "moke"
+  },
+  {
+    "name": "Morris",
+    "logo": "morris"
+  },
+  {
+    "name": "Neoplan",
+    "logo": "neoplan"
+  },
+  {
+    "name": "Nissan",
+    "logo": "nissan"
+  },
+  {
+    "name": "Noble",
+    "logo": "noble"
+  },
+  {
+    "name": "Omoda",
+    "logo": "omoda"
+  },
+  {
+    "name": "Perodua",
+    "logo": "perodua",
+    "shortLogo": "perodua-short"
+  },
+  {
+    "name": "Peugeot",
+    "logo": "peugeot"
+  },
+  {
+    "name": "Piaggio",
+    "logo": "piaggio",
+    "shortLogo": "piaggio-short"
+  },
+  {
+    "name": "Polestar",
+    "logo": "polestar"
+  },
+  {
+    "name": "Pontiac",
+    "logo": "pontiac",
+    "shortLogo": "pontiac-short"
+  },
+  {
+    "name": "Porsche",
+    "logo": "porsche"
+  },
+  {
+    "name": "Proton",
+    "logo": "proton",
+    "shortLogo": "proton-short"
+  },
+  {
+    "name": "Rage",
+    "logo": "rage"
+  },
+  {
+    "name": "Renault",
+    "logo": "renault",
+    "shortLogo": "renault-short"
+  },
+  {
+    "name": "Reva",
+    "logo": "reva"
+  },
+  {
+    "name": "Rolls-Royce",
+    "logo": "rolls-royce",
+    "shortLogo": "rolls-royce-short",
+    "altNames": [
+      "ROLLS ROYCE"
+    ]
+  },
+  {
+    "name": "Rover",
+    "logo": "rover"
+  },
+  {
+    "name": "Saab",
+    "logo": "saab"
+  },
+  {
+    "name": "Seat",
+    "logo": "seat",
+    "shortLogo": "seat-short"
+  },
+  {
+    "name": "Skoda",
+    "logo": "skoda"
+  },
+  {
+    "name": "Smart",
+    "logo": "smart",
+    "shortLogo": "smart-short"
+  },
+  {
+    "name": "Ssangyong",
+    "logo": "ssangyong",
+    "shortLogo": "ssangyong-short"
+  },
+  {
+    "name": "Subaru",
+    "logo": "subaru"
+  },
+  {
+    "name": "Suzuki",
+    "logo": "suzuki",
+    "shortLogo": "suzuki-short"
+  },
+  {
+    "name": "Swift",
+    "logo": "swift"
+  },
+  {
+    "name": "Tata",
+    "logo": "tata",
+    "shortLogo": "tata-short"
+  },
+  {
+    "name": "Tesla",
+    "logo": "tesla"
+  },
+  {
+    "name": "Tiger",
+    "logo": "tiger"
+  },
+  {
+    "name": "Toyota",
+    "logo": "toyota"
+  },
+  {
+    "name": "Triumph",
+    "logo": "triumph"
+  },
+  {
+    "name": "TVR",
+    "logo": "tvr"
+  },
+  {
+    "name": "Vauxhall",
+    "logo": "vauxhall"
+  },
+  {
+    "name": "Volkswagen",
+    "logo": "volkswagen",
+    "altNames": [
+      "VW"
+    ]
+  },
+  {
+    "name": "Volvo",
+    "logo": "volvo"
+  },
+  {
+    "name": "Westfield",
+    "logo": "westfield"
+  },
+  {
+    "name": "Xpeng",
+    "logo": "xpeng",
+    "shortLogo": "xpeng-short"
+  },
+  {
+    "name": "Yamaha",
+    "logo": "yamaha",
+    "shortLogo": "yamaha-short"
+  },
+  {
+    "name": "Zenos",
+    "logo": "zenos",
+    "shortLogo": "zenos-short"
+  }
+]

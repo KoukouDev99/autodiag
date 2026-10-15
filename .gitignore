@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Python virtual environment & cache
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+
+# Builds
+dist/
+frontend/dist/
+frontend/.angular/
+
+# Environment and secrets
+.env
+.env.local
+
+# Large models / weights (downloaded on demand)
+models/*.gguf
+models/*.bin
+models/hub/
+
+# FAISS generated indexes (can be regenerated with script)
+# Uncomment if indexes shouldn't be tracked:
+# data/faiss_index/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

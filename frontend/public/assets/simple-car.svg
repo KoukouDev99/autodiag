@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" fill="none">
+  <!-- Subtle ground shadow -->
+  <ellipse cx="80" cy="70" rx="65" ry="6" fill="#0f172a" fill-opacity="0.12"/>
+  
+  <!-- Sleek Modern Car Silhouette -->
+  <!-- Main aerodynamic body -->
+  <path d="M14 54 C13 54 12 53 12 51 L13 46 C14 42 17 40 22 39 L40 37 L60 21 C64 18 70 17 76 17 L108 17 C116 17 123 21 127 28 L142 41 C146 43 148 46 148 50 L148 52 C148 53.5 147 54 145 54 L138 54 C136 46 128 41 120 41 C112 41 104 46 102 54 L58 54 C56 46 48 41 40 41 C32 41 24 46 22 54 Z" 
+        fill="url(#carBodyGrad)" stroke="#2563eb" stroke-width="1.8" stroke-linejoin="round"/>
+
+  <!-- Lower chassis rocker panel -->
+  <path d="M12 51 L22 54 C24 46 32 41 40 41 C48 41 56 46 58 54 L102 54 C104 46 112 41 120 41 C128 41 136 46 138 54 L148 52" 
+        stroke="#1e40af" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Windows & Windshield Glass -->
+  <!-- Front windshield -->
+  <path d="M63 23 L106 23 C112 23 118 26 121 31 L132 39 L68 39 L63 23 Z" 
+        fill="url(#glassGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+  
+  <!-- Rear quarter window -->
+  <path d="M44 38 L58 24 L58 38 Z" 
+        fill="url(#glassGrad)" stroke="#38bdf8" stroke-width="1.2"/>
+
+  <!-- B-Pillar divider -->
+  <line x1="88" y1="23" x2="88" y2="38" stroke="#1e293b" stroke-width="2"/>
+
+  <!-- Door handle micro accents -->
+  <rect x="74" y="42" width="7" height="1.8" rx="0.9" fill="#1e40af"/>
+  <rect x="98" y="42" width="7" height="1.8" rx="0.9" fill="#1e40af"/>
+
+  <!-- Sleek Headlight (Crisp Blue / White Glow) -->
+  <path d="M136 42 L146 44 C147 46 146 48 143 48 L134 46 Z" fill="#67e8f9"/>
+  
+  <!-- Tail light (Crimson Red Accent) -->
+  <path d="M13 46 C13 43 15 42 18 42 L19 46 Z" fill="#ef4444"/>
+
+  <!-- Aerodynamic character crease line -->
+  <path d="M30 43 Q80 43 135 44" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Front Wheel (Sport Rim) -->
+  <circle cx="120" cy="54" r="14" fill="#1e293b"/>
+  <circle cx="120" cy="54" r="10" fill="#0f172a" stroke="#64748b" stroke-width="1.2"/>
+  <circle cx="120" cy="54" r="5" fill="#e2e8f0"/>
+  <!-- Rim spokes -->
+  <line x1="120" y1="44" x2="120" y2="64" stroke="#94a3b8" stroke-width="1.8"/>
+  <line x1="110" y1="54" x2="130" y2="54" stroke="#94a3b8" stroke-width="1.8"/>
+  <circle cx="120" cy="54" r="2" fill="#2563eb"/>
+
+  <!-- Rear Wheel (Sport Rim) -->
+  <circle cx="40" cy="54" r="14" fill="#1e293b"/>
+  <circle cx="40" cy="54" r="10" fill="#0f172a" stroke="#64748b" stroke-width="1.2"/>
+  <circle cx="40" cy="54" r="5" fill="#e2e8f0"/>
+  <!-- Rim spokes -->
+  <line x1="40" y1="44" x2="40" y2="64" stroke="#94a3b8" stroke-width="1.8"/>
+  <line x1="30" y1="54" x2="50" y2="54" stroke="#94a3b8" stroke-width="1.8"/>
+  <circle cx="40" cy="54" r="2" fill="#2563eb"/>
+
+  <defs>
+    <!-- Premium Metallic Blue Gradient -->
+    <linearGradient id="carBodyGrad" x1="12" y1="17" x2="148" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+
+    <!-- Tinted Glass Gradient -->
+    <linearGradient id="glassGrad" x1="60" y1="23" x2="130" y2="39" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+</svg>

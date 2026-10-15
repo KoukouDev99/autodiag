@@ -1,0 +1,290 @@
+.screen-content {
+  padding: 12px 16px 80px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Top Navigation Bar */
+.screen-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 8px 0;
+}
+
+.back-btn, .help-btn {
+  background: none;
+  border: none;
+  color: var(--c-night);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover, .help-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.screen-brand-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--c-night);
+  letter-spacing: -0.01em;
+}
+
+/* Page Header */
+.page-header {
+  margin-top: 4px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--c-night);
+  letter-spacing: -0.02em;
+}
+
+.vehicle-subline {
+  font-size: 13.5px;
+  color: var(--c-text-secondary);
+  margin-top: 4px;
+}
+
+/* Guide Intro */
+.guide-intro {
+  margin-top: 2px;
+}
+
+.guide-main-heading {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--c-night);
+}
+
+.guide-subheading {
+  font-size: 13px;
+  color: var(--c-text-secondary);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+/* Meta Pills */
+.guide-meta-pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.meta-pill {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.pill-easy {
+  background-color: var(--c-success-bg);
+  color: var(--c-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.pill-neutral {
+  background-color: var(--c-surface-hover);
+  color: var(--c-text-secondary);
+  border: 1px solid var(--c-border);
+}
+
+.pill-blue {
+  background-color: var(--c-primary-light);
+  color: var(--c-primary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Tools Card */
+.tools-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+}
+
+.tools-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--c-text-primary);
+}
+
+.tools-list {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tool-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-primary);
+}
+
+.tool-item svg {
+  color: var(--c-primary);
+}
+
+.tools-notice {
+  font-size: 11.5px;
+  color: var(--c-text-secondary);
+  border-top: 1px solid var(--c-border);
+  padding-top: 6px;
+}
+
+/* Step Card */
+.step-card {
+  background: var(--c-surface);
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-card);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.step-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-number-badge {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--c-primary);
+}
+
+.step-time-badge {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--c-text-secondary);
+}
+
+.step-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--c-text-primary);
+  line-height: 1.3;
+}
+
+.step-image-container {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #0b1120;
+}
+
+.step-image {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.step-image-caption {
+  font-size: 11px;
+  color: var(--c-text-secondary);
+  font-style: italic;
+  line-height: 1.35;
+  margin-top: -4px;
+}
+
+.step-instruction-text {
+  font-size: 13.5px;
+  color: var(--c-text-primary);
+  line-height: 1.5;
+}
+
+/* Upcoming Steps */
+.next-steps-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.next-steps-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--c-text-primary);
+}
+
+.upcoming-step-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+}
+
+.upcoming-step-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background-color: var(--c-primary-light);
+  color: var(--c-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.upcoming-step-info {
+  flex: 1;
+}
+
+.upcoming-tag {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--c-primary);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.upcoming-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--c-text-primary);
+  margin-top: 2px;
+}
+
+.upcoming-desc {
+  font-size: 12px;
+  color: var(--c-text-secondary);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+/* Danger alert */
+.alert-danger {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.guide-action-container {
+  margin-top: 4px;
+}

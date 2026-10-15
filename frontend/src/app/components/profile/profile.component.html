@@ -1,0 +1,698 @@
+<div class="profile-page-container">
+
+  <!-- PAGE HEADER -->
+  <div class="profile-header-banner">
+    <div class="header-titles">
+      <div class="badge-pill">
+        <span class="badge-dot"></span>
+        <span>Espace Conducteur Sécurisé</span>
+      </div>
+      <h1 class="page-title">Mon Profil <span class="amp">&</span> Compte</h1>
+      <p class="page-subtitle">Gérez vos identifiants, vos véhicules connectés et vos préférences de diagnostic.</p>
+    </div>
+
+    @if (currentUser()) {
+    <div class="header-quick-user">
+      <div class="user-avatar-mini">{{ getUserInitials() }}</div>
+      <div class="user-info-mini">
+        <span class="user-name-mini">{{ currentUser()?.name }}</span>
+        <span class="user-email-mini">{{ currentUser()?.email }}</span>
+      </div>
+      <button class="btn-logout-mini" (click)="onLogout()" title="Déconnexion">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
+    }
+  </div>
+
+  <!-- NOTIFICATION BANNERS -->
+  @if (errorMessage()) {
+  <div class="alert-box alert-error">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-content">
+      <strong>Attention</strong>
+      <span>{{ errorMessage() }}</span>
+    </div>
+    <button class="alert-dismiss" (click)="errorMessage.set(null)">✕</button>
+  </div>
+  }
+
+  @if (successMessage()) {
+  <div class="alert-box alert-success">
+    <div class="alert-icon">✅</div>
+    <div class="alert-content">
+      <strong>Succès</strong>
+      <span>{{ successMessage() }}</span>
+    </div>
+    <button class="alert-dismiss" (click)="successMessage.set(null)">✕</button>
+  </div>
+  }
+
+  <!-- ============================================================ -->
+  <!-- CASE A: USER NOT LOGGED IN -> AUTHENTICATION TABS (LOGIN / REGISTER) -->
+  <!-- ============================================================ -->
+  @if (!currentUser()) {
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      
+      <!-- AUTH TABS SWITCHER -->
+      <div class="auth-tabs-header">
+        <button 
+          class="auth-tab-btn" 
+          [class.active]="activeAuthTab() === 'login'"
+          (click)="setAuthTab('login')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          <span>Se connecter</span>
+        </button>
+
+        <button 
+          class="auth-tab-btn" 
+          [class.active]="activeAuthTab() === 'register'"
+          (click)="setAuthTab('register')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="23" y1="11" x2="17" y2="11" />
+          </svg>
+          <span>Créer un compte</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: CONNEXION -->
+      @if (activeAuthTab() === 'login') {
+      <div class="auth-form-body">
+        
+        <!-- Fast Demo Box -->
+        <div class="demo-quick-box">
+          <div class="demo-quick-info">
+            <span class="demo-icon">⚡</span>
+            <div>
+              <strong>Compte Démo Testeur</strong>
+              <div class="demo-sub">Connectez-vous instantanément avec le compte pré-configuré</div>
+            </div>
+          </div>
+          <button class="btn-demo-quick" (click)="quickDemoLogin()" [disabled]="isLoading()">
+            Connexion Démo (Thomas)
+          </button>
+        </div>
+
+        <div class="separator-row">
+          <span>ou avec vos identifiants</span>
+        </div>
+
+        <form (ngSubmit)="onLogin()" class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="login-email">Adresse Email</label>
+            <div class="input-with-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              <input 
+                id="login-email"
+                type="email" 
+                class="form-input" 
+                placeholder="votre-email@exemple.fr"
+                [(ngModel)]="loginEmail" 
+                name="loginEmail" 
+                required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label class="form-label" for="login-password">Mot de passe</label>
+            </div>
+            <div class="input-with-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input 
+                id="login-password"
+                [type]="showPassword() ? 'text' : 'password'" 
+                class="form-input" 
+                placeholder="Votre mot de passe"
+                [(ngModel)]="loginPassword" 
+                name="loginPassword" 
+                required />
+              <button type="button" class="btn-toggle-pwd" (click)="togglePasswordVisibility()" title="Afficher/Masquer">
+                @if (showPassword()) {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                  <line x1="2" y1="2" x2="22" y2="22" />
+                </svg>
+                } @else {
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          <div class="form-actions-row">
+            <label class="remember-label">
+              <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+              <span>Rester connecté</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary-submit" [disabled]="isLoading()">
+            @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Connexion en cours...</span>
+            } @else {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+              <polyline points="10 17 15 12 10 7" />
+              <line x1="15" y1="12" x2="3" y2="12" />
+            </svg>
+            <span>Se connecter à AutoDiag</span>
+            }
+          </button>
+        </form>
+
+        <div class="auth-switch-footer">
+          <span>Vous n'avez pas encore de compte ?</span>
+          <button class="btn-link" (click)="setAuthTab('register')">Créer un compte gratuitement</button>
+        </div>
+
+      </div>
+      }
+
+      <!-- TAB 2: INSCRIPTION -->
+      @if (activeAuthTab() === 'register') {
+      <div class="auth-form-body">
+        
+        <div class="register-welcome-box">
+          <div class="reg-welcome-icon">🚘</div>
+          <div>
+            <strong>Créez votre profil en 30 secondes</strong>
+            <p>Accédez à tous vos diagnostics sauvegardés, le carnet de santé de votre véhicule et l'analyse de pannes.</p>
+          </div>
+        </div>
+
+        <form (ngSubmit)="onRegister()" class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Nom complet *</label>
+            <div class="input-with-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M6 21v-2a6 6 0 0 1 12 0v2" />
+              </svg>
+              <input 
+                id="reg-name"
+                type="text" 
+                class="form-input" 
+                placeholder="ex. Sophie Martin"
+                [(ngModel)]="regName" 
+                name="regName" 
+                required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Adresse Email *</label>
+            <div class="input-with-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              <input 
+                id="reg-email"
+                type="email" 
+                class="form-input" 
+                placeholder="votre-email@domaine.fr"
+                [(ngModel)]="regEmail" 
+                name="regEmail" 
+                required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Mot de passe *</label>
+            <div class="input-with-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <input 
+                id="reg-password"
+                type="password" 
+                class="form-input" 
+                placeholder="Au moins 6 caractères"
+                [(ngModel)]="regPassword" 
+                name="regPassword" 
+                required />
+            </div>
+          </div>
+
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label class="form-label" for="reg-phone">Téléphone</label>
+              <input 
+                id="reg-phone"
+                type="tel" 
+                class="form-input" 
+                placeholder="06 12 34 56 78"
+                [(ngModel)]="regPhone" 
+                name="regPhone" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-city">Ville</label>
+              <input 
+                id="reg-city"
+                type="text" 
+                class="form-input" 
+                placeholder="ex. Lyon, Marseille"
+                [(ngModel)]="regCity" 
+                name="regCity" />
+            </div>
+          </div>
+
+          <div class="feature-perk-card">
+            <span class="perk-icon">✨</span>
+            <div class="perk-text">
+              <strong>Configuration initiale incluse</strong> : un véhicule de démonstration (Peugeot 208) sera automatiquement associé à votre compte pour démarrer immédiatement vos diagnostics.
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary-submit" [disabled]="isLoading()">
+            @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Création en cours...</span>
+            } @else {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span>Créer mon compte et accéder à AutoDiag</span>
+            }
+          </button>
+        </form>
+
+        <div class="auth-switch-footer">
+          <span>Vous avez déjà un compte ?</span>
+          <button class="btn-link" (click)="setAuthTab('login')">Se connecter ici</button>
+        </div>
+
+      </div>
+      }
+
+    </div>
+  </div>
+  }
+
+  <!-- ============================================================ -->
+  <!-- CASE B: USER IS LOGGED IN -> FULL ADVANCED PROFILE DASHBOARD -->
+  <!-- ============================================================ -->
+  @if (currentUser()) {
+  <div class="dashboard-wrapper">
+    
+    <!-- 1. HERO USER CARD -->
+    <div class="user-hero-card">
+      <div class="hero-left">
+        <div class="avatar-wrapper">
+          <div class="user-avatar-hero">{{ getUserInitials() }}</div>
+          <span class="online-indicator" title="Compte Actif"></span>
+        </div>
+        <div class="hero-details">
+          <div class="hero-name-row">
+            <h2 class="user-display-name">{{ currentUser()?.name }}</h2>
+            <span class="verified-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              Conducteur Certifié
+            </span>
+          </div>
+
+          <div class="hero-meta-row">
+            <span class="meta-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              {{ currentUser()?.email }}
+            </span>
+            <span class="meta-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              {{ currentUser()?.phone || '06 12 34 56 78' }}
+            </span>
+            <span class="meta-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              {{ currentUser()?.city || 'Paris, France' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="btn-action-edit" (click)="isEditing.set(!isEditing())">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          <span>{{ isEditing() ? 'Fermer l\'édition' : 'Modifier mes infos' }}</span>
+        </button>
+
+        <button class="btn-action-logout" (click)="onLogout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          <span>Déconnexion</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. STATS & KPIS GRID (3 Cards) -->
+    <div class="stats-kpi-grid">
+      <div class="kpi-card" routerLink="/vehicle">
+        <div class="kpi-icon-box kpi-blue">
+          <!-- Garage Workshop Building with Roll-up Door -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9.5L12 3.5L21 9.5V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V9.5Z" stroke-linejoin="round"/>
+            <path d="M7 12H17V21H7V12Z" stroke-width="1.8"/>
+            <line x1="7" y1="15" x2="17" y2="15" stroke-width="1.5"/>
+            <line x1="7" y1="18" x2="17" y2="18" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-number">{{ currentUser()?.vehicles_count || vehicles().length || 1 }}</span>
+          <span class="kpi-label">Véhicule(s) Enregistré(s)</span>
+        </div>
+        <div class="kpi-link-arrow">
+          <span>Gérer le garage</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="kpi-card" routerLink="/garage">
+        <div class="kpi-icon-box kpi-emerald">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 14 14" />
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-number">{{ currentUser()?.diagnostics_count || 6 }}</span>
+          <span class="kpi-label">Diagnostics Réalisés</span>
+        </div>
+        <div class="kpi-link-arrow">
+          <span>Voir l'historique</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-box kpi-amber">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-number">98%</span>
+          <span class="kpi-label">Score Sérénité Véhicule</span>
+        </div>
+        <div class="kpi-link-arrow text-emerald">
+          <span>Protégé & Synchro</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. PROFILE DETAILS & EDIT FORM SECTION -->
+    <div class="content-section-card">
+      <div class="section-title-row">
+        <div>
+          <h3 class="section-title">Coordonnées du conducteur</h3>
+          <p class="section-desc">Informations associées à vos devis mécaniques et prises de rendez-vous.</p>
+        </div>
+        <button class="btn-toggle-inline" (click)="isEditing.set(!isEditing())">
+          {{ isEditing() ? 'Annuler' : 'Modifier' }}
+        </button>
+      </div>
+
+      <form (ngSubmit)="onSaveProfile()" class="profile-edit-form">
+        <div class="fields-grid-2">
+          
+          <div class="form-group">
+            <label class="form-label" for="edit-name">Nom complet</label>
+            <input 
+              id="edit-name"
+              type="text" 
+              class="form-input" 
+              [(ngModel)]="editName" 
+              name="editName" 
+              [disabled]="!isEditing()"
+              required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-email">Adresse Email</label>
+            <input 
+              id="edit-email"
+              type="email" 
+              class="form-input" 
+              [(ngModel)]="editEmail" 
+              name="editEmail" 
+              [disabled]="!isEditing()"
+              required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-phone">Téléphone Mobile</label>
+            <input 
+              id="edit-phone"
+              type="tel" 
+              class="form-input" 
+              [(ngModel)]="editPhone" 
+              name="editPhone" 
+              [disabled]="!isEditing()" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-city">Ville / Région</label>
+            <input 
+              id="edit-city"
+              type="text" 
+              class="form-input" 
+              [(ngModel)]="editCity" 
+              name="editCity" 
+              [disabled]="!isEditing()" />
+          </div>
+
+          @if (isEditing()) {
+          <div class="form-group full-width">
+            <label class="form-label" for="edit-pwd">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+            <input 
+              id="edit-pwd"
+              type="password" 
+              class="form-input" 
+              placeholder="••••••••••••"
+              [(ngModel)]="editNewPassword" 
+              name="editNewPassword" />
+          </div>
+          }
+
+        </div>
+
+        @if (isEditing()) {
+        <div class="form-save-bar">
+          <button type="button" class="btn-secondary" (click)="isEditing.set(false)">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary-save" [disabled]="isLoading()">
+            @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Enregistrement...</span>
+            } @else {
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
+            </svg>
+            <span>Enregistrer les modifications</span>
+            }
+          </button>
+        </div>
+        }
+      </form>
+    </div>
+
+    <!-- 4. CONNECTED PRIMARY VEHICLE PREVIEW -->
+    <div class="content-section-card">
+      <div class="section-title-row">
+        <div>
+          <h3 class="section-title">Véhicule Connecté Principal</h3>
+          <p class="section-desc">Ce véhicule est utilisé par défaut pour les calculs de diagnostic guidé.</p>
+        </div>
+        <a routerLink="/vehicle" class="btn-outline-link">
+          <span>Ouvrir la Fiche Véhicule</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </a>
+      </div>
+
+      @if (primaryVehicle) {
+        <div class="vehicle-summary-banner">
+          <div class="veh-icon-badge veh-brand-logo-badge">
+            <img 
+              [src]="getBrandLogoUrl(primaryVehicle.brand)" 
+              [alt]="primaryVehicle.brand" 
+              class="profile-brand-logo-img" 
+              (error)="$any($event.target).src = 'assets/simple-car.svg'"
+            />
+          </div>
+          <div class="veh-summary-info">
+            <div class="veh-title-row">
+              <h4 class="veh-title">{{ primaryVehicle.brand }} {{ primaryVehicle.model }} ({{ primaryVehicle.year }})</h4>
+            </div>
+            <div class="veh-specs-tags">
+              @if (primaryVehicle.fuel) {
+                <span class="spec-tag">{{ primaryVehicle.fuel }}</span>
+              }
+              @if (primaryVehicle.engine) {
+                <span class="spec-tag">{{ primaryVehicle.engine }}</span>
+              }
+              @if (primaryVehicle.mileage) {
+                <span class="spec-tag">{{ primaryVehicle.mileage | number }} {{ primaryVehicle.mileage_unit || 'km' }}</span>
+              }
+              @if (primaryVehicle.license_plate) {
+                <span class="spec-tag plate-tag">{{ primaryVehicle.license_plate }}</span>
+              }
+            </div>
+          </div>
+          <div class="veh-actions">
+            <a routerLink="/vehicle" [queryParams]="{ id: primaryVehicle.id }" class="btn-start-diag-quick">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+              <span>Gérer</span>
+            </a>
+          </div>
+        </div>
+      } @else {
+        <div class="vehicle-summary-banner empty-veh-banner">
+          <div class="veh-icon-badge veh-brand-logo-badge">
+            <img src="assets/simple-car.svg" alt="Voiture" class="profile-brand-logo-img" />
+          </div>
+          <div class="veh-summary-info">
+            <div class="veh-title-row">
+              <h4 class="veh-title">Aucun véhicule enregistré</h4>
+            </div>
+            <p class="section-desc" style="margin: 0; font-size: 0.85rem;">Ajoutez votre premier véhicule dans votre garage pour vos diagnostics.</p>
+          </div>
+          <div class="veh-actions">
+            <a routerLink="/vehicle" class="btn-start-diag-quick">
+              <span>+ Ajouter</span>
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- 5. PREFERENCES & SECURITY SETTINGS -->
+    <div class="content-section-card">
+      <div class="section-title-row">
+        <div>
+          <h3 class="section-title">Préférences <span class="amp">&</span> Paramètres Système</h3>
+          <p class="section-desc">Sécurité du compte, alertes d'entretien et synchronisation en direct.</p>
+        </div>
+      </div>
+
+      <div class="pref-items-list">
+        
+        <div class="pref-item">
+          <div class="pref-text">
+            <strong>Alertes de révision <span class="amp">&</span> rappels mécaniques</strong>
+            <p>Recevoir une alerte proactive quand l'intervalle kilométrique est atteint (vidange, bougies, plaquettes).</p>
+          </div>
+          <button 
+            type="button" 
+            class="toggle-switch" 
+            [class.active]="prefMaintenanceAlerts()"
+            (click)="togglePreference('maintenance')">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+
+        <div class="pref-item">
+          <div class="pref-text">
+            <strong>Synchronisation cloud en temps réel</strong>
+            <p>Sauvegarde continue des sessions de diagnostic avec la base locale MySQL.</p>
+          </div>
+          <button 
+            type="button" 
+            class="toggle-switch" 
+            [class.active]="prefCloudSync()"
+            (click)="togglePreference('cloud')">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+
+        <div class="pref-item">
+          <div class="pref-text">
+            <strong>Notifications push <span class="amp">&</span> SMS d'urgence</strong>
+            <p>Permettre au copilote d'envoyer les coordonnées de dépannage lors d'une alerte critique.</p>
+          </div>
+          <button 
+            type="button" 
+            class="toggle-switch" 
+            [class.active]="prefNotifications()"
+            (click)="togglePreference('notifications')">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Quick Session Logout Row -->
+      <div class="danger-zone-bar">
+        <div>
+          <strong>Session Sécurisée</strong>
+          <p>Dernière connexion active sur cette machine. Token JWT chiffré.</p>
+        </div>
+        <button class="btn-danger-logout" (click)="onLogout()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          <span>Fermer la session</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+  }
+
+</div>

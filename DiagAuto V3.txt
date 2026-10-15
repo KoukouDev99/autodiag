@@ -1,0 +1,1675 @@
+programme 1 :
+
+1. Vision du produit
+Nom de travail
+
+AutoDiag AI
+
+Positionnement
+
+Un assistant automobile qui transforme un problème décrit simplement par un conducteur en un diagnostic compréhensible, des vérifications guidées et une décision claire : vérifier soi-même, réparer ou aller au garage.
+
+L'application ne cherche pas à remplacer un mécanicien.
+
+Elle joue le rôle de traducteur entre le conducteur et le monde automobile.
+
+Exemple :
+
+« Quand je tourne à droite, j'entends clac-clac et ça augmente quand j'accélère. »
+
+L'application va transformer cela en :
+
+Description utilisateur
+        ↓
+Compréhension IA
+        ↓
+Symptômes structurés
+        ↓
+Moteur de diagnostic
+        ↓
+Hypothèses
+        ↓
+Questions ciblées
+        ↓
+Tests simples et sûrs
+        ↓
+Mise à jour des hypothèses
+        ↓
+Résultat
+2. Le principe fondamental : ne jamais laisser l'IA diagnostiquer seule
+
+C'est probablement la décision technique la plus importante du projet.
+
+❌ Mauvaise architecture
+Utilisateur
+     ↓
+ChatGPT
+     ↓
+"Votre cardan est HS"
+
+Trop dangereux et difficile à contrôler.
+
+✅ Architecture 10/10
+                  ┌────────────────────┐
+                  │     UTILISATEUR    │
+                  └─────────┬──────────┘
+                            ↓
+                   Texte / Photo / DTC
+                            ↓
+                  ┌────────────────────┐
+                  │   COUCHE IA        │
+                  │ compréhension      │
+                  │ extraction         │
+                  └─────────┬──────────┘
+                            ↓
+                Symptômes structurés
+                            ↓
+              ┌─────────────────────────┐
+              │ MOTEUR DE DIAGNOSTIC    │
+              │                         │
+              │ règles                  │
+              │ hypothèses              │
+              │ scoring                 │
+              │ questions               │
+              │ tests                   │
+              └────────────┬────────────┘
+                           ↓
+                 Base de connaissances
+                           ↓
+                    Tests guidés
+                           ↓
+                 Mise à jour du score
+                           ↓
+                      Résultat
+                           ↓
+                ┌──────────┴──────────┐
+                ↓                     ↓
+        Explication IA          Niveau de risque
+Règle absolue
+
+IA = comprendre + expliquer
+
+Moteur de diagnostic = raisonner
+
+Règles de sécurité = protéger
+
+3. Les 3 promesses du produit
+
+L'application doit répondre à trois questions.
+
+① Comprendre
+
+Qu'est-ce qui pourrait avoir un problème ?
+
+② Vérifier
+
+Qu'est-ce que je peux vérifier moi-même sans danger ?
+
+③ Décider
+
+Est-ce que je peux continuer à rouler, faire quelque chose moi-même ou dois-je aller au garage ?
+
+C'est beaucoup plus puissant qu'un simple chatbot automobile.
+
+4. Parcours utilisateur principal
+Étape 1 — Mon véhicule
+
+L'utilisateur crée son véhicule :
+
+Marque
+Modèle
+Année
+Motorisation
+Carburant
+Boîte
+Kilométrage
+
+Exemple :
+
+Peugeot
+3008
+2022
+1.2 PureTech
+Essence
+Automatique
+72 000 km
+
+Ces informations deviennent importantes pour le diagnostic.
+
+5. Étape 2 — Quel est le problème ?
+
+L'écran propose deux possibilités.
+
+Mode rapide
+
+Boutons :
+
+🔴 Voyant moteur
+🔋 Batterie
+🚗 Démarrage difficile
+🔊 Bruit
+🛞 Direction
+🛑 Freinage
+🌡️ Surchauffe
+💨 Fumée
+⚡ Perte de puissance
+⛽ Consommation élevée
+Mode naturel
+
+L'utilisateur écrit :
+
+« Ma voiture fait un bruit métallique quand je tourne à gauche. »
+
+L'IA transforme cela en données structurées.
+
+Par exemple :
+
+{
+  "symptom": "noise",
+  "location": "front",
+  "condition": "turning",
+  "direction": "left",
+  "noise_type": "metallic",
+  "frequency": "repeated"
+}
+
+L'IA ne donne pas encore le diagnostic.
+
+6. Étape 3 — Questionnaire adaptatif
+
+C'est ici que ton application peut devenir réellement intéressante.
+
+Au lieu de poser :
+
+25 questions.
+
+elle choisit la question qui apporte le plus d'information.
+
+Exemple :
+
+Le bruit apparaît-il uniquement lorsque vous tournez ?
+
+Oui
+Non
+Je ne sais pas
+
+Puis :
+
+Le bruit augmente-t-il lorsque vous accélérez ?
+
+Puis :
+
+Le bruit vient-il plutôt de l'avant ou de l'arrière ?
+
+Puis :
+
+Entendez-vous le bruit plusieurs fois pendant un seul virage ?
+
+Le système sélectionne dynamiquement les prochaines questions.
+
+7. Moteur de diagnostic
+
+C'est le cœur du produit.
+
+Chaque problème possède un ensemble d'hypothèses.
+
+Exemple :
+
+BRUIT EN TOURNANT
+
+├── Cardan
+├── Roulement
+├── Rotule
+├── Suspension
+├── Pneumatique
+└── Autre
+
+Chaque hypothèse possède :
+
+Symptômes associés
+Questions
+Tests
+Signes contradictoires
+Niveau de danger
+Coût indicatif
+Difficulté
+Modèles concernés
+8. Système de scoring
+
+Au début, ne prétends pas afficher :
+
+Cardan : 73.8 %
+
+si tu n'as pas de données statistiques permettant de justifier cette probabilité.
+
+À la place :
+
+Correspondance forte
+Cardan
+██████████████████░░
+Correspondance forte
+Correspondance moyenne
+Roulement
+███████████░░░░░░░░░
+Correspondance moyenne
+Correspondance faible
+Rotule
+█████░░░░░░░░░░░░░░░
+Correspondance faible
+
+Techniquement, tu peux avoir un score interne :
+
+cardan = 8
+roulement = 5
+rotule = 2
+
+Puis convertir ce score en niveau de correspondance.
+
+9. Le diagnostic doit être dynamique
+
+C'est un point extrêmement important.
+
+Le système ne fait pas :
+
+Symptômes → diagnostic final
+
+Mais :
+
+Symptômes
+    ↓
+Hypothèses
+    ↓
+Question
+    ↓
+Réponse
+    ↓
+Nouveau scoring
+    ↓
+Test
+    ↓
+Résultat du test
+    ↓
+Nouveau scoring
+    ↓
+Question suivante
+    ↓
+Diagnostic
+
+Cela donne beaucoup plus l'impression d'un véritable raisonnement mécanique.
+
+10. Les tests guidés
+
+C'est probablement l'une des fonctions les plus différenciantes.
+
+Exemple :
+
+Hypothèse : roulement
+
+L'application peut proposer un test simple uniquement s'il est sûr et approprié.
+
+Puis :
+
+Que constatez-vous ?
+
+○ Bruit augmente avec la vitesse
+○ Bruit disparaît à vitesse constante
+○ Bruit dépend surtout du virage
+○ Je ne sais pas
+
+Le résultat revient dans le moteur.
+
+Test
+ ↓
+Résultat
+ ↓
+Score
+ ↓
+Nouvelle hypothèse
+11. Système de sécurité
+
+Il faut séparer complètement les règles de sécurité du système IA.
+
+Niveau 🟢
+
+Vérification simple.
+
+Exemples :
+
+niveau liquide visuellement
+pression des pneus
+état visuel
+comportement d'un voyant non critique
+Niveau 🟠
+
+Prudence.
+
+Vous pouvez éventuellement continuer sur une courte distance,
+mais faites contrôler le véhicule rapidement.
+Niveau 🔴
+
+Arrêt / professionnel.
+
+Par exemple selon le cas :
+
+problème de freinage
+direction
+airbag
+surchauffe importante
+fuite importante
+système haute tension
+perte de contrôle du véhicule
+
+L'application doit pouvoir dire :
+
+N'effectuez pas ce test vous-même. Faites contrôler le véhicule par un professionnel.
+
+12. Base de connaissances automobile
+
+C'est ici que se trouve une grande partie de la valeur du produit.
+
+La base pourrait être organisée ainsi :
+
+Marque
+ └── Modèle
+      └── Année
+           └── Motorisation
+                └── Système
+                     └── Symptôme
+                          ├── Hypothèses
+                          ├── Questions
+                          ├── Tests
+                          ├── Sécurité
+                          └── Solutions
+
+Mais attention :
+
+Ne commence pas avec 10 000 véhicules.
+
+Commence avec :
+
+10–15 problèmes extrêmement bien documentés.
+
+13. Les premiers problèmes à couvrir
+
+Pour le MVP, je choisirais environ :
+
+Groupe moteur
+🚗 Difficulté de démarrage
+⚡ Perte de puissance
+🔥 Voyant moteur
+🌡️ Surchauffe
+💨 Fumée inhabituelle
+Bruits
+🔊 Bruit au démarrage
+🔊 Bruit en accélération
+🔊 Bruit en tournant
+Freinage / roulage
+🛑 Bruit au freinage
+🛞 Vibrations
+🚗 Tirage à gauche/droite
+Électrique
+🔋 Batterie qui se décharge
+🚘 Problème de démarrage électrique
+
+Mais tous les cas dangereux ne doivent pas recevoir des procédures DIY détaillées.
+
+14. DTC / codes défaut
+
+Tu peux ajouter très tôt une fonctionnalité simple :
+
+"J'ai un code défaut."
+
+L'utilisateur écrit :
+
+P0300
+
+L'application affiche :
+
+P0300
+Ratés d'allumage détectés
+
+Que signifie ce code ?
+Causes possibles
+Signes associés
+Niveau d'urgence
+Vérifications possibles
+Ce qu'il faut demander au garage
+
+Puis elle demande :
+
+Avez-vous d'autres codes ?
+
+Cela permet d'obtenir une partie de la valeur d'un lecteur OBD sans avoir besoin de connecter immédiatement un appareil Bluetooth.
+
+15. Photo — V2
+
+La photo du tableau de bord devient ensuite une fonctionnalité très intéressante.
+
+Utilisateur :
+
+📸 photographie le tableau de bord.
+
+IA vision :
+
+Voyant moteur
+
+Puis :
+
+Voulez-vous commencer un diagnostic ?
+
+Le système retourne alors dans le moteur de diagnostic.
+
+Important
+
+La vision ne doit pas être considérée comme la source de vérité.
+
+Elle propose :
+
+symbole détecté → hypothèse
+
+puis le moteur vérifie.
+
+16. Audio — V3
+
+La fonctionnalité "Shazam automobile" est très intéressante mais pas pour le MVP.
+
+Utilisateur :
+
+🎙️ enregistre 10 secondes.
+
+Le modèle analyse :
+
+clac
+sifflement
+grincement
+grondement
+claquement
+vibration sonore
+
+Mais il faudra un véritable dataset automobile.
+
+Donc :
+
+V3, pas V1.
+
+17. Analyse d'un devis de garage
+
+Très bonne fonctionnalité commerciale.
+
+L'utilisateur photographie :
+
+Devis garage
+
+Plaquettes ........ 180 €
+Disques ........... 320 €
+Main d'œuvre ....... 150 €
+
+L'application analyse :
+
+Pièces
+Prix indicatif
+Main-d'œuvre
+Cohérence globale
+
+Elle ne doit surtout pas dire :
+
+❌ "Ce garage vous arnaque."
+
+Mais :
+
+"Le montant semble supérieur à la fourchette indicative observée pour ce type d'intervention. Plusieurs éléments peuvent expliquer cette différence."
+
+C'est beaucoup plus professionnel.
+
+18. Carnet d'entretien
+
+Chaque voiture possède son historique :
+
+🚗 Peugeot 3008
+
+12/03/2026
+Vidange
+120 €
+
+18/05/2026
+Pneus
+420 €
+
+03/08/2026
+Plaquettes
+280 €
+
+Puis :
+
+Prochaine vidange
+Prochain contrôle
+Dernière intervention
+Kilométrage
+
+Cela crée une rétention utilisateur.
+
+19. Tutoriels
+
+Une fois le diagnostic établi :
+
+Diagnostic
+     ↓
+Action
+     ↓
+Tutoriel
+
+Par exemple :
+
+Vérifier visuellement l'état d'un pneu.
+
+Mais les tutoriels doivent être classés :
+
+🟢 Facile / sûr
+🟠 Nécessite prudence
+🔴 Professionnel
+20. Recherche de garage
+
+Après diagnostic :
+
+Vous préférez continuer le diagnostic ou chercher un professionnel ?
+
+L'application peut proposer :
+
+Garages proches
+Spécialité
+Avis
+Distance
+Prix indicatif
+
+Cette partie peut devenir une source de revenus plus tard.
+
+21. Architecture technique finale
+
+Puisque tu connais déjà Angular, Node.js et les technologies web, je partirais sur :
+
+                 ANGULAR
+                    │
+                    ↓
+              PWA / Mobile
+                    │
+                    ↓
+              API NestJS
+                    │
+        ┌───────────┼────────────┐
+        ↓           ↓            ↓
+ Diagnostic      AI Service   Auth/User
+ Engine
+        │           │
+        ↓           ↓
+ PostgreSQL      LLM API
+        │
+        ↓
+ Knowledge Base
+Frontend
+
+Angular
+
+PWA
+responsive
+mobile-first
+
+Plus tard :
+
+Angular PWA
+     ↓
+Capacitor
+     ↓
+Android / iOS
+22. Backend
+
+Je recommande :
+
+Node.js + NestJS
+
+Modules :
+
+/auth
+/users
+/vehicles
+/symptoms
+/diagnosis
+/questions
+/tests
+/dtc
+/knowledge
+/maintenance
+/quotes
+/garages
+/ai
+23. Base de données
+
+PostgreSQL.
+
+Tables principales :
+
+users
+vehicles
+vehicle_models
+
+symptoms
+questions
+answers
+
+hypotheses
+diagnostic_rules
+diagnostic_tests
+
+diagnostic_sessions
+diagnostic_results
+
+dtc_codes
+safety_rules
+
+maintenance_records
+garage_quotes
+24. Exemple de modèle de diagnostic
+
+Une hypothèse pourrait ressembler conceptuellement à :
+
+{
+  "id": "CV_JOINT",
+  "name": "Cardan / joint homocinétique",
+  "symptoms": [
+    "noise_when_turning",
+    "noise_acceleration"
+  ],
+  "questions": [
+    "noise_when_turning",
+    "noise_increases_acceleration"
+  ],
+  "tests": [
+    "turning_noise_test"
+  ],
+  "risk_level": "medium"
+}
+
+Le moteur calcule ensuite :
+
+Symptômes
+   +
+Réponses
+   +
+Résultats des tests
+   +
+Contexte véhicule
+   ↓
+Score des hypothèses
+25. IA : exactement ce qu'elle doit faire
+LLM #1 — compréhension
+
+Transformer :
+
+« Elle broute quand je démarre le matin et le voyant moteur s'allume. »
+
+en :
+
+{
+  "starting_problem": true,
+  "cold_engine": true,
+  "engine_vibration": true,
+  "check_engine_light": true
+}
+LLM #2 — explication
+
+Transformer le résultat technique en langage humain :
+
+« Plusieurs causes sont possibles. Les symptômes correspondent davantage à un problème d'allumage ou d'alimentation. Voici les vérifications que vous pouvez effectuer sans intervention mécanique. »
+
+Ce que le LLM ne fait pas
+❌ inventer une panne
+❌ décider seul d'une réparation
+❌ contourner les règles de sécurité
+❌ donner une fausse certitude
+26. V0 — prototype intelligent
+
+Avant même de construire toute l'application.
+
+Objectif
+
+Prouver que le moteur fonctionne.
+
+Pas d'IA.
+
+Pas de compte.
+
+Pas de paiement.
+
+Pas d'OBD.
+
+Juste :
+
+Symptôme
+ ↓
+Questions
+ ↓
+Règles
+ ↓
+Hypothèses
+ ↓
+Test
+ ↓
+Résultat
+Seulement 3–5 problèmes.
+
+Par exemple :
+
+Bruit en tournant
+Bruit au freinage
+Démarrage difficile
+Surchauffe
+Batterie faible
+27. V1 — vrai MVP
+Fonctionnalités
+✓ compte utilisateur
+✓ véhicule
+✓ description libre
+✓ questionnaire adaptatif
+✓ moteur de diagnostic
+✓ 10–15 problèmes
+✓ tests guidés
+✓ niveau de confiance
+✓ niveau de danger
+✓ DTC manuel
+✓ historique
+✓ résultat compréhensible
+✓ recommandations
+Pas encore :
+❌ OBD Bluetooth
+❌ reconnaissance audio
+❌ marketplace
+❌ IA qui fait tout
+❌ énorme base automobile
+28. V1.5 — IA
+
+Ajouter :
+
+Texte naturel
+      ↓
+LLM
+      ↓
+Symptômes structurés
+      ↓
+Diagnostic Engine
+
+L'utilisateur peut alors parler normalement.
+
+29. V2 — fonctionnalités commerciales
+
+Ajouter :
+
+📸 reconnaissance tableau de bord
+📄 analyse devis
+📚 carnet entretien
+📖 tutoriels
+🧠 mémoire du véhicule
+🔎 recherche garage
+
+À ce stade, le produit devient beaucoup plus intéressant commercialement.
+
+30. V3 — fonctionnalités avancées
+🎙️ analyse des bruits
+🤖 modèles ML spécialisés
+📷 analyse visuelle avancée
+🔧 recommandations de pièces
+🏪 partenaires garages
+31. V4 — OBD
+
+Enfin :
+
+OBD-II
+ ↓
+ECU
+ ↓
+DTC + données live
+ ↓
+Diagnostic Engine
+
+Et là ton produit devient beaucoup plus puissant.
+
+Mais l'OBD arrive après que ton moteur de diagnostic ait déjà de la valeur.
+
+32. Modèle économique
+
+Je ne commencerais pas directement avec un abonnement obligatoire.
+
+Freemium
+
+Gratuit :
+
+✓ quelques diagnostics
+✓ véhicule
+✓ DTC simples
+
+Premium :
+
+4,99 – 7,99 €/mois
+
+avec :
+
+✓ diagnostics illimités
+✓ historique
+✓ carnet entretien
+✓ analyse avancée
+✓ devis
+✓ IA conversationnelle
+✓ plusieurs véhicules
+
+Les prix devront être testés avec de vrais utilisateurs plutôt que décidés définitivement dès maintenant.
+
+33. Paiement ponctuel
+
+Très intéressant pour les utilisateurs qui ne veulent pas d'abonnement.
+
+Par exemple :
+
+Analyse de devis : 1,99–4,99 €
+
+ou
+
+Diagnostic avancé : paiement unique
+
+Cela peut être plus facile à vendre qu'un abonnement au début.
+
+34. B2B plus tard
+
+Une autre possibilité très intéressante :
+
+Garages
+
+Le garage pourrait utiliser ton système pour :
+
+réception client
+ ↓
+symptômes
+ ↓
+pré-diagnostic
+ ↓
+ordre de réparation
+Flottes
+
+Entreprises avec :
+
+20
+50
+100
+500 véhicules
+
+L'application peut suivre :
+
+pannes
+maintenance
+coûts
+kilométrage
+historique
+35. Les vrais avantages concurrentiels
+
+Ce n'est pas :
+
+« J'utilise GPT. »
+
+Tout le monde peut utiliser une API LLM.
+
+Ton avantage doit être :
+
+1. Le moteur de diagnostic
+Symptômes
+→ questions
+→ hypothèses
+→ tests
+→ mise à jour
+→ résultat
+2. La base de connaissances
+
+Plus elle devient fiable, plus elle devient difficile à reproduire.
+
+3. Les données
+
+Avec le temps :
+
+diagnostics
++
+réponses
++
+tests
++
+résultats réels
+
+permettront d'améliorer le système.
+
+4. L'expérience utilisateur
+
+Un conducteur non mécanicien doit comprendre immédiatement quoi faire.
+
+36. Validation avec des mécaniciens
+
+C'est indispensable.
+
+Pour chaque arbre :
+
+Diagnostic
+   ↓
+Mécanicien
+   ↓
+Validation
+
+Tu peux créer un format :
+
+Symptôme
+Question
+Réponse
+Hypothèse
+Test
+Résultat
+Action
+
+et demander à des mécaniciens :
+
+« Est-ce techniquement cohérent ? »
+
+37. Les principaux risques
+🔴 Risque 1 — sécurité
+
+Une mauvaise recommandation peut avoir des conséquences physiques.
+
+Solution :
+
+Safety Engine indépendant
++
+règles strictes
++
+validation mécanicien
++
+limitation des instructions
+🔴 Risque 2 — hallucination IA
+
+Solution :
+
+LLM ≠ diagnostic
+
+Le LLM doit rester contrôlé.
+
+🔴 Risque 3 — trop gros projet
+
+Tu pourrais facilement passer 2 ans à développer :
+
+OBD
+audio
+vision
+IA
+garages
+pièces
+mobile
+paiement
+...
+
+sans avoir validé le besoin.
+
+Solution :
+
+V0 extrêmement petit.
+
+🔴 Risque 4 — mauvaise qualité de la base
+
+Un moteur parfait avec de mauvaises connaissances donne un mauvais produit.
+
+Donc :
+
+qualité > quantité.
+
+🔴 Risque 5 — réglementation / responsabilité
+
+Il faudra faire vérifier juridiquement le produit avant commercialisation, notamment les CGU, responsabilité, sécurité, protection des données et formulation des recommandations.
+
+Ne pars surtout pas du principe qu'une assurance ou un montant de couverture particulier serait légalement obligatoire sans vérification juridique spécifique.
+
+38. Plan de développement concret
+Phase 0 — 2 semaines
+Définir 5 problèmes
+        ↓
+Construire 20–30 arbres
+        ↓
+Créer les règles
+        ↓
+Faire valider par mécanicien
+Phase 1 — 3–4 semaines
+
+Angular :
+
+Accueil
+ ↓
+Véhicule
+ ↓
+Symptôme
+ ↓
+Questions
+ ↓
+Tests
+ ↓
+Résultat
+
+Backend :
+
+NestJS
+PostgreSQL
+Diagnostic Engine
+Phase 2 — 2–3 semaines
+
+Ajouter :
+
+compte
+historique
+véhicules
+DTC
+sécurité
+Phase 3 — 2–3 semaines
+
+Ajouter :
+
+LLM
+ ↓
+texte libre
+ ↓
+symptômes structurés
+Phase 4
+
+Tester avec :
+
+20 utilisateurs
++
+2–5 mécaniciens
+
+Puis mesurer :
+
+Le diagnostic est-il compréhensible ?
+Les questions sont-elles pertinentes ?
+Le résultat est-il utile ?
+Les utilisateurs savent-ils quoi faire ?
+39. Les métriques à suivre
+
+Ne mesure pas seulement :
+
+nombre de téléchargements.
+
+Mesure surtout :
+
+Diagnostic terminé
+Combien commencent ?
+Combien terminent ?
+Utilité
+
+« Est-ce que cette application vous a aidé ? »
+
+Exactitude
+
+Après passage au garage :
+
+Diagnostic application
+vs
+diagnostic réel
+Conversion
+Utilisateur gratuit
+        ↓
+Premium
+Rétention
+J1
+J7
+J30
+40. La roadmap finale
+                    AUTO DIAG AI
+                         │
+           ┌─────────────┴─────────────┐
+           │                           │
+      DIAGNOSTIC                   UTILITÉ
+           │                           │
+     Rules Engine                 Carnet
+     Knowledge Base               Devis
+     Tests                        Garages
+     Safety                       Tutoriels
+           │
+           ↓
+          IA
+           │
+     Compréhension
+     Conversation
+     Vision
+           │
+           ↓
+      TECHNOLOGIES
+           │
+    PWA → Mobile
+           │
+           ↓
+          OBD
+           │
+           ↓
+       Données réelles
+           │
+           ↓
+       ML spécialisé
+🏆 Le programme 10/10 en une phrase
+
+Construire d'abord un moteur de diagnostic automobile fiable basé sur des symptômes, des questions adaptatives, des hypothèses, des tests et des règles de sécurité ; utiliser ensuite l'IA pour comprendre le langage naturel et expliquer les résultats ; puis ajouter progressivement vision, analyse de devis, carnet d'entretien, audio et OBD.
+
+Et surtout, ton ordre de priorité doit être :
+
+1. Fiabilité du diagnostic
+2. Sécurité
+3. Expérience utilisateur
+4. Base de connaissances
+5. IA
+6. Business
+7. OBD / audio / fonctionnalités "wow"
+
+C'est cette version que je considérerais comme 10/10 en stratégie, parce qu'elle évite le piège de construire « une application avec de l'IA » et cherche plutôt à construire un véritable produit de diagnostic automobile dont l'IA n'est qu'une des briques.
+_______________________________
+
+programme 2:
+
+1. 🎯 Vision & positionnement
+Le produit en une phrase
+Un assistant qui transforme un problème automobile vague (décrit en langage courant, par photo ou par son) en un diagnostic compréhensible, sécurisé et actionnable pour quelqu'un qui n'y connaît rien.
+
+Ce que le produit N'EST PAS
+❌ Une IA qui connaît la mécanique
+
+❌ Un scanner OBD
+
+❌ Un remplacement du garagiste
+
+❌ Un chatbot qui donne des réponses au hasard
+
+Ce que le produit EST
+✅ Un traducteur entre le langage du conducteur et la mécanique
+
+✅ Un système expert avec règles + scores + tests guidés
+
+✅ Un guide de décision : comprendre → vérifier → décider
+
+Les 3 promesses
+Promesse	Question à laquelle l'app répond
+🔎 Comprendre	"Qu'est-ce qui pourrait avoir un problème ?"
+🛠️ Vérifier	"Qu'est-ce que je peux vérifier moi-même sans danger ?"
+💰 Décider	"Est-ce que je peux le faire moi-même ou dois-je aller au garage, et à quoi m'attendre ?"
+2. 👤 Parcours utilisateur
+Écran d'accueil
+text
+🚗 MES VÉHICULES (identification d'abord)
+│
+├── 🔍 Décrire un problème
+├── 📷 Scanner un voyant (V2)
+├── 🔊 Enregistrer un bruit (V3)
+├── 🧾 Vérifier un devis (V2)
+├── 📅 Carnet d'entretien (V2)
+└── 📜 Historique des diagnostics
+Pourquoi identifier le véhicule AVANT le diagnostic
+Une panne n'a pas les mêmes causes selon :
+
+Marque / Modèle / Année
+
+Motorisation (essence / diesel / hybride / électrique)
+
+Kilométrage
+
+Exemple : "Bruit au démarrage" sur une Peugeot 3008 1.5 BlueHDi 2022 n'a pas les mêmes causes que sur une Clio 1.2 essence 2005.
+
+Parcours type — "Ma voiture tremble quand je freine"
+Étape 1 — Identification
+
+text
+Peugeot 3008 · 2022 · 1.5 BlueHDi · Diesel · 86 000 km
+Étape 2 — Description du problème
+
+Mode simple : boutons (🚗 ne démarre pas, 🔊 bruit, ⚠️ voyant, 🌡️ chauffe…)
+
+Mode IA : "Depuis quelques jours ma voiture tremble quand je freine à 90 km/h."
+
+L'IA transforme en données structurées :
+
+json
+{
+  "symptom": "vibration",
+  "condition": "braking",
+  "speed": "90 km/h",
+  "duration": "few days"
+}
+Étape 3 — Questionnaire adaptatif
+L'app pose UNE question à la fois, celle qui apporte le plus d'information.
+
+text
+Les vibrations apparaissent-elles uniquement au freinage ?
+  → Oui
+Les ressentez-vous principalement dans le volant ?
+  → Oui
+Apparaissent-elles à vitesse élevée ?
+  → Oui
+Étape 4 — Moteur de diagnostic (scores)
+
+Cause	Score	Détail
+Disque de frein voilé	8	+3 freinage, +2 volant, +2 vitesse, +1 progressif
+Pneu déformé	4	+1 freinage, +2 vibration, +1 vitesse
+Suspension	2	+1 vibration, +1 progressif
+Étape 5 — Test guidé
+L'app ne dit jamais "Votre disque est défectueux". Elle dit :
+
+"Les symptômes correspondent davantage à cette hypothèse. Voici comment la vérifier."
+
+🧪 Test 1 — Vérifiez l'état visuel des disques à travers les jantes.
+👤 Résultat : Oui / Non / Je ne sais pas
+
+🧪 Test 2 — Roulez à 50 km/h et freinez doucement. La vibration est-elle présente ?
+👤 Résultat : Oui / Non / Je ne sais pas
+
+→ Le score évolue après chaque test.
+
+Étape 6 — Résultat final
+
+text
+🔎 RÉSULTAT DU DIAGNOSTIC
+
+Cause la plus probable
+Disques de frein potentiellement voilés ou usés
+Confiance : 🟠 Moyenne
+
+Autres possibilités
+· Pneu / roue (moyenne)
+· Suspension (faible)
+· Étrier (faible)
+
+🧪 Vérifications recommandées
+1. Contrôler l'état visuel des disques
+2. Contrôler l'usure des pneus
+3. Faire contrôler le système de freinage si vibrations importantes
+
+💰 Coût indicatif
+Fourchette observée : 250–450 € (selon véhicule et garage)
+
+🚨 SÉCURITÉ
+Si le véhicule tire fortement d'un côté, si la pédale devient anormale
+ou si le freinage diminue : NE POURSUIVEZ PAS. Faites contrôler le véhicule.
+
+[🔗 Acheter les pièces]  [🗺️ Trouver un garage]  [📖 Tutoriel]
+3. 🧠 Architecture produit (6 couches)
+text
+                    👤 UTILISATEUR
+                          │
+             ┌────────────┴────────────┐
+             │                         │
+       📝 Description              📷 Photo
+       du problème             tableau de bord
+             │                         │
+             └────────────┬────────────┘
+                          ↓
+                 🧠 COMPRÉHENSION IA
+              (langage naturel → données)
+                          ↓
+              🔎 MOTEUR DE DIAGNOSTIC
+              (règles + scores + tests)
+                          ↓
+              📚 BASE DE CONNAISSANCES
+              (symptômes, causes, tests)
+                          ↓
+                🧪 TESTS GUIDÉS
+                          ↓
+                  🎯 RÉSULTAT
+                          ↓
+                 🤖 IA PÉDAGOGIQUE
+              (reformulation humaine)
+⚠️ Règle d'or
+L'IA ne doit JAMAIS être le moteur de décision principal.
+
+L'IA fait	L'IA ne fait PAS
+Comprendre le langage naturel	Diagnostiquer seule
+Reformuler en langage humain	Contourner les règles de sécurité
+Poser des questions de suivi	Remplacer la base de connaissances
+Expliquer un résultat	Décider à la place du moteur de règles
+Les règles de sécurité sont codées en dur
+Freins → 🛑 "Ne roulez pas. Consultez un professionnel."
+
+Airbags → 🛑 "Consultez un professionnel."
+
+Direction → 🛑 "Ne roulez pas. Consultez un professionnel."
+
+Haute tension (VE/hybrides) → 🛑 "Ne touchez pas. Consultez un professionnel."
+
+Surchauffe importante → 🛑 "Arrêtez immédiatement."
+
+Fumée / incendie → 🛑 "Évacuez et appelez les secours."
+
+L'app doit aussi savoir dire :
+
+"Je ne peux pas déterminer la cause avec suffisamment de certitude. Consultez un mécanicien."
+
+C'est essentiel pour la crédibilité.
+
+4. 📚 Base de connaissances (le vrai investissement)
+Structure
+text
+SYMPTÔME
+   ↓
+CAUSES POSSIBLES (avec scores)
+   ↓
+TEST
+   ↓
+RÉSULTAT
+   ↓
+CAUSE SUIVANTE ou RÉSULTAT FINAL
+Exemple : VOITURE NE DÉMARRE PAS
+text
+VOITURE NE DÉMARRE PAS
+│
+├── Aucun bruit
+│     ├── Batterie
+│     ├── Fusible
+│     ├── Neiman
+│     └── Démarreur
+│
+├── "Clic" mais moteur ne tourne pas
+│     ├── Batterie faible
+│     ├── Démarreur
+│     └── Connexion électrique
+│
+└── Moteur tourne mais ne démarre pas
+      ├── Carburant
+      ├── Allumage
+      ├── Injection
+      ├── Capteur
+      └── Antidémarrage
+Contenu à produire pour chaque cause
+Champ	Exemple
+Nom	Roulement de roue avant droit
+Gravité	🟠 Moyenne
+Difficulté	🔧🔧 Intermédiaire
+Temps estimé	1h30
+Coût pièce	40–120 €
+Coût main-d'œuvre	80–150 €
+Outils	Cric, chandelles, clé à douille
+Test simple	Soulever la roue, la faire tourner à la main, écouter
+Tutoriel	Lien vidéo / guide illustré
+Sources
+Manuels de réparation
+
+Forums spécialisés (validés)
+
+Un mécanicien qui relit tout ← indispensable
+
+Les 10 symptômes du MVP
+🚗 Voiture ne démarre pas
+
+🔋 Batterie
+
+⚠️ Voyant moteur allumé
+
+🌡️ Surchauffe
+
+🔊 Bruit moteur
+
+🛞 Bruit / vibration
+
+🛑 Freinage
+
+💨 Fumée
+
+⛽ Consommation excessive
+
+⚡ Problème électrique
+
+5. 🧰 Fonctionnalités par version
+🟢 V0 — Prototype (3–4 semaines)
+Pas d'IA. Juste règles + questions + diagnostic.
+
+5 symptômes
+
+Questionnaire basique
+
+Moteur de règles simple
+
+Résultat avec causes probables
+
+Objectif : valider que le concept fonctionne
+
+🟢 V1 — MVP (2–3 mois)
+Profil véhicule (marque, modèle, année, motorisation, km)
+
+10–15 problèmes couverts
+
+Questionnaire adaptatif (une question à la fois)
+
+Moteur de diagnostic avec scores
+
+Tests guidés avec résultats Oui/Non/Je ne sais pas
+
+Niveau de confiance (🟢 élevé / 🟠 moyen / 🔴 faible)
+
+Niveau d'urgence (🟢 roulez / 🟠 prudence / 🛑 arrêtez)
+
+Historique des diagnostics
+
+Message sécurité pour freins/direction/airbag
+
+Pas d'OBD. Pas d'audio. Pas de devis. Pas de marketplace.
+
+🟡 V1.5 — IA texte (1 mois)
+"Expliquez-moi votre problème avec vos propres mots."
+
+L'IA transforme le langage naturel en symptômes structurés
+
+L'IA reformule le résultat en langage humain
+
+Toujours pas de diagnostic par l'IA seule
+
+🟡 V2 — Enrichissement (3–4 mois)
+📷 Scanner de voyants (photo du tableau de bord → GPT-4 Vision)
+
+🧾 Vérificateur de devis (photo → OCR → comparaison prix marché)
+
+📅 Carnet d'entretien prédictif (rappels vidange, CT, pneus)
+
+📖 Tutoriels illustrés (vidéos + guides pas à pas)
+
+🔗 Affiliation pièces (Oscaro, Autodoc, Amazon)
+
+🗺️ Trouver un garage (Google Maps + partenaires)
+
+🔵 V3 — Audio & écosystème (6 mois)
+🎙️ Shazam des bruits (audio → ML) — très difficile, à faire mûrement
+
+🏪 Mise en relation garages partenaires (commission 15–30 %)
+
+🛒 Pièces compatibles (affiliation renforcée)
+
+🔴 V4 — OBD & Fleet (12 mois+)
+🔌 Lecture OBD-II optionnelle (adaptateur ELM327)
+
+🚚 Version Fleet pour entreprises (29 $/véhicule/mois)
+
+6. 💻 Stack technique
+Recommandée pour toi (Angular, Node.js, PHP/Symfony, MySQL, Python)
+Composant	Choix	Pourquoi
+Prototype (V0)	PWA React/Vite ou Angular	Rapide, pas de stores, installation mobile possible
+MVP (V1)	PWA Angular	Tu maîtrises déjà Angular
+Mobile (V2+)	Flutter (réécriture) ou Capacitor (wrapper)	Flutter = meilleure expérience ; Capacitor = plus rapide
+Backend	Node.js / NestJS	Cohérent avec ton stack
+Base de données	PostgreSQL	Proche de MySQL, plus puissant
+IA texte	API LLM (Claude/GPT) via fonction serverless	Jamais la clé API dans le navigateur
+IA vision (V2)	GPT-4 Vision ou Google Cloud Vision	Scanner voyants + OCR devis
+Hébergement	Vercel / Netlify / Cloudflare Pages	Gratuit pour démarrer
+Paiements	Stripe (web) / RevenueCat (mobile)	Abonnements + essais gratuits
+Auth	Supabase Auth ou Firebase Auth	Rapide à intégrer
+Architecture
+text
+        PWA Angular (mobile + desktop)
+                  │
+             API REST / tRPC
+                  │
+          Node.js / NestJS
+                  │
+     ┌────────────┼────────────┐
+     │            │            │
+PostgreSQL   Service IA    Service Vision
+(arbres,     (LLM + RAG)   (GPT-4 Vision)
+ utilisateurs,
+ diagnostics)
+Règle d'or technique
+Le moteur de diagnostic ne dépend PAS de l'IA. L'IA est une couche d'interface. Si l'API LLM tombe, l'app continue de fonctionner avec les règles.
+
+7. 💰 Modèle économique
+Philosophie
+Ne commence pas par l'abonnement. Valide d'abord que les gens utilisent le produit.
+
+Phase 1 — Lancement (gratuit + indirect)
+Gratuit : diagnostic de base, scan de voyants, 1 véhicule
+
+Affiliation : liens vers Oscaro, Autodoc, Amazon pour les pièces identifiées
+
+Publicité ciblée : bannières garages locaux / assurances (uniquement utilisateurs gratuits)
+
+Phase 2 — Monétisation directe (à partir de 1 000 utilisateurs actifs)
+Freemium : 4,99 €/mois ou 29,99 €/an
+
+IA illimitée
+
+Vérificateur de devis
+
+Carnet d'entretien multi-véhicules
+
+Historique illimité
+
+Export PDF
+
+Paiement à l'acte : 1,99 € par analyse de devis (sans abonnement)
+
+Essai gratuit 7 à 14 jours (augmente fortement les conversions)
+
+Phase 3 — Partenariats (à partir de 5 000 utilisateurs)
+Commission garage : 15–30 % sur les mises en relation (modèle Oovoom)
+
+Lead generation : partenariats Vroomly, iDGarages
+
+Version Fleet : 29 $/véhicule/mois (flottes 5–20 véhicules)
+
+Ce que font les concurrents
+App	Prix	Modèle
+Diagnostix	4,99–9,99 $/mois	Freemium + IA
+Steer	99 
+/
+a
+n
+o
+u
+14
+,
+99
+/anou14,99/mois	Freemium + IA illimitée
+Torque ELM 327	8,99 €/sem, 17,99 €/mois, 79,99 € à vie	Premium
+Fixiom	Packs de crédits dès 4,99 $	Paiement à l'acte
+Oovoom	Gratuit	Commission garages
+La formule clé
+Diagnostic = acquisition · Carnet d'entretien = rétention · Devis = monétisation
+
+Sans carnet d'entretien : utilisateur → panne → diagnostic → quitte l'app.
+Avec carnet : utilisateur → diagnostic → réparation → entretien → rappels → revient régulièrement.
+
+8. ⚖️ Sécurité, juridique, RGPD
+Sécurité — non négociable
+Interdiction absolue de guider une réparation sur :
+
+🛑 Freins
+
+🛑 Airbags
+
+🛑 Direction
+
+🛑 Circuit haute tension (VE/hybrides)
+
+🛑 Surchauffe importante
+
+🛑 Fumée / incendie
+
+→ Message systématique : "N'utilisez pas le véhicule. Consultez un professionnel immédiatement."
+
+Juridique
+Mentions légales : "Outil d'orientation, ne remplace pas un diagnostic professionnel. L'utilisateur reste responsable de ses décisions."
+
+Assurance RC : le règlement européen sur l'accès aux infos de diagnostic impose des minimums élevés (1 M€ dommages corporels, 0,5 M€ matériels) pour les fabricants d'outils de diagnostic. Consulte un avocat spécialisé avant la commercialisation.
+
+RGPD
+Consentement explicite
+
+Droit à l'effacement
+
+Politique de confidentialité claire
+
+Surtout si tu stockes VIN, localisation, historique
+
+9. 🚀 Roadmap
+Phase	Contenu	Durée	Livrable
+1. Validation	20 utilisateurs + 2 mécaniciens, valider 10 symptômes	2–3 sem	Cahier des charges + 10 arbres
+2. Contenu	Rédiger et faire valider 20–30 arbres	4–6 sem	Base JSON/YAML validée
+3. V0	Prototype règles + questionnaire, sans IA	3–4 sem	Démo fonctionnelle
+4. V1 MVP	10–15 problèmes, tests guidés, historique, véhicule	2–3 mois	App PWA fonctionnelle
+5. Beta	50–100 utilisateurs, ajuster les arbres	1–2 mois	Retours + corrections
+6. V1.5	IA texte (compréhension langage naturel)	1 mois	Chat + reformulation
+7. Lancement	Freemium + affiliation + 1er garage partenaire	En continu	Premiers revenus
+8. V2	Photo voyants + devis + carnet	3–4 mois	Montée en gamme
+9. V3	Audio + tutoriels + garages partenaires	6 mois	Écosystème
+10. V4	OBD optionnel + Fleet	12 mois+	Élargissement
+10. 💸 Budget réaliste
+Scénario	Coût	Détail
+Toi-même	0 € dev + ~50 €/mois	Hébergement + API IA
+Freelance Flutter	3 000–5 000 €	MVP complet
+Freelance débutant	250–750 €	Prototype simple uniquement
+Agence	À partir de 25 000 €	Plateforme complète
+Le vrai investissement, c'est le contenu diagnostic, pas le code.
+
+11. 📊 KPIs à suivre
+Indicateur	Objectif V1	Objectif V2
+Utilisateurs actifs mensuels	500	5 000
+Diagnostics complétés	1 000	15 000
+Taux de satisfaction diagnostic	> 70 %	> 80 %
+Taux de conversion freemium	—	3–5 %
+Rétention à 30 jours	> 20 %	> 35 %
+Revenus mensuels	0 €	1 500–3 000 €
+12. ✅ Ce qu'il faut retenir
+Les 10 commandements du projet
+Le contenu diagnostic est le vrai produit. Le code n'est que l'emballage.
+
+L'IA est une interface, pas une autorité. Elle comprend et reformule, elle ne diagnostique pas.
+
+Les règles de sécurité sont codées en dur. Jamais d'IA sur les freins, airbags, direction, haute tension.
+
+Identifie le véhicule AVANT le diagnostic. Une panne n'a pas les mêmes causes selon le modèle.
+
+Pose UNE question à la fois. Celle qui apporte le plus d'information.
+
+Ne dis jamais "Votre pièce est cassée". Dis "Les symptômes correspondent à cette hypothèse, voici comment vérifier."
+
+Sache dire "je ne sais pas". C'est ce qui fait ta crédibilité.
+
+Commence sans IA (V0), puis ajoute-la (V1.5). Valide le concept avant d'investir.
+
+Diagnostic = acquisition · Carnet = rétention · Devis = monétisation.
+
+Fais relire tout le contenu par un mécanicien. C'est non négociable.
+
+La phrase à retenir
+"Je ne construis pas une application IA de diagnostic automobile. Je construis un assistant automobile pour les conducteurs non mécaniciens."
+
+13. 🎯 Prochaine étape concrète
+Choisis ce que tu veux que je te prépare en premier :
+
+Les 10 arbres de diagnostic JSON prêts à coder pour la V0
+
+Le cahier des charges complet écran par écran (pour toi ou un dev)
+
+Le schéma PostgreSQL (tables : vehicles, symptoms, causes, tests, diagnostics, users)
+
+Le prototype d'écran d'accueil en HTML/Angular/React
+
+Le prompt système de l'IA (compréhension + reformulation, sans diagnostic)
+
+La structure JSON d'une fiche diagnostic (avec scores, tests, sécurité)

@@ -1,0 +1,917 @@
+<div class="screen-content">
+  <!-- Unified Header & Breadcrumb -->
+  <div class="vehicle-page-header">
+    <div class="vehicle-title-col">
+      <button class="back-btn-pill" (click)="goBack()" title="Retour à l’accueil">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Retour</span>
+      </button>
+      <div>
+        <h1 class="page-title">{{ isNewMode ? 'Ajouter un véhicule' : 'Configuration Véhicule' }}</h1>
+        <p class="page-subtitle">
+          {{ isNewMode 
+            ? 'Renseignez les données techniques pour ajouter ce véhicule à votre garage.' 
+            : 'Fiche technique, motorisation et immatriculation certifiée pour le diagnostic.' 
+          }}
+        </p>
+      </div>
+    </div>
+
+    <div class="vehicle-top-actions">
+      @if (isNewMode) {
+        <button type="button" class="btn-cancel-new-mode" (click)="switchToVehicle(vehicles[0])">
+          Annuler
+        </button>
+      } @else {
+        <button type="button" class="btn-add-vehicle-modern" (click)="startNewVehicle()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>Ajouter un véhicule</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Section Garage : Liste ligne par ligne (pas de carrousel) -->
+  @if (vehicles.length > 0) {
+    <div class="garage-list-card">
+      <div class="garage-list-header">
+        <div class="garage-header-title-box">
+          <div class="garage-header-icon-circle">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 9.5L12 3L21 9.5V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V9.5Z" stroke-linejoin="round" fill="currentColor" fill-opacity="0.15"/>
+              <rect x="7" y="11" width="10" height="9" rx="1" stroke-width="1.7"/>
+              <line x1="7" y1="14" x2="17" y2="14" stroke-width="1.3"/>
+              <line x1="7" y1="17" x2="17" y2="17" stroke-width="1.3"/>
+              <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="garage-section-heading">Mon Garage Automobile</h2>
+            <p class="garage-section-sub">
+              {{ vehicles.length }} véhicule{{ vehicles.length > 1 ? 's' : '' }} enregistré{{ vehicles.length > 1 ? 's' : '' }} • Cliquez sur une ligne pour modifier
+            </p>
+          </div>
+        </div>
+
+        <button 
+          type="button" 
+          class="btn-garage-add-row" 
+          (click)="startNewVehicle()"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>Ajouter un véhicule</span>
+        </button>
+      </div>
+
+      <!-- Liste ligne par ligne -->
+      <div class="garage-rows-container">
+        @for (v of vehicles; track v.id) {
+          <div 
+            class="garage-car-row" 
+            [class.row-selected]="!isNewMode && v.id === vehicle.id"
+            (click)="switchToVehicle(v)"
+          >
+            <!-- Logo Marque -->
+            <div class="car-row-logo-box">
+              <img 
+                [src]="getBrandLogoUrl(v.brand)" 
+                [alt]="v.brand" 
+                class="car-row-logo-img" 
+                (error)="onLogoError($event)" 
+              />
+            </div>
+
+            <!-- Infos principales -->
+            <div class="car-row-info">
+              <div class="car-row-title">
+                <span class="car-row-name">{{ v.brand }} {{ v.model }}</span>
+                @if (v.is_primary) {
+                  <span class="badge-primary-star">⭐ Principal</span>
+                }
+                @if (!isNewMode && v.id === vehicle.id) {
+                  <span class="badge-editing">✓ En édition</span>
+                }
+              </div>
+              <div class="car-row-meta">
+                <span>{{ v.year }}</span>
+                <span class="meta-separator">•</span>
+                <span>{{ v.fuel }}</span>
+                @if (v.license_plate) {
+                  <span class="meta-separator">•</span>
+                  <span class="car-row-plate-pill">
+                    <span class="country-flag-icon mini flag-{{ (v.plate_country || 'F').toLowerCase() }}"></span>
+                    {{ v.license_plate }}
+                  </span>
+                }
+                @if (v.mileage) {
+                  <span class="meta-separator">•</span>
+                  <span>{{ v.mileage | number }} {{ v.mileage_unit || 'km' }}</span>
+                }
+              </div>
+            </div>
+
+            <!-- Actions sur la ligne -->
+            <div class="car-row-actions" (click)="$event.stopPropagation()">
+              @if (!v.is_primary) {
+                <button 
+                  type="button" 
+                  class="btn-row-make-primary" 
+                  (click)="setAsPrimary(v, $event)"
+                  title="Définir comme véhicule principal"
+                >
+                  ⭐ Principal
+                </button>
+              }
+              <button 
+                type="button" 
+                class="btn-row-select" 
+                [class.btn-row-active]="!isNewMode && v.id === vehicle.id"
+                (click)="switchToVehicle(v)"
+              >
+                {{ (!isNewMode && v.id === vehicle.id) ? '✓ Sélectionné' : 'Modifier' }}
+              </button>
+
+              <button 
+                type="button" 
+                class="btn-row-delete" 
+                (click)="deleteVehicleFromList(v, $event)"
+                title="Supprimer ce véhicule du garage"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+                <span>Supprimer</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="garage-empty-card">
+      <div class="garage-empty-icon-circle">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="garage-empty-icon-svg">
+          <path d="M3 9.5L12 3L21 9.5V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V9.5Z" stroke-linejoin="round" fill="currentColor" fill-opacity="0.12"/>
+          <rect x="7" y="11" width="10" height="9" rx="1" stroke-width="1.7"/>
+          <line x1="7" y1="14" x2="17" y2="14" stroke-width="1.3"/>
+          <line x1="7" y1="17" x2="17" y2="17" stroke-width="1.3"/>
+          <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="garage-empty-info">
+        <h3 class="garage-empty-title">Votre garage est vide</h3>
+        <p class="garage-empty-desc">Aucun véhicule enregistré pour le moment. Renseignez les informations ci-dessous pour enregistrer un véhicule.</p>
+      </div>
+    </div>
+  }
+
+  <!-- Vehicle Form Card -->
+  <form id="vehicleFormCard" class="vehicle-form-card" (ngSubmit)="saveVehicle()">
+    <!-- Form Hero Header with brand logo & vehicle overview -->
+    <div class="form-hero-header">
+      <div class="form-hero-left">
+        <div class="form-hero-logo-box" [class.is-new-mode]="isNewMode && !vehicle.brand">
+          @if (isNewMode && !vehicle.brand) {
+            <img src="assets/simple-car.svg" alt="Nouveau véhicule" class="form-hero-simple-car-img" />
+          } @else {
+            <img 
+              [src]="getBrandLogoUrl(vehicle.brand)" 
+              [alt]="vehicle.brand || 'Véhicule'" 
+              class="form-hero-logo-img" 
+              (error)="onLogoError($event)" 
+            />
+          }
+        </div>
+        <div class="form-hero-text">
+          <h2 class="form-hero-title">
+            {{ isNewMode ? (vehicle.brand ? vehicle.brand + ' ' + (vehicle.model || '') : 'Nouveau véhicule') : (vehicle.brand + ' ' + vehicle.model) }}
+          </h2>
+          <div class="form-hero-meta">
+            @if (isNewMode) {
+              <span class="badge-status-configuring">Configuration en cours</span>
+            } @else {
+              <span>{{ vehicle.year }} • {{ vehicle.fuel }} • {{ vehicle.engine || 'Motorisation à définir' }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="form-hero-right">
+        @if (!isNewMode) {
+          @if (vehicle.is_primary) {
+            <span class="badge-primary-vehicle">⭐ Véhicule principal</span>
+          } @else {
+            <button type="button" class="btn-make-primary-modern" (click)="setAsPrimary(vehicle, $event)">
+              Définir comme principal
+            </button>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Section 1: Caractéristiques & Motorisation -->
+    <div class="form-section-divider">
+      <span class="section-divider-title">01. Caractéristiques <span class="amp">&</span> Motorisation</span>
+      <span class="section-required-text">Données techniques</span>
+    </div>
+
+    <!-- Row 1: Marque & Modèle (2 Columns on Laptop) -->
+    <div class="form-row-2 brand-model-row">
+      <!-- Marque (Custom Searchable & Scrollable Dropdown) -->
+      <div class="form-group custom-dropdown-group">
+        <div class="label-row">
+          <label class="form-label">Marque</label>
+          @if (loadingBrands) {
+            <span class="loading-hint">Chargement du catalogue...</span>
+          } @else {
+            <span class="count-hint">{{ brands.length }} marques</span>
+          }
+        </div>
+
+        <div 
+          id="brandSelectTrigger"
+          tabindex="0"
+          class="custom-select-trigger" 
+          [class.open]="isBrandOpen" 
+          (click)="toggleBrandDropdown($event)"
+          (keydown.enter)="toggleBrandDropdown($event)"
+        >
+          <div class="trigger-brand-content">
+            @if (vehicle.brand) {
+              <img 
+                [src]="getBrandLogoUrl(vehicle.brand)" 
+                [alt]="vehicle.brand" 
+                class="trigger-mini-brand-logo" 
+                (error)="onLogoError($event)" 
+              />
+            }
+            <span class="trigger-value" [class.placeholder]="!vehicle.brand">
+              {{ vehicle.brand || 'Sélectionner une marque' }}
+            </span>
+          </div>
+          <div class="trigger-chevron" [class.rotated]="isBrandOpen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        @if (isBrandOpen) {
+          <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+            <div class="dropdown-search-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input 
+                type="text" 
+                class="dropdown-search-input" 
+                placeholder="Rechercher une marque (ex: Peugeot, Audi...)" 
+                [(ngModel)]="brandSearch" 
+                name="brandSearchField"
+                autocomplete="off"
+              />
+              @if (brandSearch) {
+                <button type="button" class="clear-search-btn" (click)="brandSearch = ''">✕</button>
+              }
+            </div>
+
+            <!-- Scrollable list with visible scrollbar -->
+            <div class="scrollable-dropdown-list">
+              @if (filteredBrands.length === 0) {
+                <div class="dropdown-empty-state">Aucune marque trouvée pour "{{ brandSearch }}"</div>
+              } @else {
+                @for (b of filteredBrands; track b) {
+                  <button 
+                    type="button"
+                    class="dropdown-item brand-dropdown-item" 
+                    [class.selected]="b === vehicle.brand"
+                    (click)="selectBrand(b)"
+                  >
+                    <div class="brand-item-title-box">
+                      <img 
+                        [src]="getBrandLogoUrl(b)" 
+                        [alt]="b" 
+                        class="brand-list-mini-logo" 
+                        loading="lazy" 
+                        (error)="$any($event.target).style.display='none'" 
+                      />
+                      <span class="item-label">{{ b }}</span>
+                    </div>
+                    @if (b === vehicle.brand) {
+                      <svg class="item-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                    }
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Modèle (Custom Searchable & Scrollable Dropdown) -->
+      <div class="form-group custom-dropdown-group">
+        <div class="label-row">
+          <label class="form-label">Modèle</label>
+          @if (loadingModels) {
+            <span class="loading-hint">Chargement des modèles...</span>
+          } @else if (models.length > 0) {
+            <span class="count-hint">{{ models.length }} modèles disponibles</span>
+          }
+        </div>
+
+        <div 
+          class="custom-select-trigger" 
+          [class.open]="isModelOpen" 
+          [class.disabled]="loadingModels || models.length === 0" 
+          (click)="toggleModelDropdown($event)"
+        >
+          <span class="trigger-value" [class.placeholder]="!vehicle.model">
+            {{ vehicle.model || (loadingModels ? 'Chargement en cours...' : 'Sélectionner un modèle') }}
+          </span>
+          <div class="trigger-chevron" [class.rotated]="isModelOpen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        @if (isModelOpen && models.length > 0) {
+          <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+            <div class="dropdown-search-box">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+              </svg>
+              <input 
+                type="text" 
+                class="dropdown-search-input" 
+                placeholder="Rechercher un modèle (ex: 208, Clio...)" 
+                [(ngModel)]="modelSearch" 
+                name="modelSearchField"
+                autocomplete="off"
+              />
+              @if (modelSearch) {
+                <button type="button" class="clear-search-btn" (click)="modelSearch = ''">✕</button>
+              }
+            </div>
+
+            <!-- Scrollable list with visible scrollbar -->
+            <div class="scrollable-dropdown-list">
+              @if (filteredModels.length === 0) {
+                <div class="dropdown-empty-state">Aucun modèle trouvé pour "{{ modelSearch }}"</div>
+              } @else {
+                @for (m of filteredModels; track m.id || m.model) {
+                  <button 
+                    type="button"
+                    class="dropdown-item" 
+                    [class.selected]="m.model === vehicle.model"
+                    (click)="selectModel(m.model)"
+                  >
+                    <div class="model-item-info">
+                      <span class="item-label">{{ m.model }}</span>
+                      @if (m.year_start) {
+                        <span class="item-sub">({{ m.year_start }} - {{ m.year_end || 'aujourd’hui' }})</span>
+                      }
+                    </div>
+                    @if (m.model === vehicle.model) {
+                      <svg class="item-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                    }
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Année & Carburant (2 Columns) -->
+    <div class="form-row-2">
+      <!-- Année -->
+      <div class="form-group custom-dropdown-group">
+        <div class="label-row">
+          <label class="form-label">Année</label>
+          @if (loadingYears) {
+            <span class="loading-hint">...</span>
+          }
+        </div>
+
+        <div 
+          class="custom-select-trigger" 
+          [class.open]="isYearOpen" 
+          [class.disabled]="!vehicle.brand || loadingYears || years.length === 0" 
+          (click)="toggleYearDropdown($event)"
+        >
+          <span class="trigger-value" [class.placeholder]="!vehicle.brand || !vehicle.year">
+            {{ (vehicle.brand && vehicle.year) ? vehicle.year : 'Sélectionner une année' }}
+          </span>
+          <div class="trigger-chevron" [class.rotated]="isYearOpen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        @if (isYearOpen && years.length > 0) {
+          <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+            <div class="scrollable-dropdown-list list-compact">
+              @for (y of years; track y) {
+                <button 
+                  type="button"
+                  class="dropdown-item" 
+                  [class.selected]="y === vehicle.year"
+                  (click)="selectYear(y)"
+                >
+                  <span class="item-label">{{ y }}</span>
+                  @if (y === vehicle.year) {
+                    <svg class="item-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Carburant -->
+      <div class="form-group custom-dropdown-group">
+        <div class="label-row">
+          <label class="form-label">Carburant</label>
+          @if (engines.length > 0 && availableFuelTypes.length > 0) {
+            <span class="count-hint">{{ availableFuelTypes.length }} type{{ availableFuelTypes.length > 1 ? 's' : '' }}</span>
+          }
+        </div>
+
+        <div 
+          class="custom-select-trigger" 
+          [class.open]="isFuelOpen" 
+          [class.disabled]="!vehicle.brand || availableFuelTypes.length === 0" 
+          (click)="toggleFuelDropdown($event)"
+        >
+          <span class="trigger-value" [class.placeholder]="!vehicle.brand || !vehicle.fuel">
+            {{ (vehicle.brand && vehicle.fuel) ? vehicle.fuel : 'Sélectionner un carburant' }}
+          </span>
+          <div class="trigger-chevron" [class.rotated]="isFuelOpen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+        </div>
+
+        @if (isFuelOpen) {
+          <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+            <div class="scrollable-dropdown-list list-compact">
+              @for (f of availableFuelTypes; track f) {
+                <button 
+                  type="button"
+                  class="dropdown-item" 
+                  [class.selected]="f === vehicle.fuel"
+                  (click)="selectFuel(f)"
+                >
+                  <span class="item-label">{{ f }}</span>
+                  @if (f === vehicle.fuel) {
+                    <svg class="item-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Motorisation & Options (Smart Dropdown from Database) -->
+    <div class="form-group custom-dropdown-group">
+      <div class="label-row">
+        <label class="form-label">Motorisation</label>
+        @if (loadingEngines) {
+          <span class="loading-hint">Chargement des motorisations...</span>
+        } @else if (availableEnginesForFuel.length > 0) {
+          <span class="count-hint">{{ availableEnginesForFuel.length }} motorisation(s) {{ showAllFuels ? '(tous carburants)' : vehicle.fuel }}</span>
+        } @else if (engines.length > 0) {
+          <span class="count-hint fuel-none-warning">0 motorisation {{ vehicle.fuel }}</span>
+        }
+      </div>
+
+      <div 
+        class="custom-select-trigger" 
+        [class.open]="isEngineOpen" 
+        [class.disabled]="isEngineDisabled || loadingEngines" 
+        (click)="toggleEngineDropdown($event)"
+      >
+        <span class="trigger-value" [class.placeholder]="!vehicle.engine">
+          {{ isEngineDisabled 
+            ? 'Sélectionner une motorisation' 
+            : (vehicle.engine || (loadingEngines ? 'Recherche des motorisations...' : 'Sélectionner une motorisation')) 
+          }}
+        </span>
+        <div class="trigger-chevron" [class.rotated]="isEngineOpen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
+      </div>
+
+      @if (isEngineOpen) {
+        <div class="custom-dropdown-panel" (click)="$event.stopPropagation()">
+          <!-- Fuel Filter Indicator Banner -->
+          <div class="dropdown-fuel-filter-bar">
+            <span class="fuel-filter-pill">
+              ⛽ {{ showAllFuels ? 'Tous les carburants' : 'Filtre : ' + vehicle.fuel }}
+              ({{ availableEnginesForFuel.length }}/{{ engines.length }})
+            </span>
+            @if (engines.length > 0) {
+              <button type="button" class="btn-toggle-fuel-filter" (click)="toggleAllFuelsFilter($event)">
+                {{ showAllFuels ? 'Filtrer sur ' + vehicle.fuel : 'Tous carburants (' + engines.length + ')' }}
+              </button>
+            }
+          </div>
+
+          <div class="dropdown-search-box">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input 
+              type="text" 
+              class="dropdown-search-input" 
+              placeholder="Rechercher une motorisation (ex: PureTech, 100 HP, TDI...)" 
+              [(ngModel)]="engineSearch" 
+              name="engineSearchField"
+              autocomplete="off"
+            />
+            @if (engineSearch) {
+              <button type="button" class="clear-search-btn" (click)="engineSearch = ''">✕</button>
+            }
+          </div>
+
+          <div class="scrollable-dropdown-list">
+            @if (filteredEngines.length === 0) {
+              <div class="dropdown-empty-state">
+                @if (availableEnginesForFuel.length === 0 && !showAllFuels) {
+                  <div>Aucune motorisation <strong>{{ vehicle.fuel }}</strong> disponible pour ce modèle.</div>
+                  <button type="button" class="btn-toggle-fuel-filter mt-2" (click)="toggleAllFuelsFilter($event)">
+                    Afficher toutes les motorisations ({{ engines.length }})
+                  </button>
+                } @else {
+                  <span>Aucune motorisation trouvée pour "{{ engineSearch }}".</span>
+                }
+              </div>
+            } @else {
+              @for (eng of filteredEngines; track eng.id) {
+                <button 
+                  type="button"
+                  class="dropdown-item engine-item-row" 
+                  [class.selected]="eng.name === vehicle.engine"
+                  (click)="selectEngine(eng)"
+                >
+                  <div class="engine-item-info">
+                    <span class="item-label font-bold">{{ eng.name }}</span>
+                    <div class="engine-item-badges">
+                      @if (eng.power_hp) {
+                        <span class="spec-badge-pill">⚡ {{ eng.power_hp }}</span>
+                      }
+                      @if (eng.displacement) {
+                        <span class="spec-badge-pill">⚙️ {{ eng.displacement }}</span>
+                      }
+                      @if (eng.fuel) {
+                        <span class="spec-badge-pill">⛽ {{ eng.fuel }}</span>
+                      }
+                    </div>
+                  </div>
+                  @if (eng.name === vehicle.engine) {
+                    <svg class="item-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  }
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Fiche Technique Automobile Complète -->
+    @if (selectedEngineSpec) {
+      <div class="specs-summary-card">
+        <div class="specs-card-header">
+          <div class="specs-badge-tag">CARACTÉRISTIQUES TECHNIQUES DÉTAILLÉES</div>
+          <div class="specs-engine-headline">{{ selectedEngineSpec.name }}</div>
+        </div>
+
+        <div class="specs-grid">
+          @if (selectedEngineSpec.power_hp) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">⚡ Puissance</span>
+              <span class="spec-tile-value highlight">{{ selectedEngineSpec.power_hp }} ({{ selectedEngineSpec.power_kw || 'kW' }})</span>
+            </div>
+          }
+          @if (selectedEngineSpec.torque_nm) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">🔄 Couple moteur</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.torque_nm }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.displacement || selectedEngineSpec.cylinders) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">⚙️ Cylindrée <span class="amp">&</span> Cylindres</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.displacement || 'Électrique' }} {{ selectedEngineSpec.cylinders ? '(' + selectedEngineSpec.cylinders + ')' : '' }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.gearbox) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">🕹️ Boîte de vitesses</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.gearbox }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.drive_type) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">🚗 Transmission</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.drive_type }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.acceleration || selectedEngineSpec.top_speed) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">⏱️ Accélération <span class="amp">&</span> Vmax</span>
+              <span class="spec-tile-value">0-100: {{ selectedEngineSpec.acceleration || '-' }} | Vmax: {{ selectedEngineSpec.top_speed || '-' }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.dimensions) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">📏 Dimensions (L × l × h)</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.dimensions }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.weight) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">⚖️ Poids à vide</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.weight }}</span>
+            </div>
+          }
+          @if (selectedEngineSpec.tires) {
+            <div class="spec-tile">
+              <span class="spec-tile-label">🛞 Pneus d’origine</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.tires }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Section 2: Identification & Compteur -->
+    <div class="form-section-divider">
+      <span class="section-divider-title">02. Identification <span class="amp">&</span> Compteur</span>
+      <span class="section-required-text">Plaque certifiée <span class="amp">&</span> Kilométrage</span>
+    </div>
+
+    <!-- Plaque d'immatriculation & Kilométrage (2 Columns) -->
+    <div class="form-row-2 plate-mileage-row">
+      <!-- Immatriculation avec pays dynamique et validation spécifique -->
+      <div class="form-group plate-form-group">
+        <div class="label-row">
+          <label class="form-label" for="plateInput">Immatriculation</label>
+          
+          <!-- Sélecteur de pays cliquable -->
+          <div class="plate-country-selector-wrapper">
+            <button 
+              type="button" 
+              class="plate-country-selector-btn" 
+              (click)="toggleCountryDropdown($event)"
+              title="Changer le pays de l’immatriculation"
+            >
+              <span class="country-flag-icon flag-{{ selectedCountry.code.toLowerCase() }}"></span>
+              <span class="country-code-pill">{{ selectedCountry.code }}</span>
+              <span class="country-name-text">{{ selectedCountry.name }}</span>
+              <svg class="country-chevron" [class.rotated]="isCountryOpen" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+
+            @if (isCountryOpen) {
+              <div class="country-dropdown-menu" (click)="$event.stopPropagation()">
+                <div class="country-dropdown-header">Sélectionnez le pays d’immatriculation :</div>
+                <div class="country-dropdown-scroll">
+                  @for (c of plateCountries; track c.code) {
+                    <button 
+                      type="button" 
+                      class="country-dropdown-item" 
+                      [class.active]="selectedCountry.code === c.code"
+                      (click)="selectCountry(c)"
+                    >
+                      <span class="country-flag-icon flag-{{ c.code.toLowerCase() }}"></span>
+                      <div class="item-country-info">
+                        <span class="item-country-name">{{ c.name }}</span>
+                        <span class="item-country-format">{{ c.placeholder }}</span>
+                      </div>
+                      <span class="item-country-code">[{{ c.code }}]</span>
+                      @if (selectedCountry.code === c.code) {
+                        <svg class="item-check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="euro-plate-wrapper" [class.is-valid]="isPlateValid" [class.is-invalid]="plateError !== null">
+          <!-- Bandeau gauche pays (cliquable pour changer de pays) -->
+          <div 
+            class="euro-band-left" 
+            [class.swiss-band]="selectedCountry.code === 'CH'" 
+            [class.non-euro-band]="!selectedCountry.isEuro"
+            (click)="toggleCountryDropdown($event)"
+            [title]="'Pays : ' + selectedCountry.name + ' (Cliquez pour changer)'"
+          >
+            @if (selectedCountry.code === 'CH') {
+              <!-- Croix suisse blanche -->
+              <svg class="swiss-cross" viewBox="0 0 24 24" width="14" height="14" fill="#ffffff">
+                <path d="M9 4h6v5h5v6h-5v5H9v-5H4V9h5V4z"/>
+              </svg>
+              <span class="euro-country-code">CH</span>
+            } @else if (selectedCountry.isEuro) {
+              <!-- Étoiles européennes dorées -->
+              <svg class="euro-stars" viewBox="0 0 24 24" width="13" height="13" fill="#fbbf24">
+                <circle cx="12" cy="4" r="1.3"/>
+                <circle cx="17.6" cy="6.4" r="1.3"/>
+                <circle cx="20" cy="12" r="1.3"/>
+                <circle cx="17.6" cy="17.6" r="1.3"/>
+                <circle cx="12" cy="20" r="1.3"/>
+                <circle cx="6.4" cy="17.6" r="1.3"/>
+                <circle cx="4" cy="12" r="1.3"/>
+                <circle cx="6.4" cy="6.4" r="1.3"/>
+              </svg>
+              <span class="euro-country-code">{{ selectedCountry.code }}</span>
+            } @else {
+              <!-- Pays non-européen (ex: DZ, MA, TN) : Drapeau en badge/fond à gauche + code unique -->
+              <div class="non-euro-flag-badge">
+                <span class="country-flag-icon mini flag-{{ selectedCountry.code.toLowerCase() }}"></span>
+              </div>
+              <span class="euro-country-code non-euro">{{ selectedCountry.code }}</span>
+            }
+          </div>
+
+          <!-- Input central style plaque minéralogique -->
+          <input 
+            id="plateInput" 
+            type="text" 
+            class="euro-plate-input" 
+            [placeholder]="selectedCountry.placeholder" 
+            maxlength="14"
+            [(ngModel)]="vehicle.license_plate" 
+            (input)="onPlateInput($event)"
+            name="license_plate" 
+            autocomplete="off"
+            spellcheck="false"
+          />
+
+          <!-- Bandeau droit : toujours 01 sur tous les pays avec couleur de son drapeau si hors UE -->
+          <div class="euro-band-right" [style.background-color]="getRightBandBgColor()">
+            <span class="plate-dep-num">01</span>
+          </div>
+        </div>
+
+        @if (plateError) {
+          <div class="plate-validation-msg error-msg">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>Format invalide (Exemple : {{ selectedCountry.example }})</span>
+          </div>
+        } @else {
+          <div class="form-help">Exemple : {{ selectedCountry.example }}</div>
+        }
+      </div>
+
+      <!-- Kilométrage avec sélecteur d'unité km / miles (Optionnel) -->
+      <div class="form-group mileage-form-group">
+        <div class="label-row">
+          <label class="form-label" for="mileageInput">Compteur kilométrique</label>
+          
+          <!-- Toggle unité km vs miles -->
+          <div class="unit-toggle-pill-group">
+            <button 
+              type="button" 
+              class="unit-pill-btn" 
+              [class.active]="(vehicle.mileage_unit || 'km') === 'km'"
+              (click)="setMileageUnit('km')"
+              title="Afficher en kilomètres"
+            >
+              km
+            </button>
+            <button 
+              type="button" 
+              class="unit-pill-btn" 
+              [class.active]="vehicle.mileage_unit === 'mi'"
+              (click)="setMileageUnit('mi')"
+              title="Afficher en miles"
+            >
+              miles
+            </button>
+          </div>
+        </div>
+
+        <div class="mileage-input-group">
+          <svg class="mileage-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <input 
+            id="mileageInput" 
+            type="number" 
+            class="form-control mileage-input" 
+            [placeholder]="vehicle.mileage_unit === 'mi' ? 'ex: 52000' : 'ex: 85000'" 
+            [(ngModel)]="vehicle.mileage" 
+            (focus)="onMileageFocus($event)"
+            (input)="onMileageInput($event)"
+            name="mileage" 
+            min="0"
+            max="2000000"
+          />
+          <span class="mileage-unit-tag">{{ vehicle.mileage_unit === 'mi' ? 'mi' : 'km' }}</span>
+        </div>
+        <div class="form-help">
+          Indiquez la valeur au compteur en {{ vehicle.mileage_unit === 'mi' ? 'miles' : 'kilomètres' }}.
+        </div>
+      </div>
+    </div>
+
+    <!-- Toggle Véhicule Principal -->
+    @if (!vehicle.is_primary) {
+      <div class="primary-toggle-box">
+        <label class="toggle-checkbox-label">
+          <input type="checkbox" [(ngModel)]="vehicle.is_primary" name="isPrimaryCheck" />
+          <span class="toggle-checkbox-text">
+            ⭐ Définir comme véhicule principal par défaut
+          </span>
+        </label>
+      </div>
+    }
+
+    <!-- Feedback message alert -->
+    @if (isSaved) {
+      <div class="save-toast" [class.error-toast]="feedbackType === 'error'">
+        @if (feedbackType === 'error') {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        } @else {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+        }
+        <span>{{ feedbackMessage || 'Opération réussie !' }}</span>
+      </div>
+    }
+
+    <!-- Submit & Action Buttons -->
+    <div class="form-actions-stack">
+      <button type="submit" class="btn-primary" [disabled]="saving">
+        <span>{{ saving ? 'Enregistrement...' : (isNewMode ? 'Ajouter ce véhicule au garage' : 'Enregistrer les modifications') }}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      @if (!isNewMode && vehicle.id) {
+        <div class="form-actions-secondary-row">
+          <button type="button" class="btn-danger-outline" (click)="deleteCurrentVehicle()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            <span>Retirer ce véhicule</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="form-footer-notice">
+      Vous pouvez ajouter plusieurs véhicules à tout moment.
+    </div>
+  </form>
+</div>

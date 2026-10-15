@@ -1,0 +1,117 @@
+<div class="screen-content">
+  <!-- Top Navigation Bar -->
+  <div class="screen-top-bar">
+    <button class="back-btn" (click)="goBack()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+    <div class="screen-brand-title">Design System</div>
+    <div class="help-btn-placeholder"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="version-tag">MVP · Version 1.0</div>
+    <h1 class="page-title">Design System</h1>
+    <p class="page-subtitle">
+      Une interface automobile claire, rassurante et accessible. Fondations et éléments sources réutilisables pour iOS
+      et Android.
+    </p>
+  </div>
+
+  <!-- Fondations Visuelles: Palette -->
+  <div class="ds-section">
+    <h3 class="ds-section-title">Fondations visuelles</h3>
+    <p class="ds-section-sub">Une palette sobre. Le bleu électrique guide l’action ; les couleurs de statut portent
+      toujours un libellé.</p>
+
+    <div class="color-swatches-grid">
+      @for (c of colors; track c.hex) {
+      <div class="color-swatch-card">
+        <div class="color-preview" [style.background-color]="c.hex"
+          [class.border-preview]="c.hex === '#FFFFFF' || c.hex === '#F3F5F9'"></div>
+        <div class="color-name">{{ c.name }}</div>
+        <div class="color-hex">{{ c.hex }}</div>
+        <div class="color-role">{{ c.role }}</div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Typographie & Grille -->
+  <div class="ds-section">
+    <h3 class="ds-section-title">Typographie & Grille</h3>
+    <div class="ds-card">
+      <div class="typo-sample">
+        <span class="typo-meta">Titre · 28 px / 700 · Interligne 122 %</span>
+        <div class="typo-h1">Comprendre la panne.</div>
+      </div>
+      <div class="typo-sample">
+        <span class="typo-meta">Corps · 14 px / 400 · Interligne 150 %</span>
+        <div class="typo-body">Des phrases courtes et des informations prudentes, faciles à comprendre.</div>
+      </div>
+      <div class="grid-specs-box">
+        <strong>Largeur mobile de référence :</strong> 402 px · Contenu flexible et marges sûres.<br>
+        <strong>Marges :</strong> 20 px · <strong>Espacement :</strong> 4 / 8 / 12 / 16 / 24 / 32 px.<br>
+        <strong>Rayons de bordure :</strong> Contrôle 12 px · Carte 18 px · Hero 24 px.
+      </div>
+    </div>
+  </div>
+
+  <!-- Boutons & Champs -->
+  <div class="ds-section">
+    <h3 class="ds-section-title">Boutons & Champs d'action</h3>
+    <div class="ds-card space-y-3">
+      <button class="btn-primary">
+        <span>Commencer un diagnostic</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <button class="btn-secondary w-full">Retour</button>
+
+      <div class="form-group mb-0">
+        <label class="form-label">Champ renseigné</label>
+        <input type="text" class="form-control" value="Peugeot 208" readonly />
+      </div>
+    </div>
+  </div>
+
+  <!-- Cartes de réponse & Messages -->
+  <div class="ds-section">
+    <h3 class="ds-section-title">Cartes de réponse & Étiquettes de sécurité</h3>
+    <div class="ds-card space-y-3">
+      <div class="option-card selected" (click)="selectedCard = 1">
+        <div class="option-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" />
+          </svg>
+        </div>
+        <div class="option-content">
+          <div class="option-title">Des clics au démarrage</div>
+          <div class="option-subtitle">Les voyants faiblissent. (État sélectionné)</div>
+        </div>
+        <div class="option-radio">
+          <div class="option-radio-dot"></div>
+        </div>
+      </div>
+
+      <div class="alert-box alert-info">
+        <div class="alert-text">
+          <strong>Une piste, pas une certitude</strong><br>
+          Un professionnel doit confirmer la cause avant toute réparation.
+        </div>
+      </div>
+
+      <div class="alert-box alert-danger">
+        <div class="alert-text">
+          <strong>Arrêtez en cas de danger</strong><br>
+          Fumée, fuite ou odeur inhabituelle : éloignez-vous et appelez l’assistance.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

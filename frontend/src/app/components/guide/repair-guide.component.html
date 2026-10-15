@@ -1,0 +1,156 @@
+<div class="screen-content">
+  <!-- Top Navigation Bar -->
+  <div class="screen-top-bar">
+    <button class="back-btn" (click)="prevStep()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="screen-brand-title">AutoDiag</div>
+    <div class="help-btn-placeholder">
+      <button class="help-btn" title="Aide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  @if (guide) {
+    <!-- Header Title -->
+    <div class="page-header">
+      <h1 class="page-title">Guide de réparation</h1>
+      <div class="vehicle-subline">
+        {{ guide.hypothesis_name }} • {{ guide.vehicle_brand || 'Peugeot' }} {{ guide.vehicle_model || '208' }}
+      </div>
+    </div>
+
+    <!-- Section Heading & Subtitle -->
+    <div class="guide-intro">
+      <h2 class="guide-main-heading">{{ guide.title }}</h2>
+      <p class="guide-subheading">{{ guide.subtitle }}</p>
+    </div>
+
+    <!-- Meta Pills (Facile, 5 min environ, 3 étapes) -->
+    <div class="guide-meta-pills">
+      <span class="meta-pill pill-easy">{{ guide.difficulty }}</span>
+      <span class="meta-pill pill-neutral">{{ guide.est_time }}</span>
+      <span class="meta-pill pill-blue">{{ guide.total_steps }} étapes</span>
+    </div>
+
+    <!-- Safety Warning Banner -->
+    <div class="alert-box alert-warning">
+      <div class="alert-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <div class="alert-text">
+        <strong>La sécurité avant tout</strong><br>
+        {{ guide.safety_warning }}
+      </div>
+    </div>
+
+    <!-- Outils nécessaires Card -->
+    <div class="tools-card">
+      <div class="tools-title">Outils nécessaires</div>
+      <div class="tools-list">
+        <div class="tool-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6 6 18M9 4.5 19.5 15M4.5 9 15 19.5"/>
+          </svg>
+          <span>Lampe de poche</span>
+        </div>
+        <div class="tool-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+            <path d="M6 6h10M6 10h10"/>
+          </svg>
+          <span>Notice du véhicule</span>
+        </div>
+      </div>
+      <div class="tools-notice">Aucun outil de démontage nécessaire.</div>
+    </div>
+
+    <!-- Active Step Card -->
+    @if (guide.steps && guide.steps[currentStepIndex]) {
+      @let step = guide.steps[currentStepIndex];
+      <div class="step-card">
+        <div class="step-card-header">
+          <span class="step-number-badge">Étape {{ step.step_num }} sur {{ guide.total_steps }}</span>
+          <span class="step-time-badge">{{ step.time_est }}</span>
+        </div>
+
+        <h3 class="step-title">{{ step.title }}</h3>
+
+        <!-- Photo Illustration -->
+        <div class="step-image-container">
+          <img [src]="step.image_url || 'assets/battery_check.jpg'" alt="Illustration étape" class="step-image" />
+        </div>
+        <div class="step-image-caption">{{ step.subtext }}</div>
+
+        <p class="step-instruction-text">{{ step.description }}</p>
+      </div>
+    }
+
+    <!-- Upcoming Steps Overview -->
+    @if (currentStepIndex < guide.steps.length - 1) {
+      <div class="next-steps-section">
+        <div class="next-steps-title">Les prochaines étapes</div>
+
+        @for (s of guide.steps; track s.id; let idx = $index) {
+          @if (idx > currentStepIndex) {
+            <div class="upcoming-step-card">
+              <div class="upcoming-step-icon">
+                @if (idx === 1) {
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                  </svg>
+                } @else {
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                  </svg>
+                }
+              </div>
+              <div class="upcoming-step-info">
+                <span class="upcoming-tag">ÉTAPE {{ s.step_num }}</span>
+                <div class="upcoming-name">{{ s.title }}</div>
+                <div class="upcoming-desc">{{ s.description | slice:0:80 }}...</div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+
+    <!-- Danger Alert -->
+    <div class="alert-box alert-danger">
+      <div class="alert-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="alert-text">
+        <strong>Un signe anormal ? Arrêtez le contrôle.</strong><br>
+        {{ guide.steps[currentStepIndex]?.caution_warning }}
+      </div>
+    </div>
+
+    <!-- Action Button -->
+    <div class="guide-action-container">
+      <button class="btn-primary" (click)="nextStep()">
+        <span>{{ currentStepIndex === guide.steps.length - 1 ? 'Terminer le contrôle' : 'Étape suivante' }}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  }
+</div>

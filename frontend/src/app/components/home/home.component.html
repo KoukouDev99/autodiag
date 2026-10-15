@@ -1,0 +1,545 @@
+<div class="screen-content">
+  <!-- Greeting -->
+  <div class="header-greeting">
+    <span class="user-hello">Bonjour Thomas,</span>
+    <h1 class="main-title">
+      Comprendre la panne.<br>
+      <span class="highlight-text">Reprendre la route.</span>
+    </h1>
+  </div>
+
+  <!-- Hero Card: Copilote Mécanique -->
+  <div class="hero-card">
+    <div class="hero-card-grid">
+      <div class="hero-content-col">
+        <div class="hero-badge">
+          <span class="hero-badge-pulse" aria-hidden="true"></span>
+          VOTRE COPILOTE MÉCANIQUE
+        </div>
+        <h2 class="hero-title">
+          Un symptôme ?<br>
+          <span class="hero-title-accent">On vous aide à y voir clair.</span>
+        </h2>
+        <p class="hero-subtext">Des questions ciblées et sans jargon, même sans valise OBD2, pour comprendre rapidement la panne.</p>
+
+        <div class="hero-cta-group">
+          <button (click)="startGeneralDiagnostic()" class="btn-primary hero-btn">
+            <span>Commencer un diagnostic</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+
+          <div class="hero-footer-text">
+            <span>✓ Sans jargon</span> • <span>✓ ~3 minutes</span> • <span>✓ 100% guidé</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-image-wrapper">
+        <img src="assets/peugeot_hero.jpg" alt="Peugeot 208" class="hero-image" />
+        <div class="hero-image-ambient-glow" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBD-II / DTC Live Scanner & Code Lookup Section -->
+  <div class="dtc-scanner-section">
+    <div class="dtc-card-header">
+      <div class="dtc-icon-badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+          <path d="M7 8h10M7 12h6"/>
+        </svg>
+      </div>
+      <div class="dtc-title-group">
+        <div class="dtc-badge-pill-header">12 412 CODES STANDARD & CONSTRUCTEURS</div>
+        <h3 class="dtc-section-title">Valise OBD-II & Code Défaut (DTC)</h3>
+        <p class="dtc-section-subtitle">P (Moteur/Boîte), B (Carrosserie), C (Châssis/Freins), U (Réseau CAN)</p>
+      </div>
+    </div>
+
+    <!-- Search Input & Brand Filter -->
+    <div class="dtc-search-bar-row">
+      <div class="dtc-search-input-wrapper">
+        <svg class="dtc-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input 
+          type="text" 
+          [(ngModel)]="dtcSearchQuery" 
+          (input)="onDtcSearchInput()" 
+          placeholder="Ex: P0420, P0300, P1120, U0100..." 
+          class="dtc-input"
+        />
+        @if (dtcSearchQuery) {
+          <button type="button" class="dtc-clear-btn" (click)="dtcSearchQuery = ''; dtcSearchResults = []">✕</button>
+        }
+      </div>
+
+      <div class="dtc-make-select-wrapper">
+        <select [(ngModel)]="dtcSelectedMake" (change)="onDtcSearchInput()" class="dtc-make-select">
+          @for (m of makesList; track m) {
+            <option [value]="m">{{ m === 'TOUTES' ? 'Toutes marques' : m }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Live Search Results Dropdown -->
+    @if (dtcSearchResults.length > 0) {
+      <div class="dtc-results-dropdown">
+        <div class="dtc-results-header">
+          <span>{{ dtcSearchResults.length }} code(s) trouvé(s)</span>
+          <span class="dtc-hint-text">Cliquez pour voir les causes & coûts</span>
+        </div>
+        <div class="dtc-results-scroll">
+          @for (item of dtcSearchResults; track item.code) {
+            <button type="button" class="dtc-result-row" (click)="inspectDtc(item.code)">
+              <span class="dtc-code-badge" [attr.data-type]="item.type || item.code[0]">{{ item.code }}</span>
+              <div class="dtc-result-info">
+                <div class="dtc-result-title">{{ item.bilingual_title?.en || item.description }}</div>
+                <div class="dtc-result-meta">{{ item.system }} • {{ item.is_generic ? 'Standard SAE' : 'Constructeur' }}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Popular Codes Quick Pills -->
+    <div class="dtc-shortcuts-row">
+      <span class="dtc-shortcuts-label">Codes fréquents :</span>
+      <div class="dtc-shortcuts-pills">
+        @for (sc of commonDtcShortcuts; track sc.code) {
+          <button type="button" class="dtc-shortcut-pill" (click)="selectDtcShortcut(sc.code)">
+            <span class="pill-code">{{ sc.code }}</span>
+            <span class="pill-name">{{ sc.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Symptoms Grid Section -->
+  <div class="section-container">
+    <div class="section-header">
+      <h3 class="section-title">Que se passe-t-il ?</h3>
+      <p class="section-subtitle">Choisissez le symptôme que vous observez.</p>
+    </div>
+
+    <div class="symptoms-grid">
+      @for (symptom of symptoms; track symptom.id) {
+      <button class="symptom-card" (click)="startSymptomDiagnostic(symptom)">
+        <div class="symptom-icon-box" [ngClass]="'icon-' + symptom.icon">
+          <!-- Dynamic Realistic Automotive SVG Icons -->
+          @if (symptom.icon === 'key') {
+          <!-- Engine Start / Stop Push Button (Ne démarre pas) -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <!-- Brushed Bezel Ring -->
+            <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.12"/>
+            <!-- Concentric Ring & Notch Lights -->
+            <circle cx="14" cy="14" r="9" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 2" opacity="0.6"/>
+            <circle cx="14" cy="14" r="7" fill="currentColor" fill-opacity="0.25"/>
+            <!-- Power / Ignition Symbol -->
+            <line x1="14" y1="9" x2="14" y2="14" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M10.5 11.5A5 5 0 1 0 17.5 11.5" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            <!-- Indicator Status Dot -->
+            <circle cx="14" cy="3.5" r="1.3" fill="#38bdf8"/>
+          </svg>
+          } @else if (symptom.icon === 'engine') {
+          <!-- Silhouette exacte du voyant moteur Check Engine (Tableau de bord officiel) -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 100 85" fill="none">
+            <path d="M 34 18 H 61 V 24 H 53 V 29 H 67 V 35 H 73 V 41 H 80 C 86.5 41, 86.5 59, 80 59 H 73 V 65 H 67 V 71 H 38 L 27 60 H 23 V 54 H 18 V 66 C 18 68.5, 14 68.5, 14 66 V 52 L 11.5 50 L 14 48 V 34 C 14 31.5, 18 31.5, 18 34 V 46 H 23 V 40 H 31 V 29 H 42 V 24 H 34 Z" 
+                  fill="#f59e0b" fill-opacity="0.12" stroke="#f59e0b" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          } @else if (symptom.icon === 'sound') {
+          <!-- Mechanical Gear & Sound Vibration Waves -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="11" cy="15" r="5" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="11" cy="15" r="2" fill="currentColor"/>
+            <path d="M11 8V10M11 20V22M4 15H6M16 15H18M6 10L7.5 11.5M14.5 18.5L16 20M6 20L7.5 18.5M14.5 11.5L16 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="18" cy="8" r="3" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="18" cy="8" r="1" fill="currentColor"/>
+            <path d="M19 12C20.5 13 21.5 14.2 21.5 15.5C21.5 16.8 20.5 18 19 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+            <path d="M22 9C24.5 11 26 13.2 26 15.5C26 17.8 24.5 20 22 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.8"/>
+          </svg>
+          } @else if (symptom.icon === 'smoke') {
+          <!-- Pot d'échappement & Fumée Noire (suie) + Fumée Blanche (vapeur) -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <!-- Embout d'échappement chromé biseauté -->
+            <path d="M2 19H8C9.5 19 10.5 20.2 10.5 21.8C10.5 23.4 9.5 24.5 8 24.5H2V19Z" fill="#475569" stroke="#94a3b8" stroke-width="1.5"/>
+            <ellipse cx="8" cy="21.8" rx="1.6" ry="2.6" fill="#0f172a" stroke="#cbd5e1" stroke-width="1.2"/>
+
+            <!-- Volute 1 : FUMÉE NOIRE DENSE (Combustion / Suie / Carbone) -->
+            <path d="M9.5 19.5C8.8 17 10 14.8 12.2 14.2C12.5 12.2 14.2 10.8 16.5 10.8C18.2 10.8 19.8 11.8 20.2 13.5C21.6 13.5 22.8 14.8 22.8 16.5C22.8 18.2 21.5 19.4 19.8 19.4C18.8 20.4 16.8 20.8 14.8 20.2C13.5 20.8 11.2 21 9.5 19.5Z"
+                  fill="#111827" stroke="#374151" stroke-width="1.3" stroke-linejoin="round"/>
+            <!-- Tourbillon interne suie noire -->
+            <path d="M13.2 15.5C14.8 14.5 17 15 17.5 16.8" stroke="#6b7280" stroke-width="1.2" stroke-linecap="round"/>
+
+            <!-- Volute 2 : FUMÉE BLANCHE ÉCLATANTE (Vapeur d'eau / Refroidissement) -->
+            <path d="M14 10.5C13.5 8 15.2 5.8 17.8 5.8C19.8 5.8 21.2 7 21.6 8.5C23 8.5 24.5 9.5 24.5 11.2C24.5 12.8 23.2 14 21.8 14C20.5 14.5 19 14 18.2 12.8C17 13.2 15.2 12.5 14 10.5Z"
+                  fill="#ffffff" stroke="#94a3b8" stroke-width="1.3" stroke-linejoin="round"/>
+            <!-- Tourbillon interne vapeur blanche -->
+            <path d="M17.5 7.8C18.8 7.8 20 8.5 19.8 9.8" stroke="#cbd5e1" stroke-width="1.2" stroke-linecap="round"/>
+
+            <!-- Flocons d'échappement (1 particule noire, 1 particule blanche) -->
+            <circle cx="11.2" cy="22.5" r="1.3" fill="#111827" stroke="#374151" stroke-width="0.8"/>
+            <circle cx="24.8" cy="6.2" r="1.2" fill="#ffffff" stroke="#94a3b8" stroke-width="0.8"/>
+          </svg>
+          } @else if (symptom.icon === 'thermometer') {
+          <!-- Coolant Thermometer & Surchauffe Moteur -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M12 5C12 3.6 13.1 2.5 14.5 2.5C15.9 2.5 17 3.6 17 5V15.2C18.8 16.3 20 18.3 20 20.5C20 23.5 17.5 26 14.5 26C11.5 26 9 23.5 9 20.5C9 18.3 10.2 16.3 12 15.2V5Z" 
+                  fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.8"/>
+            <circle cx="14.5" cy="20.5" r="3.2" fill="#ef4444"/>
+            <rect x="13.2" y="8" width="2.6" height="10" rx="1.3" fill="#ef4444"/>
+            <line x1="19" y1="6" x2="22" y2="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="19" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <line x1="19" y1="14" x2="22" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M4 21C5 20 6 20 7 21C8 22 9 22 10 21" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M4 25C5 24 6 24 7 25C8 26 9 26 10 25" stroke="#f87171" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          } @else if (symptom.icon === 'brakes') {
+          <!-- Ventilated Brake Rotor & Performance Caliper -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="11.5" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/>
+            <circle cx="14" cy="14" r="4.5" stroke="currentColor" stroke-width="1.4" fill="currentColor" fill-opacity="0.25"/>
+            <circle cx="14" cy="14" r="1.8" fill="currentColor"/>
+            <circle cx="9" cy="11" r="0.9" fill="currentColor"/>
+            <circle cx="11" cy="8" r="0.9" fill="currentColor"/>
+            <circle cx="11" cy="19" r="0.9" fill="currentColor"/>
+            <circle cx="8" cy="16" r="0.9" fill="currentColor"/>
+            <circle cx="17" cy="19" r="0.9" fill="currentColor"/>
+            <circle cx="19" cy="16" r="0.9" fill="currentColor"/>
+            <!-- Brake Caliper in Crimson Red Accent -->
+            <path d="M14 2.5C19.5 2.5 24 6 25.5 11.5L22.5 13C21.5 9 18 6.5 14 6.5V2.5Z" fill="#fb7185" stroke="#fb7185" stroke-width="1.4" stroke-linejoin="round"/>
+            <circle cx="18" cy="5" r="0.9" fill="#ffffff"/>
+            <circle cx="22" cy="8" r="0.9" fill="#ffffff"/>
+          </svg>
+          } @else if (symptom.icon === 'battery') {
+          <!-- 12V Battery with Terminal Posts & Charge Arc -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="3.5" y="8" width="21" height="16" rx="2.5" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="6" y="4.5" width="4.5" height="3.5" rx="1" fill="currentColor"/>
+            <rect x="17.5" y="4.5" width="4.5" height="3.5" rx="1" fill="currentColor"/>
+            <path d="M7 12H9.5M8.25 10.75V13.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M18.5 12H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M15 10L11.5 15.5H15.5L13.5 21.5L18 14.5H14.5L16 10H15Z" fill="#34d399"/>
+          </svg>
+          } @else if (symptom.icon === 'zap') {
+          <!-- Spark Plug & Electric Spark Discharge -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="12.5" y="2.5" width="3" height="3" rx="0.8" fill="currentColor"/>
+            <path d="M11 5.5H17V12.5H11V5.5Z" fill="currentColor" fill-opacity="0.25" stroke="currentColor" stroke-width="1.4"/>
+            <line x1="11" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="11" y1="10.5" x2="17" y2="10.5" stroke="currentColor" stroke-width="1.2"/>
+            <rect x="9.5" y="12.5" width="9" height="3.5" rx="0.5" fill="currentColor" stroke="currentColor" stroke-width="1.4"/>
+            <rect x="11" y="16" width="6" height="5.5" fill="currentColor" fill-opacity="0.4" stroke="currentColor" stroke-width="1.4"/>
+            <line x1="11" y1="18" x2="17" y2="18" stroke="currentColor" stroke-width="1"/>
+            <line x1="11" y1="19.5" x2="17" y2="19.5" stroke="currentColor" stroke-width="1"/>
+            <path d="M12.5 21.5V25H15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M14 21.5L12 23.5L16 22.5L14 25.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 14L3.5 13.5M22 14L24.5 13.5M5.5 19L3 20M22.5 19L25 20" stroke="#c084fc" stroke-width="1.4" stroke-linecap="round" opacity="0.8"/>
+          </svg>
+          } @else {
+          <!-- Fuel Dispenser Pump & Fuel Droplet -->
+          <svg class="realistic-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="5" y="5" width="12" height="20" rx="2" fill="currentColor" fill-opacity="0.18" stroke="currentColor" stroke-width="1.8"/>
+            <rect x="7.5" y="8" width="7" height="4.5" rx="1" fill="currentColor" fill-opacity="0.5"/>
+            <line x1="3" y1="25" x2="19" y2="25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M17 10C20 10 22 12 22 16V21C22 22.5 23.5 23 24.5 22C25.5 21 25.5 18 25 15L24 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M24 12L21 8H18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18.5 17C18.5 17 17 18.5 17 19.5C17 20.3 17.7 21 18.5 21C19.3 21 20 20.3 20 19.5C20 18.5 18.5 17 18.5 17Z" fill="#fb923c"/>
+          </svg>
+          }
+        </div>
+        <span class="symptom-label">{{ symptom.label }}</span>
+        <svg class="symptom-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </button>
+      }
+    </div>
+  </div>
+
+  <!-- Vehicle / Garage Section -->
+  <div class="section-container garage-section-wrapper">
+    <div class="section-header-inline">
+      <div class="garage-title-row">
+        <h3 class="section-title">Mon garage</h3>
+        @if (vehicles.length > 0) {
+          <span class="garage-count-badge">{{ vehicles.length }} véhicule{{ vehicles.length > 1 ? 's' : '' }}</span>
+        }
+      </div>
+
+      <div class="garage-header-actions">
+        @if (vehicles.length > 1) {
+          <div class="carousel-nav-arrows">
+            <button type="button" class="carousel-arrow-btn" (click)="prevVehicle()" title="Véhicule précédent" aria-label="Précédent">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="carousel-arrow-btn" (click)="nextVehicle()" title="Véhicule suivant" aria-label="Suivant">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        }
+        <button class="link-btn add-car-link-btn" (click)="addNewVehicle()">+ Ajouter</button>
+      </div>
+    </div>
+
+    <!-- Vehicles List -> Grandes cartes de garage même s'il n'y a qu'un véhicule -->
+    @if (vehicles.length > 0) {
+      <div class="garage-carousel-wrapper">
+        <div class="garage-carousel-track" (scroll)="onCarouselScroll($event)">
+          @for (v of vehicles; track v.id; let idx = $index) {
+            <div 
+              class="garage-carousel-card" 
+              [id]="'garage-vehicle-card-' + idx"
+              [class.primary-card]="v.is_primary"
+              (click)="goToVehicle(v)"
+            >
+              <div class="card-badge-top-row">
+                <span class="vehicle-plate-pill">{{ v.license_plate || 'GARAGE' }}</span>
+                @if (v.is_primary) {
+                  <span class="primary-pill">⭐ Principal</span>
+                } @else {
+                  <button type="button" class="btn-set-primary-quick" (click)="setPrimary(v, $event)" title="Définir comme véhicule principal">
+                    Définir principal
+                  </button>
+                }
+              </div>
+
+              <div class="card-vehicle-main-row">
+                <div class="vehicle-icon-box vehicle-brand-logo-box">
+                  <img 
+                    [src]="getBrandLogoUrl(v.brand)" 
+                    [alt]="v.brand" 
+                    class="vehicle-brand-logo-img" 
+                    (error)="onLogoError($event)" 
+                  />
+                </div>
+                <div class="vehicle-info">
+                  <div class="vehicle-name">{{ v.brand }} {{ v.model }}</div>
+                  <div class="vehicle-meta">{{ v.year }} • {{ v.fuel }}</div>
+                  @if (v.engine) {
+                    <div class="vehicle-engine-text">{{ v.engine }}</div>
+                  }
+                  <div class="vehicle-mileage">{{ v.mileage | number:'1.0-0' }} km</div>
+                </div>
+              </div>
+
+              <div class="carousel-card-footer">
+                <button type="button" class="btn-quick-diag" (click)="startVehicleDiagnostic(v, $event)">
+                  ⚡ Diagnostic
+                </button>
+                <div class="card-manage-link">
+                  <span>Gérer</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Extra "Add Vehicle" card at the end of Carousel -->
+          <div class="garage-carousel-card add-vehicle-slide-card" (click)="addNewVehicle()">
+            <div class="add-slide-content">
+              <div class="add-slide-icon-box">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 8v8M8 12h8"/>
+                </svg>
+              </div>
+              <div class="add-slide-text">Ajouter un véhicule</div>
+              <div class="add-slide-sub">Agrandir votre garage</div>
+            </div>
+          </div>
+        </div>
+
+        @if (vehicles.length > 1) {
+          <!-- Carousel Pagination Dots -->
+          <div class="carousel-dots-indicator">
+            @for (v of vehicles; track v.id; let idx = $index) {
+              <button 
+                type="button" 
+                class="carousel-dot" 
+                [class.active]="idx === activeVehicleIndex"
+                (click)="goToVehicleIndex(idx)"
+                [attr.aria-label]="'Aller au véhicule ' + (idx + 1)"
+              ></button>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Case 3: Zero Vehicles -->
+    @else {
+      <div class="empty-garage-card" (click)="addNewVehicle()">
+        <div class="empty-garage-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="empty-garage-icon-svg">
+            <path d="M3 9.5L12 3L21 9.5V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V9.5Z" stroke-linejoin="round" fill="currentColor" fill-opacity="0.12"/>
+            <rect x="7" y="11" width="10" height="9" rx="1" stroke-width="1.7"/>
+            <line x1="7" y1="14" x2="17" y2="14" stroke-width="1.3"/>
+            <line x1="7" y1="17" x2="17" y2="17" stroke-width="1.3"/>
+            <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="empty-garage-text">Aucun véhicule dans votre garage</div>
+        <button type="button" class="btn-primary-mini">+ Ajouter mon premier véhicule</button>
+      </div>
+    }
+  </div>
+
+  <!-- Recent Diagnostics Section -->
+  <div class="section-container">
+    <div class="section-header-inline">
+      <h3 class="section-title">Diagnostics récents</h3>
+      <button class="link-btn" (click)="goToHistory()">Tout voir</button>
+    </div>
+
+    <div class="recent-list">
+      @for (diag of recentDiagnostics; track diag.id) {
+      <div class="recent-card" (click)="goToHistory()">
+        <div class="recent-info">
+          <div class="recent-title">{{ diag.summary_title }}</div>
+          <div class="recent-meta">
+            {{ diag.status === 'in_progress' ? 'Aujourd’hui' : '12 septembre' }} • {{ diag.vehicle_brand }} {{
+            diag.vehicle_model }}
+          </div>
+        </div>
+        <span class="status-badge" [ngClass]="diag.status === 'in_progress' ? 'badge-in-progress' : 'badge-archived'">
+          {{ diag.status === 'in_progress' ? 'En cours' : 'Archivé' }}
+        </span>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- DTC Detail Inspector Modal -->
+  @if (dtcModalOpen && selectedDtcDetail) {
+    <div class="dtc-modal-overlay" (click)="closeDtcModal()">
+      <div class="dtc-modal-card" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="dtc-modal-header">
+          <div class="dtc-modal-title-group">
+            <span class="dtc-code-badge-large" [attr.data-type]="selectedDtcDetail.type || selectedDtcDetail.code[0]">
+              {{ selectedDtcDetail.code }}
+            </span>
+            <div class="dtc-modal-header-text">
+              <h2 class="dtc-modal-code-title">
+                {{ selectedDtcDetail.bilingual_title?.en || selectedDtcDetail.title }}
+              </h2>
+              <div class="dtc-modal-meta-line">
+                <span>{{ selectedDtcDetail.system }}</span>
+                @if (selectedDtcDetail.is_generic) {
+                  <span class="dtc-badge-pill generic">SAE J2012 / Standard</span>
+                } @else {
+                  <span class="dtc-badge-pill mfr">Spécifique Constructeur</span>
+                }
+              </div>
+            </div>
+          </div>
+          <button type="button" class="dtc-modal-close-btn" (click)="closeDtcModal()" aria-label="Fermer">✕</button>
+        </div>
+
+        <div class="dtc-modal-body">
+          <!-- Description -->
+          <div class="dtc-modal-section">
+            <h4 class="dtc-subhead">Fonctionnement & Définition</h4>
+            <p class="dtc-desc-text">{{ selectedDtcDetail.description }}</p>
+          </div>
+
+          <!-- Repair Estimates Box if available -->
+          @if (selectedDtcDetail.repair_info) {
+            <div class="dtc-repair-estimates-box">
+              <div class="repair-stat">
+                <span class="stat-label">Coût estimé</span>
+                <span class="stat-value">
+                  {{ selectedDtcDetail.repair_info.cost_min_eur }} € – {{ selectedDtcDetail.repair_info.cost_max_eur }} €
+                </span>
+              </div>
+              <div class="repair-stat">
+                <span class="stat-label">Temps MO atelier</span>
+                <span class="stat-value">
+                  {{ selectedDtcDetail.repair_info.hours_min }}h – {{ selectedDtcDetail.repair_info.hours_max }}h
+                </span>
+              </div>
+              <div class="repair-stat">
+                <span class="stat-label">Faisabilité DIY</span>
+                <span class="stat-pill" [class.diy-yes]="selectedDtcDetail.repair_info.diy_possible">
+                  {{ selectedDtcDetail.repair_info.diy_possible ? 'Réalisable soi-même' : 'Atelier recommandé' }}
+                </span>
+              </div>
+            </div>
+          }
+
+          <!-- Possible Causes -->
+          @if (selectedDtcDetail.possible_causes && selectedDtcDetail.possible_causes.length > 0) {
+            <div class="dtc-modal-section">
+              <h4 class="dtc-subhead">Causes fréquentes identifiées</h4>
+              <ul class="dtc-causes-list">
+                @for (cause of selectedDtcDetail.possible_causes; track cause) {
+                  <li class="dtc-cause-item">
+                    <span class="cause-bullet">▸</span>
+                    <span>{{ cause }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <!-- Symptoms -->
+          @if (selectedDtcDetail.symptoms && selectedDtcDetail.symptoms.length > 0) {
+            <div class="dtc-modal-section">
+              <h4 class="dtc-subhead">Symptômes ressentis</h4>
+              <div class="dtc-symptoms-tags">
+                @for (symp of selectedDtcDetail.symptoms; track symp) {
+                  <span class="dtc-symptom-tag">{{ symp }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Affected Components -->
+          @if (selectedDtcDetail.affected_components && selectedDtcDetail.affected_components.length > 0) {
+            <div class="dtc-modal-section">
+              <h4 class="dtc-subhead">Composants du véhicule concernés</h4>
+              <div class="dtc-symptoms-tags">
+                @for (comp of selectedDtcDetail.affected_components; track comp) {
+                  <span class="dtc-comp-tag">⚙ {{ comp }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Specific Definitions across brands if any -->
+          @if (selectedDtcDetail.specific_definitions && (selectedDtcDetail.specific_definitions | json) !== '{}') {
+            <div class="dtc-modal-section">
+              <h4 class="dtc-subhead">Variantes par constructeur</h4>
+              <div class="dtc-mfr-grid">
+                @for (entry of (selectedDtcDetail.specific_definitions | keyvalue); track entry.key) {
+                  <div class="mfr-definition-item">
+                    <span class="mfr-name-tag">{{ entry.key }}</span>
+                    <span class="mfr-desc-text">{{ entry.value }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="dtc-modal-footer">
+          <button type="button" class="btn-primary dtc-start-diag-btn" (click)="closeDtcModal(); startGeneralDiagnostic()">
+            Lancer un diagnostic guidé pour ce problème
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

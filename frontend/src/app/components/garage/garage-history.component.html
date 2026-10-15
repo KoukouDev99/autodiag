@@ -1,0 +1,171 @@
+<div class="screen-content">
+  <!-- Top Navigation Bar -->
+  <div class="screen-top-bar">
+    <button class="back-btn" (click)="goBack()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="screen-brand-title">Mon Garage & Outils</div>
+    <div class="help-btn-placeholder"></div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Historique & Véhicule</h1>
+    <p class="page-subtitle">Suivi complet de votre Peugeot 208 et diagnostics enregistrés.</p>
+  </div>
+
+  <!-- Segmented Tabs Switcher -->
+  <div class="tab-switcher">
+    <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+      Diagnostics
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'maintenance'" (click)="setTab('maintenance')">
+      Carnet d’entretien
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'dtc'" (click)="setTab('dtc')">
+      Codes DTC OBD2
+    </button>
+  </div>
+
+  <!-- TAB 1: Diagnostics History -->
+  @if (activeTab === 'history') {
+    <div class="tab-pane">
+      <div class="pane-title-row">
+        <h3 class="pane-title">Sessions de diagnostic</h3>
+        <span class="pane-badge">{{ diagnostics.length }} session(s)</span>
+      </div>
+
+      <div class="history-cards-list">
+        @for (diag of diagnostics; track diag.id) {
+          <div class="history-item-card">
+            <div class="history-card-top">
+              <span class="status-badge" [ngClass]="diag.status === 'in_progress' ? 'badge-in-progress' : 'badge-archived'">
+                {{ diag.status === 'in_progress' ? 'En cours' : 'Archivé' }}
+              </span>
+              <span class="history-date">
+                {{ diag.status === 'in_progress' ? 'Aujourd’hui' : '12 septembre 2026' }}
+              </span>
+            </div>
+
+            <div class="history-card-body">
+              <h4 class="history-diag-title">{{ diag.summary_title }}</h4>
+              <p class="history-diag-desc">{{ diag.summary_desc }}</p>
+              
+              <div class="history-vehicle-pill">
+                <img [src]="getBrandLogoUrl(diag.vehicle_brand)" class="history-mini-brand-logo" alt="" (error)="onLogoError($event)" />
+                <span>{{ diag.vehicle_brand }} {{ diag.vehicle_model }} • Symptôme : {{ diag.symptom_label }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 2: Maintenance Carnet -->
+  @if (activeTab === 'maintenance') {
+    <div class="tab-pane">
+      <div class="pane-title-row">
+        <h3 class="pane-title">Carnet d’entretien numérique</h3>
+        <span class="pane-badge">{{ vehicle?.brand }} {{ vehicle?.model }}</span>
+      </div>
+
+      <div class="maintenance-cards-list">
+        @for (record of maintenanceRecords; track record.id) {
+          <div class="maintenance-item-card">
+            <div class="maint-icon-box">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+            </div>
+
+            <div class="maint-details">
+              <div class="maint-header-row">
+                <h4 class="maint-type">{{ record.service_type }}</h4>
+                <span class="maint-cost">{{ record.cost }} €</span>
+              </div>
+              <div class="maint-subline">
+                <span>{{ record.service_date | date:'mediumDate' }}</span> • <span>{{ record.mileage | number:'1.0-0' }} km</span>
+              </div>
+              <p class="maint-notes">{{ record.notes }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- TAB 3: OBD2 DTC Scanner -->
+  @if (activeTab === 'dtc') {
+    <div class="tab-pane">
+      <div class="pane-title-row">
+        <h3 class="pane-title">Décodeur de codes défaut (DTC)</h3>
+      </div>
+      <p class="dtc-intro-p">
+        Renseignez le code lu sur votre valise OBD-II (ex: P0300, P0420, P0562) pour obtenir une explication claire sans jargon.
+      </p>
+
+      <!-- Search Input -->
+      <div class="dtc-search-bar">
+        <input 
+          type="text" 
+          class="form-control dtc-input" 
+          placeholder="Ex: P0300" 
+          [(ngModel)]="dtcInput"
+          (keydown.enter)="searchDtc()"
+        />
+        <button class="btn-primary dtc-search-btn" (click)="searchDtc()">
+          Chercher
+        </button>
+      </div>
+
+      <!-- Quick suggestions -->
+      <div class="dtc-chips-row">
+        <span class="chip-hint">Suggestions :</span>
+        <button class="dtc-chip" (click)="dtcInput = 'P0300'; searchDtc('P0300')">P0300</button>
+        <button class="dtc-chip" (click)="dtcInput = 'P0420'; searchDtc('P0420')">P0420</button>
+        <button class="dtc-chip" (click)="dtcInput = 'P0562'; searchDtc('P0562')">P0562</button>
+      </div>
+
+      <!-- Search Results Card -->
+      @if (searchedDtc) {
+        <div class="dtc-result-card">
+          <div class="dtc-result-header">
+            <div class="dtc-code-badge">{{ searchedDtc.code }}</div>
+            <span class="dtc-urgency-badge" [ngClass]="'urgency-' + searchedDtc.urgency.toLowerCase()">
+              Urgence {{ searchedDtc.urgency }}
+            </span>
+          </div>
+
+          <h4 class="dtc-result-title">{{ searchedDtc.title }}</h4>
+          <div class="dtc-system-tag">Système : {{ searchedDtc.system }}</div>
+          <p class="dtc-result-desc">{{ searchedDtc.description }}</p>
+
+          <!-- Causes possibles -->
+          <div class="dtc-causes-section">
+            <div class="dtc-causes-label">Causes probables identifiées :</div>
+            <ul class="dtc-causes-list">
+              @for (cause of searchedDtc.possible_causes; track cause) {
+                <li>{{ cause }}</li>
+              }
+            </ul>
+          </div>
+
+          <!-- Conseils garage -->
+          <div class="dtc-advice-box">
+            <div class="advice-header">Conseil pour votre garagiste :</div>
+            <div class="advice-content">{{ searchedDtc.garage_advice }}</div>
+          </div>
+        </div>
+      }
+
+      @if (dtcError) {
+        <div class="alert-box alert-warning">
+          <div class="alert-text">{{ dtcError }}</div>
+        </div>
+      }
+    </div>
+  }
+</div>

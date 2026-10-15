@@ -1,0 +1,385 @@
+.screen-content {
+  padding: 12px 16px 80px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Top Navigation Bar */
+.screen-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0 8px 0;
+}
+
+.back-btn, .help-btn {
+  background: none;
+  border: none;
+  color: var(--c-night);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover, .help-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.screen-brand-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--c-night);
+  letter-spacing: -0.01em;
+}
+
+/* Page Header */
+.page-header {
+  margin-top: 4px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--c-night);
+  letter-spacing: -0.02em;
+}
+
+.vehicle-subline {
+  font-size: 13.5px;
+  color: var(--c-text-secondary);
+  margin-top: 4px;
+}
+
+/* Stepper & Progress indicator */
+.stepper-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stepper-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+}
+
+.stepper-count {
+  font-weight: 700;
+  color: var(--c-primary);
+}
+
+.stepper-category {
+  font-weight: 600;
+  color: var(--c-text-secondary);
+}
+
+.progress-bar-track {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.progress-segment {
+  flex: 1;
+  height: 5px;
+  border-radius: var(--radius-pill);
+  background-color: #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.progress-segment.active {
+  background-color: var(--c-primary);
+}
+
+.progress-segment.current {
+  background-color: var(--c-primary);
+}
+
+/* Symptom Pill */
+.symptom-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  font-size: 12.5px;
+  color: var(--c-primary);
+  font-weight: 600;
+}
+
+.symptom-pill-icon {
+  display: flex;
+  align-items: center;
+}
+
+/* Question Block */
+.question-block {
+  margin-top: 4px;
+}
+
+.question-heading {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--c-night);
+  line-height: 1.28;
+}
+
+.question-desc {
+  font-size: 13px;
+  color: var(--c-text-secondary);
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+/* Options List */
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Actions Row */
+.quiz-actions-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.quiz-actions-row .btn-secondary {
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.quiz-actions-row .btn-primary {
+  flex: 1;
+}
+
+/* Alert styling */
+.alert-box {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-card);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.alert-warning {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.alert-text strong {
+  color: #78350f;
+}
+
+.obd-subtext {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--c-text-secondary);
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   UX GUIDANCE & NON-TECHNICAL PEDAGOGY STYLES
+   ========================================================================== */
+.stepper-main-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper-pct-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.stepper-sub-hint {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.progress-bar-track-smooth {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #2563eb);
+  border-radius: 10px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sensory direct observation tip */
+.sensory-action-tip {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  color: #166534;
+}
+
+.sensory-tip-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sensory-tip-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sensory-tip-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #15803d;
+  text-transform: uppercase;
+}
+
+.sensory-tip-text p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #166534;
+  font-weight: 500;
+}
+
+/* Option card special styling */
+.option-card.is-unknown-card {
+  border-style: dashed;
+  background: #f8fafc;
+}
+
+.option-card.is-unknown-card.selected {
+  border-style: solid;
+  border-color: #38bdf8;
+  background: #f0f9ff;
+}
+
+/* Unknown Helper Box ("Je ne sais pas" mode) */
+.unknown-helper-box {
+  background: linear-gradient(135deg, #fefce8, #fef9c3);
+  border: 1px solid #fef08a;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.unknown-helper-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.helper-icon {
+  font-size: 16px;
+}
+
+.helper-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #854d0e;
+}
+
+.helper-reformulation {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #713f12;
+}
+
+.helper-reassurance {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #15803d;
+  margin-top: 2px;
+}
+
+/* "Pourquoi cette question ?" Box */
+.why-ask-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.why-ask-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: background 0.15s;
+}
+
+.why-ask-header:hover {
+  background: #f1f5f9;
+}
+
+.why-ask-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.why-icon {
+  font-size: 15px;
+}
+
+.why-toggle-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0284c7;
+}
+
+.why-ask-content {
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #475569;
+  border-top: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
