@@ -6,6 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.ai.embeddings.router import router as embeddings_router
 from app.ai.reformulation.router import router as reformulation_router
+from app.ai.rag.router import router as rag_router
+from app.ai.explanation.router import router as explanation_router
 
 app = FastAPI(
     title="AutoDiag Local AI Service",
@@ -31,6 +33,8 @@ app.add_middleware(
 # Register routers
 app.include_router(embeddings_router)
 app.include_router(reformulation_router)
+app.include_router(rag_router)
+app.include_router(explanation_router)
 
 @app.get("/api/health")
 async def health_check():

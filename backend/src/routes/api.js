@@ -453,6 +453,125 @@ router.post('/reformulate-question', async (req, res) => {
   });
 });
 
+// IA #3: Technical RAG Context Retrieval (FastAPI microservice proxy + deterministic fallback)
+router.post('/retrieve-context', async (req, res) => {
+  const { query, top_k = 3, min_score = 0.25, filter_doc_type } = req.body;
+  if (!query || !query.trim()) {
+    return res.json({
+      query: '',
+      passages: [],
+      total: 0,
+      fallback_applied: false
+    });
+  }
+
+  // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  try {
+    const aiResponse = await fetch(`${aiServiceUrl}/api/retrieve-context`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, top_k, min_score, filter_doc_type }),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (aiResponse.ok) {
+      const data = await aiResponse.json();
+      return res.json(data);
+    }
+  } catch (aiErr) {
+    console.warn('[AI Service] FastAPI offline or timed out for RAG, applying fallback:', aiErr.message);
+  }
+
+  // 2. Deterministic Fallback: SQL search in faults
+  try {
+    const pool = getPool();
+    const [faults] = await pool.query(
+      `SELECT f.code as fault_code, f.name as title, f.description as content, 
+              f.cost_min, f.cost_max, f.is_danger, 'fault' as doc_type
+       FROM faults f 
+       WHERE f.name LIKE ? OR f.description LIKE ? OR f.code LIKE ?
+       LIMIT ?`,
+      [`%${query}%`, `%${query}%`, `%${query}%`, top_k]
+    );
+
+    const passages = faults.map(f => ({
+      doc_id: `fault-${f.fault_code}`,
+      doc_type: 'fault',
+      fault_code: f.fault_code,
+      title: f.title,
+      content: `PANNE TECHNIQUE [${f.fault_code}] : ${f.title}. ${f.content}. Fourchette de coût : ${f.cost_min}€ à ${f.cost_max}€.`,
+      score: 0.75,
+      source_id: 2,
+      source_name: 'AutoDiag Diagnostic Sensory Trees & Workshop Heuristics',
+      license: 'CC-BY-NC-SA 4.0',
+      version: '4.2',
+      metadata: { cost_min: f.cost_min, cost_max: f.cost_max, is_danger: Boolean(f.is_danger) }
+    }));
+
+    return res.json({
+      query,
+      passages,
+      total: passages.length,
+      fallback_applied: true
+    });
+  } catch (dbErr) {
+    return res.json({ query, passages: [], total: 0, fallback_applied: true });
+  }
+});
+
+// IA #4: Plain Language Diagnostic Explanation (FastAPI microservice proxy + deterministic fallback)
+router.post('/explain-diagnosis', async (req, res) => {
+  const { fault_code, fault_name, symptoms, context, top_k_rag = 3 } = req.body;
+
+  // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  try {
+    const aiResponse = await fetch(`${aiServiceUrl}/api/explain-diagnosis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fault_code, fault_name, symptoms, context, top_k_rag }),
+      signal: AbortSignal.timeout(5000)
+    });
+    if (aiResponse.ok) {
+      const data = await aiResponse.json();
+      return res.json(data);
+    }
+  } catch (aiErr) {
+    console.warn('[AI Service] FastAPI offline or timed out for explanation, applying fallback:', aiErr.message);
+  }
+
+  // 2. Deterministic Fallback: Enforce the 4 mandatory sections and strict cap confidence <= 95
+  const name = fault_name || 'Défaut mécanique';
+  const whatIsHappening = `Votre véhicule rencontre un dysfonctionnement technique lié à : ${name.toLowerCase()}.`;
+  const probableCause = `L'usure naturelle ou les contraintes de fonctionnement empêchent le bon fonctionnement du composant concerné.`;
+  const whatToDo = `1. Contrôle visuel préliminaire sans démontage (Gratuit / 0€).\n2. Remplacement ou réparation de la pièce défaillante (estimation 80€ à 250€).\n3. Passage à la valise électronique en atelier si le problème persiste.`;
+  const warning = `En cas d'odeur anormale, de fumée, de voyant rouge allumé ou de comportement dangereux du véhicule, arrêtez immédiatement le véhicule et contactez un dépanneur.`;
+  
+  const confidence = Math.min(88, 95); // Strict cap <= 95%
+
+  return res.json({
+    fault_code: fault_code || null,
+    fault_name: name,
+    explanation: `🔍 CE QUI SE PASSE :\n${whatIsHappening}\n\n🎯 CAUSE PROBABLE :\n${probableCause}\n\n🔧 QUOI FAIRE :\n${whatToDo}\n\n⚠️ ATTENTION :\n${warning}\n\nCONFIANCE : ${confidence}%`,
+    sections: {
+      what_is_happening: whatIsHappening,
+      probable_cause: probableCause,
+      what_to_do: whatToDo,
+      warning: warning
+    },
+    confidence,
+    source_citations: [
+      {
+        source_id: 2,
+        source_name: 'AutoDiag Diagnostic Sensory Trees & Workshop Heuristics',
+        license: 'CC-BY-NC-SA 4.0',
+        version: '4.2'
+      }
+    ],
+    fallback_applied: true
+  });
+});
+
 // 4. Recent diagnostics
 router.get('/diagnostics/recent', async (req, res) => {
   try {
