@@ -572,6 +572,107 @@ router.post('/explain-diagnosis', async (req, res) => {
   });
 });
 
+// IA #5: Safety Guard (FastAPI microservice proxy + deterministic fallback)
+router.post('/check-safety', async (req, res) => {
+  const { text, fault_code, system, is_danger_known, symptoms, context } = req.body;
+
+  // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  try {
+    const aiResponse = await fetch(`${aiServiceUrl}/api/check-safety`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, fault_code, system, is_danger_known, symptoms, context }),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (aiResponse.ok) {
+      const data = await aiResponse.json();
+      return res.json(data);
+    }
+  } catch (aiErr) {
+    console.warn('[AI Service] FastAPI offline or timed out for safety check, applying local fallback:', aiErr.message);
+  }
+
+  // 2. Deterministic Fallback : evaluate critical regex patterns
+  const combined = `${text || ''} ${context || ''} ${(symptoms || []).join(' ')} ${system || ''}`.toLowerCase();
+  
+  if (is_danger_known || /frein|pédale.*molle|perte.*frein|disque.*rouge/.test(combined)) {
+    return res.json({
+      is_danger: true,
+      severity: 'critical',
+      critical_system: 'Freinage',
+      danger_reason: "Défaillance ou perte d'efficacité critique du circuit de freinage.",
+      immediate_action: "Arrêtez le véhicule immédiatement en lieu sécurisé. Ne roulez sous aucun prétexte et contactez une dépanneuse.",
+      detection_source: 'deterministic_rule',
+      confidence: 95,
+      fallback_applied: true
+    });
+  }
+
+  if (/direction.*bloqu|volant.*dur|perte.*direction/.test(combined)) {
+    return res.json({
+      is_danger: true,
+      severity: 'critical',
+      critical_system: 'Direction',
+      danger_reason: "Blocage ou anomalie sévère de la direction assistée.",
+      immediate_action: "Immobilisation immédiate. Ne forcez pas sur le volant et faites remorquer le véhicule.",
+      detection_source: 'deterministic_rule',
+      confidence: 95,
+      fallback_applied: true
+    });
+  }
+
+  if (/surchauffe|aiguille.*rouge|fumée.*blanche|liquide.*bout/.test(combined)) {
+    return res.json({
+      is_danger: true,
+      severity: 'high',
+      critical_system: 'Refroidissement / Surchauffe',
+      danger_reason: "Surchauffe thermique extrême du moteur.",
+      immediate_action: "Arrêtez le moteur dès que possible. Ne touchez JAMAIS au bouchon de radiateur moteur chaud.",
+      detection_source: 'deterministic_rule',
+      confidence: 95,
+      fallback_applied: true
+    });
+  }
+
+  if (/odeur.*essence|fuite.*carburant|flamme|fumée.*noire/.test(combined)) {
+    return res.json({
+      is_danger: true,
+      severity: 'critical',
+      critical_system: 'Carburant / Incendie',
+      danger_reason: "Fuite inflammable de carburant ou amorce d'incendie.",
+      immediate_action: "Évacuez les occupants, coupez le contact et appelez les services d'urgence (18/112).",
+      detection_source: 'deterministic_rule',
+      confidence: 95,
+      fallback_applied: true
+    });
+  }
+
+  if (/voyant.*rouge|voyant.*stop/.test(combined)) {
+    return res.json({
+      is_danger: true,
+      severity: 'high',
+      critical_system: 'Alerte Combiné',
+      danger_reason: "Alerte de gravité maximale déclenchée par le calculateur de bord (voyant STOP ou rouge).",
+      immediate_action: "Arrêt impératif du véhicule conformément aux consignes du constructeur.",
+      detection_source: 'deterministic_rule',
+      confidence: 95,
+      fallback_applied: true
+    });
+  }
+
+  return res.json({
+    is_danger: false,
+    severity: 'low',
+    critical_system: null,
+    danger_reason: null,
+    immediate_action: "Aucun risque de sécurité vitale détecté. Vous pouvez poursuivre le diagnostic.",
+    detection_source: 'deterministic_rule',
+    confidence: 95,
+    fallback_applied: true
+  });
+});
+
 // 4. Recent diagnostics
 router.get('/diagnostics/recent', async (req, res) => {
   try {

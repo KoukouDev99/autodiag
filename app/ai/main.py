@@ -8,6 +8,7 @@ from app.ai.embeddings.router import router as embeddings_router
 from app.ai.reformulation.router import router as reformulation_router
 from app.ai.rag.router import router as rag_router
 from app.ai.explanation.router import router as explanation_router
+from app.ai.safety.router import router as safety_router
 
 app = FastAPI(
     title="AutoDiag Local AI Service",
@@ -35,6 +36,7 @@ app.include_router(embeddings_router)
 app.include_router(reformulation_router)
 app.include_router(rag_router)
 app.include_router(explanation_router)
+app.include_router(safety_router)
 
 @app.get("/api/health")
 async def health_check():

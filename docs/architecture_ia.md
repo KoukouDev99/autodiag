@@ -31,7 +31,7 @@ flowchart TD
     ENGINE --> RAG["IA #3: RAG Base Technique<br/>(Index FAISS 407 docs SAE J2012 / Procédures)"]
     ENGINE --> EXPL["IA #4: Explication Vulgarisée<br/>(Synthèse 4 parties max 95%)"]
     
-    SAFETY["IA #5: Garde-fou Sécurité<br/>(Règles déterministes d'abord, LLM ensuite)"] -.->|Supervise| EXPL
+    SAFETY["IA #5: Garde-fou Sécurité<br/>(Règles déterministes d'abord, LLM ensuite)"] -.->|Supervise & Alerte| EXPL
 ```
 
 ---
@@ -165,7 +165,38 @@ flowchart TD
 
 ---
 
-## 7. Organisation des Dossiers Livrables
+## 7. Module IA #5 — Garde-fou Sécurité (Safety Guard)
+
+* **Objectif** : Identifier immédiatement tout risque pour la vie humaine, la sécurité routière ou l'intégrité vitale du véhicule.
+* **Principe Fondamental : CONTRÔLE DÉTERMINISTE D'ABORD, LLM EN SECOND** :
+  1. **Contrôles déterministes immédiats (< 1ms)** : Évaluation stricte par expressions régulières et métadonnées base sur les 7 familles critiques :
+     * **Freinage** : pédale molle, pédale au plancher, perte de frein, disque rouge.
+     * **Direction** : volant bloqué, direction très dure, rotule cassée.
+     * **Pression d'huile / Moteur** : burette rouge, voyant huile rouge, niveau à sec.
+     * **Refroidissement / Surchauffe** : moteur en surchauffe, aiguille dans le rouge, liquide qui bout.
+     * **Carburant / Incendie** : odeur d'essence, fuite carburant, flammes, fumée noire sous capot.
+     * **Pneumatiques / Châssis** : pneu éclaté, roue desserrée, vibration violente.
+     * **Alerte combiné** : voyant STOP ou rouge allumé.
+  2. **LLM en second** : Analyse des formulations familières ou imagées si aucun déclencheur direct n'a été intercepté.
+  3. **Cap de confiance** : Confiance toujours plafonnée à $\le 95\%$.
+
+### Schéma de Réponse API (`POST /api/check-safety`)
+```json
+{
+  "is_danger": true,
+  "severity": "critical",
+  "critical_system": "Freinage",
+  "danger_reason": "Défaillance ou perte d'efficacité critique du circuit de freinage.",
+  "immediate_action": "Arrêtez le véhicule immédiatement en lieu sécurisé. Ne roulez sous aucun prétexte et contactez une dépanneuse.",
+  "detection_source": "deterministic_rule",
+  "confidence": 95,
+  "fallback_applied": false
+}
+```
+
+---
+
+## 8. Organisation Complète des Dossiers Livrables
 
 ```
 ├── app/
@@ -188,7 +219,10 @@ flowchart TD
 │       │   ├── __init__.py
 │       │   ├── service.py           # DiagnosisExplainer & templates
 │       │   └── router.py            # POST /api/explain-diagnosis
-│       └── safety/                  # IA #5 : Garde-fou sécurité (à venir Étape 6)
+│       └── safety/                  # IA #5 : Garde-fou sécurité (déterministe d'abord)
+│           ├── __init__.py
+│           ├── service.py           # SafetyGuardService & patterns
+│           └── router.py            # POST /api/check-safety
 ├── data/
 │   ├── canonical_symptoms.json      # Référentiel des symptômes
 │   ├── tech_documents.json          # Référentiel unifié des documents techniques
@@ -202,5 +236,7 @@ flowchart TD
     ├── test_embeddings.py           # 10 tests (IA #1)
     ├── test_reformulation.py        # 7 tests (IA #2)
     ├── test_rag.py                  # 8 tests (IA #3)
-    └── test_explanation.py          # 7 tests (IA #4)
+    ├── test_explanation.py          # 7 tests (IA #4)
+    └── test_safety.py               # 10 tests (IA #5)
+    # Total : 42 tests unitaires et d'intégration (100% passants)
 ```
