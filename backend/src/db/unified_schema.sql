@@ -158,3 +158,21 @@ CREATE TABLE IF NOT EXISTS solutions (
   garage_memo_tip TEXT,
   FOREIGN KEY (fault_id) REFERENCES faults(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- 12. Strategic Performance Indexes
+ALTER TABLE dtc_codes ADD INDEX IF NOT EXISTS idx_dtc_type (type);
+ALTER TABLE dtc_codes ADD INDEX IF NOT EXISTS idx_dtc_system (system);
+ALTER TABLE dtc_codes ADD INDEX IF NOT EXISTS idx_dtc_urgency (urgency);
+ALTER TABLE car_catalog ADD INDEX IF NOT EXISTS idx_catalog_make_model (make, model);
+ALTER TABLE car_catalog ADD INDEX IF NOT EXISTS idx_catalog_make_group (make_group);
+ALTER TABLE faults ADD INDEX IF NOT EXISTS idx_faults_system (system);
+ALTER TABLE faults ADD INDEX IF NOT EXISTS idx_faults_danger (is_danger);
+ALTER TABLE faults ADD INDEX IF NOT EXISTS idx_faults_severity (severity);
+ALTER TABLE fault_symptoms ADD INDEX IF NOT EXISTS idx_fs_lookup (symptom_id, is_primary, relevance_score);
+ALTER TABLE diagnostic_rules ADD INDEX IF NOT EXISTS idx_rules_lookup (question_id, answer_option_id, fault_id);
+ALTER TABLE diagnostic_questions ADD INDEX IF NOT EXISTS idx_dq_symptom_step (symptom_id, step_num);
+ALTER TABLE answer_options ADD INDEX IF NOT EXISTS idx_ao_question_order (question_id, order_index);
+ALTER TABLE diagnostic_sessions ADD INDEX IF NOT EXISTS idx_sessions_user_status (user_id, status, created_at);
+ALTER TABLE session_answers ADD INDEX IF NOT EXISTS idx_answers_session_q (session_id, question_id);
+ALTER TABLE diagnostic_tests ADD INDEX IF NOT EXISTS idx_dt_fault (fault_id);
+ALTER TABLE solutions ADD INDEX IF NOT EXISTS idx_sol_fault (fault_id);

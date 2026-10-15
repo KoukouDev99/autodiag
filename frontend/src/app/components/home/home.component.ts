@@ -1,7 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DiagnosticService, Symptom, Vehicle, RecentDiagnostic, DtcCode } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
 
@@ -12,10 +14,13 @@ import { VehicleLogoService } from '../../services/vehicle-logo.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private diagnosticService = inject(DiagnosticService);
   private vehicleLogoService = inject(VehicleLogoService);
   private router = inject(Router);
+
+  private dtcSearch$ = new Subject<string>();
+  private dtcSub?: Subscription;
 
   symptoms: Symptom[] = [];
   vehicles: Vehicle[] = [];
@@ -55,6 +60,16 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.dtcSub = this.dtcSearch$.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe((query) => {
+      this.executeDtcSearch(query);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dtcSub?.unsubscribe();
   }
 
   loadData(): void {
@@ -192,11 +207,15 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/garage']);
   }
 
-  // --- DTC OBD-II Search & Inspection ---
+  // --- DTC OBD-II Search & Inspection (Optimized with RxJS debounceTime 300ms) ---
   onDtcSearchInput(): void {
-    const q = this.dtcSearchQuery.trim();
+    this.dtcSearch$.next(this.dtcSearchQuery.trim());
+  }
+
+  private executeDtcSearch(q: string): void {
     if (q.length < 2) {
       this.dtcSearchResults = [];
+      this.isSearchingDtc = false;
       return;
     }
     this.isSearchingDtc = true;
