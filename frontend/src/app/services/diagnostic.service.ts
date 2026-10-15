@@ -552,6 +552,14 @@ export class DiagnosticService {
     );
   }
 
+  normalizeSymptom(text: string): Observable<AiNormalizeResult> {
+    return this.http.post<AiNormalizeResult>(`${this.apiUrl}/normalize-symptom`, { text });
+  }
+
+  checkSafety(text: string): Observable<AiSafetyResult> {
+    return this.http.post<AiSafetyResult>(`${this.apiUrl}/check-safety`, { text });
+  }
+
   private fallbackLocalSearch(category?: string, query?: string): DiagnosticItem[] {
     let list = DIAGNOSTIC_DATABASE;
     if (category) {
@@ -567,5 +575,33 @@ export class DiagnosticService {
     }
     return list;
   }
+}
+
+export interface AiNormalizeResult {
+  symptom_id: number | null;
+  code: string | null;
+  label: string | null;
+  category: string | null;
+  score: number;
+  needs_clarification: boolean;
+  message?: string;
+  top_3_alternatives?: Array<{
+    symptom_id: number;
+    code: string;
+    label: string;
+    category: string;
+    score: number;
+  }>;
+  fallback_applied?: boolean;
+}
+
+export interface AiSafetyResult {
+  is_danger: boolean;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  critical_system: string | null;
+  danger_reason: string | null;
+  immediate_action: string;
+  confidence: number;
+  fallback_applied?: boolean;
 }
 

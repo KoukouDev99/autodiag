@@ -43,6 +43,118 @@
     </div>
   </div>
 
+  <!-- ✨ IA Copilote Smart Natural Language Search Section -->
+  <div class="ai-search-section">
+    <div class="ai-search-header">
+      <div class="ai-icon-badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </div>
+      <div class="ai-title-group">
+        <div class="ai-badge-pill-header">
+          <span class="ai-live-dot"></span>
+          IA COPILOTE 100% LOCALE & PRIVÉE
+        </div>
+        <h3 class="ai-section-title">Recherche Intelligente de Panne</h3>
+        <p class="ai-section-subtitle">Décrivez ce qui arrive avec vos propres mots. L'IA analyse votre situation sans jargon.</p>
+      </div>
+    </div>
+
+    <!-- AI Search Input Box -->
+    <div class="ai-input-wrapper">
+      <svg class="ai-input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input 
+        type="text" 
+        [(ngModel)]="aiSearchQuery" 
+        (input)="onAiSearchInput()" 
+        placeholder="Décrivez votre panne... Ex: ma pédale de frein est molle, de la fumée blanche au démarrage" 
+        class="ai-input"
+        id="ai-natural-search-input"
+      />
+      @if (isAnalyzingAi) {
+        <div class="ai-spinner" title="Analyse IA en cours..."></div>
+      }
+      @if (aiSearchQuery) {
+        <button type="button" class="ai-clear-btn" (click)="clearAiSearch()" aria-label="Effacer">✕</button>
+      }
+    </div>
+
+    <!-- Quick Example Pills -->
+    <div class="ai-examples-row">
+      <span class="ai-examples-label">Exemples fréquents :</span>
+      <div class="ai-examples-pills">
+        @for (ex of aiExamplePrompts; track ex) {
+          <button type="button" class="ai-example-pill" (click)="selectAiPrompt(ex)">
+            <span>{{ ex }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ⚠️ Critical Safety Hazard Banner (IA #5) -->
+    @if (aiSafetyAlert && aiSafetyAlert.is_danger) {
+      <div class="ai-safety-alert-banner">
+        <div class="ai-safety-icon-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+        <div class="ai-safety-content">
+          <div class="ai-safety-title">
+            ARRÊT IMPÉRATIF DU VÉHICULE · Risque : {{ aiSafetyAlert.critical_system || 'Système Critique' }}
+          </div>
+          <p class="ai-safety-reason">{{ aiSafetyAlert.danger_reason }}</p>
+          <div class="ai-safety-action">
+            <strong>Consigne immédiate :</strong> {{ aiSafetyAlert.immediate_action }}
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- 🎯 Matched Symptom Card (IA #1 Normalisation) -->
+    @if (aiMatchedSymptom && aiMatchedSymptom.label) {
+      <div class="ai-match-card">
+        <div class="ai-match-left">
+          <div class="ai-match-badge">
+            <span class="ai-match-score">Pertinence IA : {{ Math.round((aiMatchedSymptom.score || 0.8) * 100) }}%</span>
+            <span class="ai-match-category">{{ aiMatchedSymptom.category || 'Moteur' }}</span>
+          </div>
+          <h4 class="ai-match-title">{{ aiMatchedSymptom.label }}</h4>
+          <p class="ai-match-subtitle">
+            L'IA locale a identifié ce symptôme comme la meilleure correspondance pour vos observations.
+          </p>
+          @if (aiMatchedSymptom.top_3_alternatives && aiMatchedSymptom.top_3_alternatives.length > 1) {
+            <div class="ai-alternatives-row">
+              <span class="ai-alt-label">Pistes secondaires :</span>
+              @for (alt of aiMatchedSymptom.top_3_alternatives; track alt.code) {
+                @if (alt.code !== aiMatchedSymptom.code) {
+                  <button type="button" class="ai-alt-chip" (click)="launchAiDiagnostic(alt.symptom_id)">
+                    {{ alt.label }} ({{ Math.round(alt.score * 100) }}%)
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+        <div class="ai-match-right">
+          <button type="button" class="btn-primary ai-launch-btn" (click)="launchAiDiagnostic()">
+            <span>Lancer ce diagnostic</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
   <!-- OBD-II / DTC Live Scanner & Code Lookup Section -->
   <div class="dtc-scanner-section">
     <div class="dtc-card-header">

@@ -6,6 +6,8 @@
     "backend": "npm start --prefix backend",
     "frontend": "npm start --prefix frontend",
     "start:backend": "npm start --prefix backend",
-    "start:frontend": "npm start --prefix frontend"
+    "start:frontend": "npm start --prefix frontend",
+    "ai": "C:\\Users\\yakoub\\.autodiag_venv\\Scripts\\python.exe -m uvicorn app.ai.main:app --host 127.0.0.1 --port 8001 --reload",
+    "start:ai": "npm run ai"
   }
 }

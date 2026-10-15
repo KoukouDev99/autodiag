@@ -38,6 +38,25 @@ app.include_router(rag_router)
 app.include_router(explanation_router)
 app.include_router(safety_router)
 
+@app.get("/")
+async def root():
+    """Root welcome endpoint with service metadata and documentation link."""
+    return {
+        "status": "online",
+        "service": "AutoDiag Local AI Microservice",
+        "mode": "100% Offline / Local Inference",
+        "version": "1.0.0",
+        "documentation": "http://127.0.0.1:8001/docs",
+        "modules": [
+            "IA #1: Semantic Symptom Normalization (/api/normalize-symptom)",
+            "IA #2: Beginner Question Reformulation (/api/reformulate-question)",
+            "IA #3: Technical RAG Retriever (/api/retrieve-context)",
+            "IA #4: Plain Language Explanation (/api/explain-diagnosis)",
+            "IA #5: Real-time Safety Guard (/api/check-safety)"
+        ]
+    }
+
+@app.get("/health")
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint for the local AI service."""

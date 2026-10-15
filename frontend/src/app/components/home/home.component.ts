@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { DiagnosticService, Symptom, Vehicle, RecentDiagnostic, DtcCode } from '../../services/diagnostic.service';
+import { DiagnosticService, Symptom, Vehicle, RecentDiagnostic, DtcCode, AiNormalizeResult, AiSafetyResult } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
 
 @Component({
@@ -15,12 +15,29 @@ import { VehicleLogoService } from '../../services/vehicle-logo.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  readonly Math = Math;
   private diagnosticService = inject(DiagnosticService);
   private vehicleLogoService = inject(VehicleLogoService);
   private router = inject(Router);
 
   private dtcSearch$ = new Subject<string>();
   private dtcSub?: Subscription;
+
+  // IA Copilote Search
+  aiSearchQuery = '';
+  isAnalyzingAi = false;
+  aiMatchedSymptom: AiNormalizeResult | null = null;
+  aiSafetyAlert: AiSafetyResult | null = null;
+  private aiSearch$ = new Subject<string>();
+  private aiSub?: Subscription;
+
+  aiExamplePrompts = [
+    'Pédale de frein molle',
+    'Fumée blanche à l\'échappement',
+    'Moteur broute à l\'accélération',
+    'Démarreur tourne mais ne se lance pas',
+    'Voyant huile rouge allumé'
+  ];
 
   symptoms: Symptom[] = [];
   vehicles: Vehicle[] = [];
@@ -66,10 +83,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     ).subscribe((query) => {
       this.executeDtcSearch(query);
     });
+
+    this.aiSub = this.aiSearch$.pipe(
+      debounceTime(350),
+      distinctUntilChanged()
+    ).subscribe((query) => {
+      this.executeAiSearch(query);
+    });
   }
 
   ngOnDestroy(): void {
     this.dtcSub?.unsubscribe();
+    this.aiSub?.unsubscribe();
   }
 
   loadData(): void {
@@ -260,4 +285,66 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.dtcModalOpen = false;
     this.selectedDtcDetail = null;
   }
+
+  // --- IA Copilote Smart Symptom Search ---
+  onAiSearchInput(): void {
+    this.aiSearch$.next(this.aiSearchQuery.trim());
+  }
+
+  selectAiPrompt(prompt: string): void {
+    this.aiSearchQuery = prompt;
+    this.onAiSearchInput();
+  }
+
+  clearAiSearch(): void {
+    this.aiSearchQuery = '';
+    this.aiMatchedSymptom = null;
+    this.aiSafetyAlert = null;
+    this.isAnalyzingAi = false;
+  }
+
+  private executeAiSearch(q: string): void {
+    if (q.length < 3) {
+      this.aiMatchedSymptom = null;
+      this.aiSafetyAlert = null;
+      this.isAnalyzingAi = false;
+      return;
+    }
+    this.isAnalyzingAi = true;
+
+    // 1. Garde-fou Sécurité (IA #5)
+    this.diagnosticService.checkSafety(q).subscribe({
+      next: (safe) => {
+        this.aiSafetyAlert = safe && safe.is_danger ? safe : null;
+      },
+      error: () => {
+        this.aiSafetyAlert = null;
+      }
+    });
+
+    // 2. Normalisation Sémantique (IA #1)
+    this.diagnosticService.normalizeSymptom(q).subscribe({
+      next: (result) => {
+        this.aiMatchedSymptom = result;
+        this.isAnalyzingAi = false;
+      },
+      error: () => {
+        this.aiMatchedSymptom = null;
+        this.isAnalyzingAi = false;
+      }
+    });
+  }
+
+  launchAiDiagnostic(symptomId?: number | null): void {
+    const targetId = symptomId || this.aiMatchedSymptom?.symptom_id;
+    if (targetId) {
+      this.diagnosticService.startDiagnostic(targetId, this.vehicle?.id || 1).subscribe({
+        next: (res) => this.router.navigate(['/diagnostic', res.session_id]),
+        error: () => this.router.navigate(['/diagnostic', 1])
+      });
+    } else {
+      this.startGeneralDiagnostic();
+    }
+  }
 }
+
