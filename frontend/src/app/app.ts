@@ -1,20 +1,29 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { DiagnosticService } from './services/diagnostic.service';
+import { TranslationService, SupportedLang } from './services/translation.service';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
 export class App implements OnInit {
   private router = inject(Router);
   diagService = inject(DiagnosticService);
+  translationService = inject(TranslationService);
   currentUser = this.diagService.currentUser;
+
+  // Language management
+  languages = this.translationService.languages;
+  currentLang = this.translationService.currentLang;
+  currentLangInfo = this.translationService.currentLangInfo;
+  showLangDropdown = signal(false);
 
   // Dark Mode state: default to true (Dark mode) or stored preference
   isDarkMode = signal(true);
@@ -69,6 +78,23 @@ export class App implements OnInit {
 
   toggleNotifications(): void {
     this.showNotificationsModal.set(!this.showNotificationsModal());
+  }
+
+  toggleLangDropdown(event: Event): void {
+    event.stopPropagation();
+    this.showLangDropdown.set(!this.showLangDropdown());
+  }
+
+  selectLanguage(lang: SupportedLang): void {
+    this.translationService.setLanguage(lang);
+    this.showLangDropdown.set(false);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.showLangDropdown()) {
+      this.showLangDropdown.set(false);
+    }
   }
 
   navigateTo(path: string): void {

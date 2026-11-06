@@ -1,29 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, of, catchError, map } from 'rxjs';
-import { CAR_CATALOG_DATA } from '../data/car-catalog.data';
-import {
-  DiagnosticItem,
-  DIAGNOSTIC_DATABASE,
-  getDiagnosticCategories,
-  searchDiagnostics,
-  getDiagnosticById,
-  getDiagnosticsByCategory
-} from '../data/diagnostic-database.data';
-import { ObdPid, OBD_PIDS } from '../data/obd-pids.data';
+import { Observable, tap, of, from, catchError, map, switchMap, shareReplay } from 'rxjs';
+import type { DiagnosticItem } from '../data/diagnostic-database.data';
+import type { ObdPid } from '../data/obd-pids.data';
 
 export type {
   DiagnosticItem,
   ObdPid
-};
-
-export {
-  DIAGNOSTIC_DATABASE,
-  getDiagnosticCategories,
-  searchDiagnostics,
-  getDiagnosticById,
-  getDiagnosticsByCategory,
-  OBD_PIDS
 };
 
 
@@ -118,6 +101,8 @@ export interface Hypothesis {
   id: number;
   symptom_id: number;
   name: string;
+  fault_code?: string;
+  is_danger?: boolean | number;
   priority_badge: string;
   priority_label: string;
   order_index: number;
@@ -223,7 +208,7 @@ export interface DtcCode {
   possible_causes: string[];
   urgency: string;
   garage_advice: string;
-  bilingual_title?: { en: string; de?: string };
+  bilingual_title?: { en: string; fr?: string; de?: string };
   affected_components?: string[];
   symptoms?: string[];
   related_codes?: string[];
@@ -252,6 +237,16 @@ export class DiagnosticService {
 
   currentUser = signal<UserProfile | null>(this.loadInitialUser());
   token = signal<string | null>(this.loadInitialToken());
+
+  // Client-side HTTP caches for fast navigation & zero redundant requests
+  private symptomsCache$: Observable<Symptom[]> | null = null;
+  private vehiclesCache$: Observable<Vehicle[]> | null = null;
+  private catalogMakesCache$: Observable<string[]> | null = null;
+  private catalogModelsCache = new Map<string, Observable<{ id: number; model: string; year_start: number | null; year_end: number | null }[]>>();
+  private catalogYearsCache = new Map<string, Observable<number[]>>();
+  private catalogEnginesCache = new Map<string, Observable<EngineSpecItem[]>>();
+  private kbCategoriesCache$: Observable<{ id: string; name: string; count: number; icon: string }[]> | null = null;
+  private dtcLookupCache = new Map<string, Observable<DtcCode>>();
 
   private loadInitialUser(): UserProfile | null {
     if (typeof localStorage === 'undefined') return null;
@@ -345,7 +340,16 @@ export class DiagnosticService {
   }
 
   getVehicles(): Observable<Vehicle[]> {
-    return this.http.get<Vehicle[]>(`${this.apiUrl}/vehicles`);
+    if (!this.vehiclesCache$) {
+      this.vehiclesCache$ = this.http.get<Vehicle[]>(`${this.apiUrl}/vehicles`).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.vehiclesCache$.pipe(map(list => list.map(v => ({ ...v }))));
+  }
+
+  invalidateVehiclesCache(): void {
+    this.vehiclesCache$ = null;
   }
 
   getVehicle(id: number): Observable<Vehicle> {
@@ -353,97 +357,146 @@ export class DiagnosticService {
   }
 
   createVehicle(vehicle: Partial<Vehicle>): Observable<Vehicle> {
-    return this.http.post<Vehicle>(`${this.apiUrl}/vehicles`, vehicle);
+    return this.http.post<Vehicle>(`${this.apiUrl}/vehicles`, vehicle).pipe(
+      tap(() => this.invalidateVehiclesCache())
+    );
   }
 
   updateVehicle(id: number, vehicle: Partial<Vehicle>): Observable<Vehicle> {
-    return this.http.put<Vehicle>(`${this.apiUrl}/vehicles/${id}`, vehicle);
+    return this.http.put<Vehicle>(`${this.apiUrl}/vehicles/${id}`, vehicle).pipe(
+      tap(() => this.invalidateVehiclesCache())
+    );
   }
 
   setPrimaryVehicle(id: number): Observable<Vehicle> {
-    return this.http.put<Vehicle>(`${this.apiUrl}/vehicles/${id}/primary`, {});
+    return this.http.put<Vehicle>(`${this.apiUrl}/vehicles/${id}/primary`, {}).pipe(
+      tap(() => this.invalidateVehiclesCache())
+    );
   }
 
   deleteVehicle(id: number): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/vehicles/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/vehicles/${id}`).pipe(
+      tap(() => this.invalidateVehiclesCache())
+    );
   }
 
   getCatalogMakes(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.apiUrl}/catalog/makes`).pipe(
-      map(makes => (makes && makes.length > 0) ? makes : this.getFallbackMakes()),
-      catchError(() => of(this.getFallbackMakes()))
-    );
+    if (!this.catalogMakesCache$) {
+      this.catalogMakesCache$ = this.http.get<string[]>(`${this.apiUrl}/catalog/makes`).pipe(
+        switchMap(makes => (makes && makes.length > 0) ? of(makes) : this.getFallbackMakes$()),
+        catchError(() => this.getFallbackMakes$()),
+        shareReplay(1)
+      );
+    }
+    return this.catalogMakesCache$.pipe(map(makes => [...makes]));
   }
 
   getCatalogModels(make: string): Observable<{ id: number; model: string; year_start: number | null; year_end: number | null }[]> {
-    return this.http.get<{ id: number; model: string; year_start: number | null; year_end: number | null }[]>(
-      `${this.apiUrl}/catalog/models?make=${encodeURIComponent(make)}`
-    ).pipe(
-      map(models => (models && models.length > 0) ? models : this.getFallbackModels(make)),
-      catchError(() => of(this.getFallbackModels(make)))
-    );
+    const key = make.trim().toLowerCase();
+    let cached$ = this.catalogModelsCache.get(key);
+    if (!cached$) {
+      cached$ = this.http.get<{ id: number; model: string; year_start: number | null; year_end: number | null }[]>(
+        `${this.apiUrl}/catalog/models?make=${encodeURIComponent(make)}`
+      ).pipe(
+        switchMap(models => (models && models.length > 0) ? of(models) : this.getFallbackModels$(make)),
+        catchError(() => this.getFallbackModels$(make)),
+        shareReplay(1)
+      );
+      this.catalogModelsCache.set(key, cached$);
+    }
+    return cached$.pipe(map(models => [...models]));
   }
 
   getCatalogYears(make: string, model: string): Observable<number[]> {
-    return this.http.get<number[]>(
-      `${this.apiUrl}/catalog/years?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`
-    ).pipe(
-      map(years => (years && years.length > 0) ? years : this.getFallbackYears(make, model)),
-      catchError(() => of(this.getFallbackYears(make, model)))
-    );
+    const key = `${make.trim().toLowerCase()}:${model.trim().toLowerCase()}`;
+    let cached$ = this.catalogYearsCache.get(key);
+    if (!cached$) {
+      cached$ = this.http.get<number[]>(
+        `${this.apiUrl}/catalog/years?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`
+      ).pipe(
+        switchMap(years => (years && years.length > 0) ? of(years) : this.getFallbackYears$(make, model)),
+        catchError(() => this.getFallbackYears$(make, model)),
+        shareReplay(1)
+      );
+      this.catalogYearsCache.set(key, cached$);
+    }
+    return cached$.pipe(map(years => [...years]));
   }
 
   getCatalogEngines(make: string, model: string, year?: number): Observable<EngineSpecItem[]> {
-    let url = `${this.apiUrl}/catalog/engines?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
-    if (year) url += `&year=${encodeURIComponent(year)}`;
-    return this.http.get<EngineSpecItem[]>(url).pipe(
-      catchError(() => of([]))
+    const key = `${make.trim().toLowerCase()}:${model.trim().toLowerCase()}:${year || 'all'}`;
+    let cached$ = this.catalogEnginesCache.get(key);
+    if (!cached$) {
+      let url = `${this.apiUrl}/catalog/engines?make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`;
+      if (year) url += `&year=${encodeURIComponent(year)}`;
+      cached$ = this.http.get<EngineSpecItem[]>(url).pipe(
+        catchError(() => of([])),
+        shareReplay(1)
+      );
+      this.catalogEnginesCache.set(key, cached$);
+    }
+    return cached$.pipe(map(engines => [...engines]));
+  }
+
+  private getFallbackMakes$(): Observable<string[]> {
+    return from(import('../data/car-catalog.data')).pipe(
+      map(({ CAR_CATALOG_DATA }) => {
+        const set = new Set<string>();
+        for (const item of CAR_CATALOG_DATA) {
+          if (item.make) set.add(item.make);
+        }
+        return Array.from(set).sort((a, b) => a.localeCompare(b));
+      })
     );
   }
 
-  private getFallbackMakes(): string[] {
-    const set = new Set<string>();
-    for (const item of CAR_CATALOG_DATA) {
-      if (item.make) set.add(item.make);
-    }
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }
-
-  private getFallbackModels(make: string): { id: number; model: string; year_start: number | null; year_end: number | null }[] {
+  private getFallbackModels$(make: string): Observable<{ id: number; model: string; year_start: number | null; year_end: number | null }[]> {
     const target = make.trim().toLowerCase();
-    return CAR_CATALOG_DATA
-      .filter(item => item.make.trim().toLowerCase() === target)
-      .map(item => ({
-        id: item.id,
-        model: item.model,
-        year_start: item.year_start,
-        year_end: item.year_end
-      }))
-      .sort((a, b) => a.model.localeCompare(b.model));
+    return from(import('../data/car-catalog.data')).pipe(
+      map(({ CAR_CATALOG_DATA }) =>
+        CAR_CATALOG_DATA
+          .filter(item => item.make.trim().toLowerCase() === target)
+          .map(item => ({
+            id: item.id,
+            model: item.model,
+            year_start: item.year_start,
+            year_end: item.year_end
+          }))
+          .sort((a, b) => a.model.localeCompare(b.model))
+      )
+    );
   }
 
-  private getFallbackYears(make: string, model: string): number[] {
+  private getFallbackYears$(make: string, model: string): Observable<number[]> {
     const targetMake = make.trim().toLowerCase();
     const targetModel = model.trim().toLowerCase();
     const currentYear = new Date().getFullYear();
-    const found = CAR_CATALOG_DATA.find(
-      item => item.make.trim().toLowerCase() === targetMake && item.model.trim().toLowerCase() === targetModel
+    return from(import('../data/car-catalog.data')).pipe(
+      map(({ CAR_CATALOG_DATA }) => {
+        const found = CAR_CATALOG_DATA.find(
+          item => item.make.trim().toLowerCase() === targetMake && item.model.trim().toLowerCase() === targetModel
+        );
+        const start = (found && found.year_start) ? found.year_start : 1995;
+        const end = (found && found.year_end) ? found.year_end : currentYear;
+        const years: number[] = [];
+        for (let y = Math.min(end, currentYear); y >= start; y--) {
+          years.push(y);
+        }
+        if (years.length === 0) {
+          for (let y = currentYear; y >= 1995; y--) years.push(y);
+        }
+        return years;
+      })
     );
-    const start = (found && found.year_start) ? found.year_start : 1995;
-    const end = (found && found.year_end) ? found.year_end : currentYear;
-    const years: number[] = [];
-    for (let y = Math.min(end, currentYear); y >= start; y--) {
-      years.push(y);
-    }
-    if (years.length === 0) {
-      for (let y = currentYear; y >= 1995; y--) years.push(y);
-    }
-    return years;
   }
 
-
   getSymptoms(): Observable<Symptom[]> {
-    return this.http.get<Symptom[]>(`${this.apiUrl}/symptoms`);
+    if (!this.symptomsCache$) {
+      this.symptomsCache$ = this.http.get<Symptom[]>(`${this.apiUrl}/symptoms`).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.symptomsCache$.pipe(map(list => [...list]));
   }
 
   getRecentDiagnostics(): Observable<RecentDiagnostic[]> {
@@ -478,9 +531,15 @@ export class DiagnosticService {
   }
 
   lookupDtc(code: string, make?: string): Observable<DtcCode> {
-    let url = `${this.apiUrl}/dtc/${encodeURIComponent(code)}`;
-    if (make) url += `?make=${encodeURIComponent(make)}`;
-    return this.http.get<DtcCode>(url);
+    const key = `${code.trim().toUpperCase()}:${(make || '').trim().toUpperCase()}`;
+    let cached$ = this.dtcLookupCache.get(key);
+    if (!cached$) {
+      let url = `${this.apiUrl}/dtc/${encodeURIComponent(code)}`;
+      if (make) url += `?make=${encodeURIComponent(make)}`;
+      cached$ = this.http.get<DtcCode>(url).pipe(shareReplay(1));
+      this.dtcLookupCache.set(key, cached$);
+    }
+    return cached$;
   }
 
   searchDtc(query: string, type?: string, make?: string, limit = 50): Observable<DtcCode[]> {
@@ -496,18 +555,22 @@ export class DiagnosticService {
   getPids(mode?: string): Observable<ObdPid[]> {
     let url = `${this.apiUrl}/pids`;
     if (mode) url += `?mode=${encodeURIComponent(mode)}`;
+    const fallback$ = from(import('../data/obd-pids.data')).pipe(
+      map(({ OBD_PIDS }) => mode ? OBD_PIDS.filter(p => p.mode === mode) : OBD_PIDS)
+    );
     return this.http.get<ObdPid[]>(url).pipe(
-      map(rows => (rows && rows.length > 0) ? rows : (mode ? OBD_PIDS.filter(p => p.mode === mode) : OBD_PIDS)),
-      catchError(() => of(mode ? OBD_PIDS.filter(p => p.mode === mode) : OBD_PIDS))
+      switchMap(rows => (rows && rows.length > 0) ? of(rows) : fallback$),
+      catchError(() => fallback$)
     );
   }
 
   getPid(mode: string, pid: string): Observable<ObdPid | null> {
     return this.http.get<ObdPid>(`${this.apiUrl}/pids/${encodeURIComponent(mode)}/${encodeURIComponent(pid)}`).pipe(
-      catchError(() => {
-        const found = OBD_PIDS.find(p => p.mode === mode && p.pid.toUpperCase() === pid.toUpperCase());
-        return of(found || null);
-      })
+      catchError(() =>
+        from(import('../data/obd-pids.data')).pipe(
+          map(({ OBD_PIDS }) => OBD_PIDS.find(p => p.mode === mode && p.pid.toUpperCase() === pid.toUpperCase()) || null)
+        )
+      )
     );
   }
 
@@ -517,20 +580,27 @@ export class DiagnosticService {
 
   // 12. Automotive Diagnostic Knowledge Base (Full Dataset)
   getKbCategories(): Observable<{ id: string; name: string; count: number; icon: string }[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/kb/categories`).pipe(
-      map(rows => {
-        if (rows && rows.length > 0) {
-          return rows.map(r => ({
-            id: r.category_id,
-            name: r.category,
-            count: r.count,
-            icon: r.icon
-          }));
-        }
-        return getDiagnosticCategories();
-      }),
-      catchError(() => of(getDiagnosticCategories()))
-    );
+    if (!this.kbCategoriesCache$) {
+      const fallback$ = from(import('../data/diagnostic-database.data')).pipe(
+        map(m => m.getDiagnosticCategories())
+      );
+      this.kbCategoriesCache$ = this.http.get<any[]>(`${this.apiUrl}/kb/categories`).pipe(
+        switchMap(rows => {
+          if (rows && rows.length > 0) {
+            return of(rows.map(r => ({
+              id: r.category_id,
+              name: r.category,
+              count: r.count,
+              icon: r.icon
+            })));
+          }
+          return fallback$;
+        }),
+        catchError(() => fallback$),
+        shareReplay(1)
+      );
+    }
+    return this.kbCategoriesCache$;
   }
 
   getKbDiagnostics(category?: string, query?: string): Observable<DiagnosticItem[]> {
@@ -541,14 +611,18 @@ export class DiagnosticService {
     if (params.length > 0) url += `?${params.join('&')}`;
 
     return this.http.get<DiagnosticItem[]>(url).pipe(
-      map(items => (items && items.length > 0) ? items : this.fallbackLocalSearch(category, query)),
-      catchError(() => of(this.fallbackLocalSearch(category, query)))
+      switchMap(items => (items && items.length > 0) ? of(items) : this.fallbackLocalSearch$(category, query)),
+      catchError(() => this.fallbackLocalSearch$(category, query))
     );
   }
 
   getKbDiagnosticById(id: string): Observable<DiagnosticItem | null> {
     return this.http.get<DiagnosticItem>(`${this.apiUrl}/kb/diagnostics/${id}`).pipe(
-      catchError(() => of(getDiagnosticById(id) || null))
+      catchError(() =>
+        from(import('../data/diagnostic-database.data')).pipe(
+          map(m => m.getDiagnosticById(id) || null)
+        )
+      )
     );
   }
 
@@ -567,24 +641,29 @@ export class DiagnosticService {
     api_key?: string | null;
     provider?: string | null;
     model?: string | null;
+    language?: string | null;
   }): Observable<AiChatResponse> {
     return this.http.post<AiChatResponse>(`${this.apiUrl}/chat`, payload);
   }
 
-  private fallbackLocalSearch(category?: string, query?: string): DiagnosticItem[] {
-    let list = DIAGNOSTIC_DATABASE;
-    if (category) {
-      list = list.filter(item => item.category_id === category || item.category === category);
-    }
-    if (query) {
-      const q = query.trim().toLowerCase();
-      list = list.filter(item =>
-        item.subcategory.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
-        item.symptoms.some(s => s.toLowerCase().includes(q))
-      );
-    }
-    return list;
+  private fallbackLocalSearch$(category?: string, query?: string): Observable<DiagnosticItem[]> {
+    return from(import('../data/diagnostic-database.data')).pipe(
+      map(({ DIAGNOSTIC_DATABASE }) => {
+        let list = DIAGNOSTIC_DATABASE;
+        if (category) {
+          list = list.filter(item => item.category_id === category || item.category === category);
+        }
+        if (query) {
+          const q = query.trim().toLowerCase();
+          list = list.filter(item =>
+            item.subcategory.toLowerCase().includes(q) ||
+            item.category.toLowerCase().includes(q) ||
+            item.symptoms.some(s => s.toLowerCase().includes(q))
+          );
+        }
+        return list;
+      })
+    );
   }
 }
 

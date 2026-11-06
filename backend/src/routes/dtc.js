@@ -3,11 +3,17 @@ const router = express.Router();
 const { getPool } = require('../db/db');
 const { appCache } = require('../utils/cache');
 
-// 1. DTC Lookup & Search (Wal33D/dtc-database Engine)
+// 1. DTC Lookup & Search (Wal33D/dtc-database Engine - Cached for 30 min)
 router.get('/dtc/search', async (req, res) => {
   try {
-    const pool = getPool();
     const { q, type, make, limit = 50, offset = 0 } = req.query;
+    const cacheKey = `dtc:search:${(q || '').trim().toUpperCase()}:${(type || '').toUpperCase()}:${(make || '').toUpperCase()}:${limit}:${offset}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const pool = getPool();
     let sql = 'SELECT * FROM dtc_codes WHERE 1=1';
     const params = [];
 
@@ -66,6 +72,7 @@ router.get('/dtc/search', async (req, res) => {
       };
     });
 
+    appCache.set(cacheKey, results, 1800);
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -267,8 +274,14 @@ router.get('/kb/categories', async (req, res) => {
 
 router.get('/kb/diagnostics', async (req, res) => {
   try {
-    const pool = getPool();
     const { category, query } = req.query;
+    const cacheKey = `kb:diagnostics:${(category || 'ALL').toLowerCase()}:${(query || '').trim().toLowerCase()}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const pool = getPool();
     let sql = 'SELECT * FROM diagnostic_kb WHERE 1=1';
     const params = [];
 
@@ -293,6 +306,7 @@ router.get('/kb/diagnostics', async (req, res) => {
       repair_guide: typeof r.repair_guide === 'string' ? JSON.parse(r.repair_guide) : r.repair_guide
     }));
 
+    appCache.set(cacheKey, parsed, 3600);
     res.json(parsed);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -301,17 +315,25 @@ router.get('/kb/diagnostics', async (req, res) => {
 
 router.get('/kb/diagnostics/:id', async (req, res) => {
   try {
+    const cacheKey = `kb:diagnostic:${req.params.id}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const pool = getPool();
     const [rows] = await pool.query('SELECT * FROM diagnostic_kb WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Diagnostic item not found' });
     
     const item = rows[0];
-    res.json({
+    const parsed = {
       ...item,
       symptoms: typeof item.symptoms === 'string' ? JSON.parse(item.symptoms) : item.symptoms,
       diagnosis_steps: typeof item.diagnosis_steps === 'string' ? JSON.parse(item.diagnosis_steps) : item.diagnosis_steps,
       repair_guide: typeof item.repair_guide === 'string' ? JSON.parse(item.repair_guide) : item.repair_guide
-    });
+    };
+    appCache.set(cacheKey, parsed, 3600);
+    res.json(parsed);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

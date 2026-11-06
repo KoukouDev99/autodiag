@@ -4,8 +4,9 @@
  */
 
 class MemoryCache {
-  constructor(defaultTTLSeconds = 300) {
+  constructor(defaultTTLSeconds = 300, maxEntries = 1000) {
     this.defaultTTL = defaultTTLSeconds * 1000;
+    this.maxEntries = maxEntries;
     this.store = new Map();
     this.hits = 0;
     this.misses = 0;
@@ -29,6 +30,12 @@ class MemoryCache {
   }
 
   set(key, value, ttlSeconds = null) {
+    if (this.store.size >= this.maxEntries && !this.store.has(key)) {
+      const oldestKey = this.store.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.store.delete(oldestKey);
+      }
+    }
     const ttl = (ttlSeconds !== null ? ttlSeconds : this.defaultTTL / 1000) * 1000;
     this.store.set(key, {
       value,
@@ -78,6 +85,10 @@ class MemoryCache {
     const count = this.store.size;
     this.store.clear();
     return count;
+  }
+
+  clear() {
+    return this.flush();
   }
 
   getStats() {

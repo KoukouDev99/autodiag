@@ -1,0 +1,66 @@
+<USER_REQUEST>
+# MISSION
+Structurer le moteur de diagnostic automobile hybride DB + IA du projet autodiag_dev.
+Le moteur de règles (DB + DiagnosticEngine) est l'AUTORITÉ DE DÉCISION.
+L'IA est une COUCHE PÉRIPHÉRIQUE (entrée, sortie, fallback). Elle ne décide JAMAIS.
+
+# CONTEXTE EXISTANT (à respecter, ne pas casser)
+- Base : MariaDB 10.4, base autodiag_dev
+- Tables : diagnostic_sessions, session_answers, questions, question_options,
+  hypotheses, faults, archive_diagnostic_sessions (archivage)
+- Moteur : backend/src/db/DiagnosticEngine.js → evaluate(...) calcule en mémoire
+  le score de confiance (pondérations règles + compatibilité motorisation/km
+  + calibration de contraste). PAS de colonne confidence_percent en SQL.
+- Routes : backend/src/routes/diagnostics.js (sélection adaptative des questions,
+  early stopping, garde Migration 004 : jamais status='completed' à 0 réponse)
+- Migrations récentes : 002 (archive/purge), 003 (fix seed), 004 (garde autocomplete)
+- Couverture actuelle : 19 pannes seedées (FAULT-***-***). 37 hypothèses en attente
+  de Phase 2b (CREATE_NEW_FAULT) + table legacy_id_map.
+- Tests existants : tests/test_migration_003_seed_integrity.js,
+  tests/test_migration_004_autocomplete.js
+
+# PRINCIPE D'ARCHITECTURE (NON NÉGOCIABLE)
+Hiérarchie stricte, du plus fort au plus faible :
+1. RÈGLES DE SÉCURITÉ (freins, direction, airbag, fuite carburant) → arrêt dur,
+   l'IA ne peut ni contourner ni adoucir.
+2. MOTEUR DE RÈGLES DB (DiagnosticEngine.evaluate) → produit le fault_code
+   et le score de confiance. Seule source d'autorité pour un diagnostic.
+3. IA DE SORTIE → reformule/explique le résultat du moteur, sans jamais
+   altérer le fault_code ni le score.
+4. IA D'ENTRÉE → normalise le texte libre utilisateur vers un symptom_id
+   (propose, ne décide pas ; validation par whitelist DB).
+5. IA DE FALLBACK → uniquement si le moteur ne renvoie AUCUN match.
+   Sortie étiquetée "NON VÉRIFIÉ — consulter un professionnel".
+   Ne p
+<truncated 7860 bytes>
+t tracé dans ai_audit_log.
+[ ] Le fallback est TOUJOURS étiqueté 'ai_fallback_unverified'.
+[ ] Aucune régression sur la garde Migration 004 (0 réponse ≠ completed).
+[ ] La documentation permet à un nouvel arrivant de comprendre la hiérarchie.
+
+# MÉTHODE DE TRAVAIL DEMANDÉE
+1. Commence par produire un PLAN (fichiers à créer/modifier, ordre, risques)
+   et ATTENDS ma validation avant d'écrire du code.
+2. Implémente module par module, en commit atomiques, avec tests associés.
+3. À chaque étape, indique : ce qui est fait, ce qui reste, ce qui bloque.
+4. Ne touche PAS aux migrations 002/003/004 ni à DiagnosticEngine sans
+   demande explicite : elles sont considérées stables.
+5. Si une ambiguïté métier apparaît (ex. sémantique exacte de shouldStopEarly
+   combiné à !selectedQuestion), POSE LA QUESTION au lieu de supposer.
+
+# SORTIE ATTENDUE DE TA PREMIÈRE RÉPONSE
+- Le plan détaillé (arborescence + ordre d'implémentation)
+- La liste des questions bloquantes éventuelles
+- Rien d'autre : pas de code tant que le plan n'est pas validé.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-15T23:43:25+02:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\yakoub\Desktop\development web\Mes projets dev\Mes projets personnale\projet front-end\projet application Diagnostic auto\scratch\test_dod_session.js (LANGUAGE_JAVASCRIPT)
+Cursor is on line: 3
+Other open documents:
+- c:\Users\yakoub\Desktop\development web\Mes projets dev\Mes projets personnale\projet front-end\projet application Diagnostic auto\scratch\test_dod_session.js (LANGUAGE_JAVASCRIPT)
+- c:\Users\yakoub\Desktop\development web\Mes projets dev\Mes projets personnale\projet front-end\projet application Diagnostic auto\backend\.env (LANGUAGE_UNSPECIFIED)
+- c:\Users\yakoub\Desktop\development web\Mes projets dev\Mes projets personnale\projet front-end\projet application Diagnostic auto\frontend\src\app\components\vehicle\vehicle.component.css (LANGUAGE_CSS)
+</ADDITIONAL_METADATA>

@@ -65,16 +65,19 @@ CREATE TABLE IF NOT EXISTS fault_symptoms (
 CREATE TABLE IF NOT EXISTS fault_vehicles (
   id INT AUTO_INCREMENT PRIMARY KEY,
   fault_id INT NOT NULL,
-  make VARCHAR(80) DEFAULT NULL, -- NULL = toutes marques
-  model VARCHAR(80) DEFAULT NULL, -- NULL = tous modèles
-  fuel_type VARCHAR(50) DEFAULT NULL, -- 'Essence', 'Diesel', 'Hybride', 'Électrique', NULL = tous
+  make VARCHAR(80) DEFAULT NULL,
+  model VARCHAR(80) DEFAULT NULL,
+  fuel_type VARCHAR(50) DEFAULT NULL,
   engine_code VARCHAR(100) DEFAULT NULL,
   year_start INT DEFAULT NULL,
   year_end INT DEFAULT NULL,
   mileage_min INT DEFAULT 0,
   compatibility ENUM('compatible', 'frequent', 'incompatible') DEFAULT 'compatible',
   notes TEXT,
-  FOREIGN KEY (fault_id) REFERENCES faults(id) ON DELETE CASCADE
+  evidence_level VARCHAR(50) NOT NULL DEFAULT 'verified',
+  source_record_id INT DEFAULT NULL,
+  FOREIGN KEY (fault_id) REFERENCES faults(id) ON DELETE CASCADE,
+  FOREIGN KEY (source_record_id) REFERENCES source_records(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- 7. Diagnostic Questions (Questions de distinction et parcours)

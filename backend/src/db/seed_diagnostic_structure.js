@@ -801,8 +801,8 @@ async function seedDiagnosticStructure() {
   console.log('[Seed] Connected to database to structure diagnostic knowledge...');
 
   // Clean existing questions and hypotheses for symptoms 1 to 9 to rebuild cleanly
-  console.log('[Seed] Cleaning old records for symptoms 1..9...');
-  await pool.query('DELETE FROM session_answers WHERE session_id IN (SELECT id FROM diagnostic_sessions WHERE symptom_id <= 9)');
+  // Migration 003 Fix: DO NOT blindly wipe user session_answers during knowledge structure re-seed.
+  // Preserves existing session data to prevent orphaned sessions with status 'completed' and 0 answers.
   await pool.query('DELETE FROM question_options WHERE question_id IN (SELECT id FROM questions WHERE symptom_id <= 9)');
   await pool.query('DELETE FROM questions WHERE symptom_id <= 9');
   await pool.query('DELETE FROM hypotheses WHERE symptom_id <= 9');

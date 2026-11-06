@@ -6,9 +6,12 @@
         <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <div class="screen-brand-title">AutoDiag</div>
+    <div class="screen-brand-group">
+      <div class="screen-brand-title">AutoDiag</div>
+      <span class="oem-badge">{{ 'DÉPANNAGE GUIDÉ OEM' | translate }}</span>
+    </div>
     <div class="help-btn-placeholder">
-      <button class="help-btn" title="Aide">
+      <button class="help-btn" [title]="'Aide méthodologique' | translate">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -18,69 +21,171 @@
     </div>
   </div>
 
-  <!-- Header Title -->
+  <!-- Header Title & Vehicle Context -->
   <div class="page-header">
-    <h1 class="page-title">Diagnostic guidé</h1>
+    <div class="header-pre-tag">{{ 'ARBRE DE DÉCISION CONSTRUCTEUR · ISO 14229' | translate }}</div>
+    <h1 class="page-title">{{ 'Diagnostic Guidé d\'Atelier' | translate }}</h1>
     <div class="vehicle-subline">
-      {{ sessionData?.vehicle_brand || 'Peugeot' }} {{ sessionData?.vehicle_model || '208' }} • 
-      {{ sessionData?.vehicle_year || 2019 }} • 
-      {{ sessionData?.vehicle_fuel || 'Essence' }}
+      <span class="v-pill">🚗 {{ sessionData?.vehicle_brand || 'Peugeot' }} {{ sessionData?.vehicle_model || '208' }}</span>
+      <span class="v-pill">⛽ {{ (sessionData?.vehicle_fuel || 'Essence') | translate }}</span>
+      <span class="v-pill">⚡ {{ sessionData?.vehicle_engine || '1.2 PureTech' }}</span>
     </div>
   </div>
 
-  <!-- Stepper & Progress indicator -->
-  <div class="stepper-container">
-    <div class="stepper-labels">
-      <div class="stepper-main-info">
-        <span class="stepper-count">Étape {{ stepNum }} sur {{ totalSteps }}</span>
-        <span class="stepper-pct-badge">{{ progressPct }}%</span>
-      </div>
-      <span class="stepper-sub-hint">On élimine les causes une par une</span>
+  <!-- 4-PHASE OEM METHODOLOGY STEPPER -->
+  <div class="oem-stepper-card">
+    <div class="oem-stepper-header">
+      <span class="oem-stepper-title">{{ 'DÉMARCHE MÉTHODOLOGIQUE CONSTRUCTEUR' | translate }}</span>
+      <span class="oem-stepper-progress">{{ 'Phase' | translate }} {{ currentPhase }} {{ 'sur' | translate }} 4</span>
     </div>
-    
+
+    <div class="oem-phases-grid">
+      @for (phase of OEM_PHASES; track phase.id) {
+        <div 
+          class="phase-item" 
+          [class.active]="phase.id === currentPhase"
+          [class.completed]="phase.id < currentPhase"
+        >
+          <div class="phase-indicator">
+            @if (phase.id < currentPhase) {
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            } @else {
+              <span>{{ phase.id }}</span>
+            }
+          </div>
+          <div class="phase-meta">
+            <span class="phase-label">{{ phase.label | translate }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
     <div class="progress-bar-track-smooth">
       <div class="progress-bar-fill" [style.width.%]="progressPct"></div>
     </div>
   </div>
 
-  <!-- Symptom Pill Reminder -->
-  <div class="symptom-pill">
-    <div class="symptom-pill-icon">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <circle cx="7.5" cy="15.5" r="5.5"/>
-        <path d="m21 2-9.6 9.6M15.5 7.5l3 3M18.5 4.5l3 3"/>
-      </svg>
+  <!-- Active Subsystem & Step Code Banner -->
+  <div class="subsystem-banner">
+    <div class="subsystem-badge-group">
+      <span class="subsystem-code">{{ stepCode }}</span>
+      <span class="subsystem-name">{{ targetSubsystem | translate }}</span>
     </div>
-    <span class="symptom-pill-text">
-      Votre constatation : <strong>{{ sessionData?.symptom_label || 'la voiture ne démarre pas' }}</strong>
-    </span>
+    <div class="symptom-tag">
+      <span class="symptom-dot"></span>
+      <span>{{ 'Constat :' | translate }} {{ (sessionData?.symptom_label || 'Démarrage impossible') | translate }}</span>
+    </div>
   </div>
 
-  <!-- Question Block -->
+  <!-- Question / Instruction Block -->
   @if (currentQuestion) {
-    <div class="question-block">
-      <h2 class="question-heading">{{ currentQuestion.title }}</h2>
-      <p class="question-desc">{{ currentQuestion.description }}</p>
+    <div class="test-step-card">
+      <div class="step-card-header">
+        <span class="step-instruction-tag">{{ 'INSTRUCTION OPÉRATIONNELLE' | translate }}</span>
+        <span class="step-num-pill">{{ 'quiz.step' | translate }} {{ stepNum }} / {{ totalSteps }}</span>
+      </div>
+
+      <h2 class="question-heading">{{ currentQuestion.title | translate }}</h2>
+      <p class="question-desc">{{ currentQuestion.description | translate }}</p>
+
+      <!-- Target Specification / Pass-Fail Criteria Box -->
+      <div class="target-spec-box">
+        <div class="spec-header">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span class="spec-title">{{ 'CRITÈRE DE CONFORMITÉ CONSTRUCTEUR (TARGET SPEC)' | translate }}</span>
+        </div>
+        <p class="spec-detail">{{ targetSpecification | translate }}</p>
+      </div>
+
+      <!-- Direct Sensory Observation Protocol if available -->
+      @if (currentQuestion.test_action) {
+        <div class="sensory-action-tip">
+          <div class="sensory-tip-icon">🔧</div>
+          <div class="sensory-tip-text">
+            <span class="sensory-tip-tag">{{ 'PROTOCOLE DE VÉRIFICATION SUR VÉHICULE' | translate }}</span>
+            <p>{{ currentQuestion.test_action | translate }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- ⚡ AI Advisor Interactive Helper Button & Collapsible Drawer -->
+      <div class="ai-advisor-trigger-row">
+        <button type="button" class="btn-ai-advisor" (click)="toggleAiAdvisor()">
+          <span class="ai-advisor-pulse"></span>
+          <span>⚡ {{ (showAiAdvisor ? 'Masquer l\'aide AutoDiag IA' : 'Demander conseil à AutoDiag IA pour ce test') | translate }}</span>
+        </button>
+      </div>
+
+      @if (showAiAdvisor) {
+        <div class="ai-advisor-card">
+          <div class="ai-advisor-card-header">
+            <div class="ai-advisor-badge">
+              <span class="ai-live-dot"></span>
+              {{ 'AUTODIAG IA · ASSISTANCE CONTEXTUELLE AU TEST' | translate }}
+            </div>
+            <button type="button" class="ai-advisor-open-full" (click)="openFullAssistantWithQuestion()">
+              {{ 'Ouvrir le chat complet ↗' | translate }}
+            </button>
+          </div>
+
+          <!-- Messages in Step -->
+          <div class="ai-advisor-messages-box">
+            @for (msg of aiAdvisorMessages; track msg.content) {
+              <div class="ai-step-bubble" [class.user-bubble]="msg.role === 'user'">
+                <p>{{ msg.content | translate }}</p>
+              </div>
+            }
+            @if (aiAdvisorThinking) {
+              <div class="ai-advisor-loading">
+                <span class="ai-dot-flashing"></span> {{ 'Analyse AutoDiag IA en cours...' | translate }}
+              </div>
+            }
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="ai-advisor-presets-row">
+            <button type="button" class="ai-preset-chip" (click)="askAiAdvisor('Comment tester ce point sans multimètre ni démontage ?')">
+              ❓ {{ 'Sans multimètre ?' | translate }}
+            </button>
+            <button type="button" class="ai-preset-chip" (click)="askAiAdvisor('Est-ce dangereux pour le démarreur si j\'essaie encore ?')">
+              ⚠️ {{ 'Risque mécanique ?' | translate }}
+            </button>
+            <button type="button" class="ai-preset-chip" (click)="askAiAdvisor('Que signifie si les feux faiblissent en même temps ?')">
+              💡 {{ 'Feux qui faiblissent ?' | translate }}
+            </button>
+          </div>
+
+          <!-- Quick Question Input -->
+          <div class="ai-advisor-input-row">
+            <input 
+              type="text" 
+              [(ngModel)]="aiAdvisorQuestion" 
+              [placeholder]="'Posez une question sur ce test...' | translate" 
+              (keydown.enter)="askAiAdvisor()"
+              class="ai-advisor-input"
+            />
+            <button type="button" class="ai-advisor-send-btn" (click)="askAiAdvisor()" [disabled]="!aiAdvisorQuestion.trim() || aiAdvisorThinking">
+              {{ 'assistant.send' | translate }}
+            </button>
+          </div>
+        </div>
+      }
     </div>
 
-    <!-- Direct Sensory Observation Tip if available -->
-    @if (currentQuestion.test_action) {
-      <div class="sensory-action-tip">
-        <div class="sensory-tip-icon">👀</div>
-        <div class="sensory-tip-text">
-          <span class="sensory-tip-tag">TEST SIMPLE SANS OUTIL</span>
-          <p>{{ currentQuestion.test_action }}</p>
-        </div>
-      </div>
-    }
-
-    <!-- Selectable Options List -->
+    <!-- Selectable Options List (Formatted as Workshop Verifications) -->
+    <div class="options-section-label">{{ 'RÉSULTAT DE L\'OBSERVATION OU MESURE SUR LE VÉHICULE :' | translate }}</div>
     <div class="options-list">
       @for (opt of currentQuestion.options; track opt.id) {
         <div 
           class="option-card" 
           [class.selected]="selectedOptionId === opt.id"
-          [class.is-unknown-card]="opt.icon === 'help' || opt.title.toLowerCase().includes('ne sais pas')"
+          [class.is-unknown-card]="opt.icon === 'help' || opt.title.toLowerCase().includes('impossible') || opt.title.toLowerCase().includes('insuffisante')"
           (click)="selectOption(opt)"
         >
           <div class="option-icon">
@@ -95,11 +200,7 @@
                 <path d="M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
                 <path d="M16 21h5v-5"/>
               </svg>
-            } @else if (opt.icon === 'power') {
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"/>
-              </svg>
-            } @else if (opt.icon === 'zap') {
+            } @else if (opt.icon === 'power' || opt.icon === 'zap') {
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
@@ -113,8 +214,17 @@
           </div>
 
           <div class="option-content">
-            <div class="option-title">{{ opt.title }}</div>
-            <div class="option-subtitle">{{ opt.subtitle }}</div>
+            <div class="option-header-row">
+              <span class="option-title">{{ opt.title | translate }}</span>
+              @if (isFailOption(opt)) {
+                <span class="status-chip chip-fail">{{ 'NON CONFORME' | translate }}</span>
+              } @else if (isPassOption(opt)) {
+                <span class="status-chip chip-pass">{{ 'CONFORME' | translate }}</span>
+              } @else if (isIndeterminateOption(opt)) {
+                <span class="status-chip chip-neutral">{{ 'INDÉTERMINÉ' | translate }}</span>
+              }
+            </div>
+            <div class="option-subtitle">{{ opt.subtitle | translate }}</div>
           </div>
 
           <div class="option-radio">
@@ -124,39 +234,43 @@
       }
     </div>
 
-    <!-- "Je ne sais pas" Reassuring Helper Mode (Principe 7) -->
+    <!-- "Données insuffisantes / Contrôle impossible" Helper -->
     @if (isUnknownSelected) {
       <div class="unknown-helper-box">
         <div class="unknown-helper-header">
-          <span class="helper-icon">💡</span>
-          <span class="helper-title">Pas de panique ! Regardons autrement :</span>
+          <span class="helper-icon">🛡️</span>
+          <span class="helper-title">{{ 'Procédure en cas de contrôle impossible sans outillage :' | translate }}</span>
         </div>
         <p class="helper-reformulation">
-          {{ currentQuestion.reformulation || defaultReformulation }}
+          {{ (currentQuestion.reformulation || defaultReformulation) | translate }}
         </p>
         <div class="helper-reassurance">
-          ✓ Vous pouvez continuer sans crainte. AutoDiag adaptera les hypothèses suivantes.
+          ✓ {{ 'Règle déterministe : Cette inconnue ne pénalise aucune hypothèse et sera relayée dans l\'ordre de réparation (OR) d\'atelier.' | translate }}
         </div>
       </div>
     }
 
-    <!-- "Pourquoi cette question ?" Explanation Box (Principe 3 & Section 11) -->
+    <!-- "Logique d'Élimination de l'Arbre" Explanation Box -->
     <div class="why-ask-box">
       <div class="why-ask-header" (click)="toggleWhyAsk()">
         <div class="why-ask-title">
-          <span class="why-icon">💡</span>
-          <span>Pourquoi cette question ?</span>
+          <span class="why-icon">📐</span>
+          <span>{{ 'Logique d\'élimination dans l\'arbre de décision' | translate }}</span>
         </div>
-        <span class="why-toggle-btn">{{ showWhyAsk ? 'Masquer' : 'Comprendre' }}</span>
+        <span class="why-toggle-btn">{{ (showWhyAsk ? 'Masquer' : 'Examiner la règle') | translate }}</span>
       </div>
       @if (showWhyAsk) {
         <div class="why-ask-content">
-          {{ currentQuestion.why_ask || defaultWhyAsk }}
+          <p class="why-p">{{ (currentQuestion.why_ask || defaultWhyAsk) | translate }}</p>
+          <div class="elimination-impact-preview">
+            <strong>{{ 'Impact sur le diagnostic :' | translate }}</strong>
+            <span>{{ 'Si l\'entraînement démarreur est conforme → Le circuit 12V batterie et le démarreur sont formellement validés ; la recherche bascule vers l\'allumage et l\'injection.' | translate }}</span>
+          </div>
         </div>
       }
     </div>
 
-    <!-- Warning / Safety Caution Box (Principe 6) -->
+    <!-- Workshop Safety Caution Box -->
     <div class="alert-box alert-warning">
       <div class="alert-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -166,29 +280,29 @@
         </svg>
       </div>
       <div class="alert-text">
-        <strong>Consigne de sécurité :</strong><br>
-        {{ currentQuestion.warning_text || 'Ne forcez jamais le démarreur plus de 5 secondes. En cas d’odeur de brûlé ou de fumée, arrêtez immédiatement.' }}
+        <strong>{{ 'Consigne de sécurité atelier :' | translate }}</strong><br>
+        {{ (currentQuestion.warning_text || 'Ne forcez jamais le démarreur plus de 5 secondes. En cas d’odeur de surchauffe ou fumée, coupez immédiatement le contact.') | translate }}
       </div>
     </div>
 
     <!-- Bottom Actions Row -->
     <div class="quiz-actions-row">
-      <button class="btn-secondary" (click)="goBack()">Retour</button>
+      <button class="btn-secondary" (click)="goBack()">{{ 'Annuler' | translate }}</button>
       <button class="btn-primary" (click)="continue()" [disabled]="!selectedOptionId || submitting">
-        <span>{{ submitting ? 'Analyse...' : 'Continuer' }}</span>
+        <span>{{ (submitting ? 'Évaluation de l\'arbre...' : 'Enregistrer le résultat & Étape suivante') | translate }}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </div>
 
-    <!-- Security OBD Subtext -->
+    <!-- Standard Compliance Footer -->
     <div class="obd-subtext">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         <path d="m9 12 2 2 4-4"/>
       </svg>
-      <span>Guidage 100% accessible · Zéro jargon technique</span>
+      <span>{{ 'Moteur Déterministe ISO 14229 · Zéro Hallucination · Traçabilité Intégrale' | translate }}</span>
     </div>
   }
 </div>

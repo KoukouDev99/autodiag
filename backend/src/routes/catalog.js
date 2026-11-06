@@ -88,15 +88,21 @@ router.get('/catalog/years', async (req, res) => {
   }
 });
 
-// 4. Car Catalog: Engines
+// 4. Car Catalog: Engines (Cached for 1 hour)
 router.get('/catalog/engines', async (req, res) => {
   try {
-    const pool = getPool();
     const { make, model, year } = req.query;
     if (!make) {
       return res.status(400).json({ error: 'Le paramètre make est obligatoire' });
     }
 
+    const cacheKey = `catalog:engines:${make.toLowerCase().trim()}:${(model || '').toLowerCase().trim()}:${year || 'all'}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const pool = getPool();
     let query = `
       SELECT id, name, power_hp, power_kw, torque_nm, displacement, cylinders,
              fuel, gearbox, drive_type, top_speed, acceleration, dimensions, weight, tires
@@ -114,18 +120,26 @@ router.get('/catalog/engines', async (req, res) => {
 
     query += ` ORDER BY name ASC LIMIT 60`;
     const [rows] = await pool.query(query, params);
+    appCache.set(cacheKey, rows, 3600);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 5. Car Catalog: Engine Details
+// 5. Car Catalog: Engine Details (Cached for 1 hour)
 router.get('/catalog/engine-details/:id', async (req, res) => {
   try {
+    const cacheKey = `catalog:engine-details:${req.params.id}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const pool = getPool();
     const [rows] = await pool.query('SELECT * FROM car_specs_engines WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Moteur non trouvé' });
+    appCache.set(cacheKey, rows[0], 3600);
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -150,12 +164,19 @@ router.get('/symptoms', async (req, res) => {
   }
 });
 
-// 7. Single Symptom by ID
+// 7. Single Symptom by ID (Cached for 1 hour)
 router.get('/symptoms/:id', async (req, res) => {
   try {
+    const cacheKey = `symptoms:id:${req.params.id}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const pool = getPool();
     const [rows] = await pool.query('SELECT * FROM symptoms WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: 'Symptom not found' });
+    appCache.set(cacheKey, rows[0], 3600);
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });

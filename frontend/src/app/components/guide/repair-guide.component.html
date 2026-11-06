@@ -21,23 +21,23 @@
   @if (guide) {
     <!-- Header Title -->
     <div class="page-header">
-      <h1 class="page-title">Guide de réparation</h1>
+      <h1 class="page-title">{{ 'guide.title' | translate }}</h1>
       <div class="vehicle-subline">
-        {{ guide.hypothesis_name }} • {{ guide.vehicle_brand || 'Peugeot' }} {{ guide.vehicle_model || '208' }}
+        {{ guide.hypothesis_name | translate }} • {{ guide.vehicle_brand || 'Peugeot' }} {{ guide.vehicle_model || '208' }}
       </div>
     </div>
 
     <!-- Section Heading & Subtitle -->
     <div class="guide-intro">
-      <h2 class="guide-main-heading">{{ guide.title }}</h2>
-      <p class="guide-subheading">{{ guide.subtitle }}</p>
+      <h2 class="guide-main-heading">{{ guide.title | translate }}</h2>
+      <p class="guide-subheading">{{ guide.subtitle | translate }}</p>
     </div>
 
     <!-- Meta Pills (Facile, 5 min environ, 3 étapes) -->
     <div class="guide-meta-pills">
-      <span class="meta-pill pill-easy">{{ guide.difficulty }}</span>
-      <span class="meta-pill pill-neutral">{{ guide.est_time }}</span>
-      <span class="meta-pill pill-blue">{{ guide.total_steps }} étapes</span>
+      <span class="meta-pill pill-easy">{{ guide.difficulty | translate }}</span>
+      <span class="meta-pill pill-neutral">{{ guide.est_time | translate }}</span>
+      <span class="meta-pill pill-blue">{{ guide.total_steps }} {{ 'étapes' | translate }}</span>
     </div>
 
     <!-- Safety Warning Banner -->
@@ -50,30 +50,30 @@
         </svg>
       </div>
       <div class="alert-text">
-        <strong>La sécurité avant tout</strong><br>
-        {{ guide.safety_warning }}
+        <strong>{{ 'guide.safety_first' | translate }}</strong><br>
+        {{ guide.safety_warning | translate }}
       </div>
     </div>
 
     <!-- Outils nécessaires Card -->
     <div class="tools-card">
-      <div class="tools-title">Outils nécessaires</div>
+      <div class="tools-title">{{ 'guide.tools_needed' | translate }}</div>
       <div class="tools-list">
         <div class="tool-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M18 6 6 18M9 4.5 19.5 15M4.5 9 15 19.5"/>
           </svg>
-          <span>Lampe de poche</span>
+          <span>{{ 'Lampe de poche' | translate }}</span>
         </div>
         <div class="tool-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
             <path d="M6 6h10M6 10h10"/>
           </svg>
-          <span>Notice du véhicule</span>
+          <span>{{ 'Notice du véhicule' | translate }}</span>
         </div>
       </div>
-      <div class="tools-notice">Aucun outil de démontage nécessaire.</div>
+      <div class="tools-notice">{{ 'Aucun outil de démontage nécessaire.' | translate }}</div>
     </div>
 
     <!-- Active Step Card -->
@@ -81,26 +81,26 @@
       @let step = guide.steps[currentStepIndex];
       <div class="step-card">
         <div class="step-card-header">
-          <span class="step-number-badge">Étape {{ step.step_num }} sur {{ guide.total_steps }}</span>
-          <span class="step-time-badge">{{ step.time_est }}</span>
+          <span class="step-number-badge">{{ 'quiz.step' | translate }} {{ step.step_num }} {{ 'quiz.of' | translate }} {{ guide.total_steps }}</span>
+          <span class="step-time-badge">{{ step.time_est | translate }}</span>
         </div>
 
-        <h3 class="step-title">{{ step.title }}</h3>
+        <h3 class="step-title">{{ step.title | translate }}</h3>
 
         <!-- Photo Illustration -->
         <div class="step-image-container">
-          <img [src]="step.image_url || 'assets/battery_check.jpg'" alt="Illustration étape" class="step-image" />
+          <img [src]="step.image_url || 'assets/battery_check.jpg'" [alt]="'Illustration étape' | translate" class="step-image" />
         </div>
-        <div class="step-image-caption">{{ step.subtext }}</div>
+        <div class="step-image-caption">{{ step.subtext | translate }}</div>
 
-        <p class="step-instruction-text">{{ step.description }}</p>
+        <p class="step-instruction-text">{{ step.description | translate }}</p>
       </div>
     }
 
     <!-- Upcoming Steps Overview -->
     @if (currentStepIndex < guide.steps.length - 1) {
       <div class="next-steps-section">
-        <div class="next-steps-title">Les prochaines étapes</div>
+        <div class="next-steps-title">{{ 'Les prochaines étapes' | translate }}</div>
 
         @for (s of guide.steps; track s.id; let idx = $index) {
           @if (idx > currentStepIndex) {
@@ -118,9 +118,9 @@
                 }
               </div>
               <div class="upcoming-step-info">
-                <span class="upcoming-tag">ÉTAPE {{ s.step_num }}</span>
-                <div class="upcoming-name">{{ s.title }}</div>
-                <div class="upcoming-desc">{{ s.description | slice:0:80 }}...</div>
+                <span class="upcoming-tag">{{ 'ÉTAPE' | translate }} {{ s.step_num }}</span>
+                <div class="upcoming-name">{{ s.title | translate }}</div>
+                <div class="upcoming-desc">{{ (s.description | translate) | slice:0:80 }}...</div>
               </div>
             </div>
           }
@@ -138,15 +138,15 @@
         </svg>
       </div>
       <div class="alert-text">
-        <strong>Un signe anormal ? Arrêtez le contrôle.</strong><br>
-        {{ guide.steps[currentStepIndex]?.caution_warning }}
+        <strong>{{ 'Un signe anormal ? Arrêtez le contrôle.' | translate }}</strong><br>
+        {{ guide.steps[currentStepIndex]?.caution_warning | translate }}
       </div>
     </div>
 
     <!-- Action Button -->
     <div class="guide-action-container">
       <button class="btn-primary" (click)="nextStep()">
-        <span>{{ currentStepIndex === guide.steps.length - 1 ? 'Terminer le contrôle' : 'Étape suivante' }}</span>
+        <span>{{ (currentStepIndex === guide.steps.length - 1 ? 'Terminer le contrôle' : 'Étape suivante') | translate }}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>

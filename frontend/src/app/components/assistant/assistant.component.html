@@ -1,164 +1,124 @@
 <div class="assistant-page-container">
 
-  <!-- Header Section -->
-  <div class="assistant-header-card">
-    <div class="assistant-header-left">
-      <div class="assistant-avatar">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
+  <!-- Vehicle Context Header (Seules les informations du véhicule sont affichées) -->
+  <div class="vehicle-header-bar">
+    <div class="vehicle-header-left">
+      <div class="veh-status-badge">
+        @if (vehicle?.brand) {
+          <img 
+            [src]="getBrandLogoUrl(vehicle?.brand)" 
+            (error)="onLogoError($event)" 
+            [alt]="vehicle?.brand || 'Logo marque'" 
+            class="veh-brand-logo-img"
+          />
+        } @else {
+          <span class="veh-car-icon">🚗</span>
+        }
+        <span class="veh-live-dot" [title]="'assistant.connected_veh' | translate"></span>
       </div>
-      <div class="assistant-title-group">
-        <div class="assistant-badge-row">
-          <span class="pulse-indicator"></span>
-          <span class="assistant-status">COPILOTE IA INTERACTIF</span>
-          <span class="provider-tag">{{ activeModelLabel }}</span>
-        </div>
-        <h2 class="assistant-title">Assistant Mécanique Personnel</h2>
-        <p class="assistant-subtitle">
-          @if (vehicle) {
-            Réponses adaptées à votre <strong>{{ vehicle.brand }} {{ vehicle.model }}</strong> ({{ vehicle.engine || 'Essence' }}, {{ vehicle.mileage ? (vehicle.mileage | number) + ' km' : '' }})
-          } @else {
-            Conseils d'atelier et explications mécaniques sans jargon
-          }
-        </p>
-      </div>
-    </div>
-
-    <div class="assistant-header-right">
-      <button type="button" class="settings-toggle-btn" (click)="showSettings = !showSettings" title="Configurer l'API IA (Groq / DeepSeek / OpenAI)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
-        <span>Clé API / Modèle</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Settings Drawer / Modal (if opened) -->
-  @if (showSettings) {
-    <div class="settings-drawer-card">
-      <div class="settings-drawer-header">
-        <h3 class="settings-drawer-title">⚙️ Configuration du Fournisseur d'IA</h3>
-        <button type="button" class="drawer-close-btn" (click)="showSettings = false">✕</button>
-      </div>
-
-      <div class="settings-drawer-body">
-        <p class="settings-help-text">
-          Choisissez votre moteur d'IA. Pour une utilisation <strong>100% gratuite et ultra-rapide</strong>, nous vous recommandons <strong>Groq Cloud</strong> (DeepSeek-R1 70B sans carte bancaire).
-        </p>
-
-        <!-- Provider Radio Selection -->
-        <div class="provider-radio-group">
-          <label class="provider-radio-item" [class.selected]="selectedProvider === 'groq'">
-            <input type="radio" name="provider" value="groq" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
-            <div class="provider-radio-content">
-              <span class="provider-name">Groq Cloud (Recommandé)</span>
-              <span class="provider-desc">100% Gratuit · Modèle DeepSeek-R1 70B ultra-rapide (~500 tokens/sec)</span>
-            </div>
-            <span class="badge-free">GRATUIT</span>
-          </label>
-
-          <label class="provider-radio-item" [class.selected]="selectedProvider === 'deepseek'">
-            <input type="radio" name="provider" value="deepseek" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
-            <div class="provider-radio-content">
-              <span class="provider-name">DeepSeek API Officielle</span>
-              <span class="provider-desc">Modèle deepseek-chat (platform.deepseek.com)</span>
-            </div>
-          </label>
-
-          <label class="provider-radio-item" [class.selected]="selectedProvider === 'openrouter'">
-            <input type="radio" name="provider" value="openrouter" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
-            <div class="provider-radio-content">
-              <span class="provider-name">OpenRouter</span>
-              <span class="provider-desc">Modèle gratuit deepseek/deepseek-r1:free</span>
-            </div>
-            <span class="badge-free">GRATUIT</span>
-          </label>
-
-          <label class="provider-radio-item" [class.selected]="selectedProvider === 'openai'">
-            <input type="radio" name="provider" value="openai" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
-            <div class="provider-radio-content">
-              <span class="provider-name">OpenAI</span>
-              <span class="provider-desc">Modèle gpt-4o-mini (api.openai.com)</span>
-            </div>
-          </label>
-
-          <label class="provider-radio-item" [class.selected]="selectedProvider === 'local'">
-            <input type="radio" name="provider" value="local" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
-            <div class="provider-radio-content">
-              <span class="provider-name">IA Locale Hors-Ligne (Qwen2.5)</span>
-              <span class="provider-desc">Aucune clé requise · Fonctionne 100% sur votre ordinateur sans internet</span>
-            </div>
-          </label>
-        </div>
-
-        <!-- API Key Input Field -->
-        @if (selectedProvider !== 'local') {
-          <div class="key-input-group">
-            <label class="key-input-label" for="custom-ai-key">
-              Clé d'API {{ selectedProvider === 'groq' ? 'Groq (commence par gsk_...)' : (selectedProvider === 'deepseek' ? 'DeepSeek (commence par sk-...)' : 'API Key') }} :
-            </label>
-            <div class="key-input-wrapper">
-              <input 
-                id="custom-ai-key"
-                type="password" 
-                [(ngModel)]="customApiKey" 
-                placeholder="Collez votre clé API ici..."
-                class="key-text-input"
-              />
-              @if (customApiKey) {
-                <button type="button" class="key-clear-btn" (click)="customApiKey = ''">Effacer</button>
-              }
-            </div>
-            <div class="key-help-link">
-              @if (selectedProvider === 'groq') {
-                <span>💡 Obtenez votre clé gratuite en 30 secondes sans carte bancaire sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></span>
-              } @else if (selectedProvider === 'deepseek') {
-                <span>💡 Obtenez votre clé sur <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a></span>
-              } @else if (selectedProvider === 'openrouter') {
-                <span>💡 Obtenez votre clé sur <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></span>
-              }
-            </div>
+      <div class="veh-info-col">
+        @if (vehicle) {
+          <div class="veh-name-row">
+            <span class="veh-brand-model">{{ vehicle.brand }} {{ vehicle.model }}</span>
+            @if (vehicle.year) {
+              <span class="veh-year-tag">{{ vehicle.year }}</span>
+            }
+          </div>
+          <div class="veh-meta-row">
+            <span class="veh-meta-item">{{ vehicle.engine || 'Essence / Diesel' }}</span>
+            @if (vehicle.mileage) {
+              <span class="veh-meta-sep">•</span>
+              <span class="veh-meta-item">{{ vehicle.mileage | number }} km</span>
+            }
+          </div>
+        } @else {
+          <div class="veh-name-row">
+            <span class="veh-brand-model">{{ 'assistant.multibrand' | translate }}</span>
+          </div>
+          <div class="veh-meta-row">
+            <span class="veh-meta-item">{{ 'assistant.multibrand_sub' | translate }}</span>
           </div>
         }
-
-        <div class="settings-actions">
-          <button type="button" class="btn-primary settings-save-btn" (click)="saveSettings()">
-            Enregistrer & Appliquer
-          </button>
-        </div>
       </div>
     </div>
-  }
+
+    <!-- Header Actions (Reset discussion) -->
+    <div class="vehicle-header-actions">
+      @if (messages.length > 1) {
+        <button 
+          type="button" 
+          class="veh-action-btn" 
+          (click)="clearChat()" 
+          [title]="'assistant.new_chat' | translate"
+          aria-label="Réinitialiser la discussion"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
+          </svg>
+          <span class="action-btn-text">{{ 'assistant.new' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
 
   <!-- Chat Messages Stream -->
   <div class="chat-messages-container" #messagesScroll>
     @for (msg of messages; track $index) {
       <div class="message-row" [class.user-row]="msg.role === 'user'" [class.assistant-row]="msg.role === 'assistant'">
         @if (msg.role === 'assistant') {
-          <div class="msg-avatar assistant-avatar-sm">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          <div class="msg-avatar assistant-avatar-sm" aria-hidden="true" title="AutoDiag IA">
+            <svg class="robot-icon-svg" width="22" height="22" viewBox="0 0 32 32" fill="none">
+              <!-- Antenna with pulsing dot -->
+              <line x1="16" y1="2" x2="16" y2="7" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
+              <circle cx="16" cy="3" r="2.2" fill="#38bdf8"/>
+              <!-- Robot Head Shell -->
+              <rect x="5" y="7" width="22" height="18" rx="6" fill="#0c1829" stroke="#38bdf8" stroke-width="2"/>
+              <!-- Ears / Screws -->
+              <rect x="2" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
+              <rect x="27" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
+              <!-- Eye Visor Glass -->
+              <rect x="8" y="11" width="16" height="7" rx="3.5" fill="#1e293b"/>
+              <!-- High-Tech Glowing Eyes -->
+              <circle cx="12" cy="14.5" r="2" fill="#38bdf8"/>
+              <circle cx="20" cy="14.5" r="2" fill="#38bdf8"/>
+              <circle cx="12.7" cy="13.8" r="0.7" fill="#ffffff"/>
+              <circle cx="20.7" cy="13.8" r="0.7" fill="#ffffff"/>
+              <!-- Digital Smile -->
+              <path d="M11 20.5C12.5 22 19.5 22 21 20.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
           </div>
         }
 
         <div class="message-bubble" [class.user-bubble]="msg.role === 'user'" [class.assistant-bubble]="msg.role === 'assistant'">
           <div class="message-text" [innerHTML]="formatContent(msg.content)"></div>
+          
           <div class="message-meta">
-            @if (msg.role === 'assistant' && msg.provider) {
-              <span class="meta-provider">{{ msg.provider }}</span>
+            @if (msg.role === 'assistant') {
+              @if (msg.db_context_applied) {
+                <span class="meta-db-badge" title="Fiche technique certifiée issue de la base MySQL AutoDiag">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                  {{ 'assistant.mysql_badge' | translate }}
+                </span>
+              }
+              
+              <!-- Quick copy button -->
+              <button 
+                type="button" 
+                class="copy-msg-btn" 
+                (click)="copyMessage(msg.content, $index)" 
+                [title]="copiedIndex === $index ? ('assistant.copied' | translate) : ('assistant.copy' | translate)"
+              >
+                @if (copiedIndex === $index) {
+                  <span class="copied-badge">{{ 'assistant.copied' | translate }}</span>
+                } @else {
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                }
+              </button>
             }
-            @if (msg.role === 'assistant' && msg.db_context_applied) {
-              <span class="meta-db-badge" title="Fiche technique certifiée extraite en direct de la base MySQL AutoDiag">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-                Base MySQL
-              </span>
-            }
+
             <span class="meta-time">{{ msg.timestamp | date:'HH:mm' }}</span>
           </div>
         </div>
@@ -168,28 +128,45 @@
     <!-- Typing Indicator -->
     @if (isThinking) {
       <div class="message-row assistant-row">
-        <div class="msg-avatar assistant-avatar-sm">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <circle cx="12" cy="12" r="3"/>
+        <div class="msg-avatar assistant-avatar-sm" aria-hidden="true" title="AutoDiag IA">
+          <svg class="robot-icon-svg" width="22" height="22" viewBox="0 0 32 32" fill="none">
+            <!-- Antenna with pulsing dot -->
+            <line x1="16" y1="2" x2="16" y2="7" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="16" cy="3" r="2.2" fill="#38bdf8"/>
+            <!-- Robot Head Shell -->
+            <rect x="5" y="7" width="22" height="18" rx="6" fill="#0c1829" stroke="#38bdf8" stroke-width="2"/>
+            <!-- Ears / Screws -->
+            <rect x="2" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
+            <rect x="27" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
+            <!-- Eye Visor Glass -->
+            <rect x="8" y="11" width="16" height="7" rx="3.5" fill="#1e293b"/>
+            <!-- High-Tech Glowing Eyes -->
+            <circle cx="12" cy="14.5" r="2" fill="#38bdf8"/>
+            <circle cx="20" cy="14.5" r="2" fill="#38bdf8"/>
+            <circle cx="12.7" cy="13.8" r="0.7" fill="#ffffff"/>
+            <circle cx="20.7" cy="13.8" r="0.7" fill="#ffffff"/>
+            <!-- Digital Smile -->
+            <path d="M11 20.5C12.5 22 19.5 22 21 20.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </div>
         <div class="message-bubble assistant-bubble typing-bubble">
-          <div class="typing-indicator">
+          <div class="typing-indicator" aria-label="AutoDiag IA réfléchit">
             <span></span><span></span><span></span>
           </div>
-          <span class="typing-label">Le copilote mécanique formule sa réponse...</span>
+          <span class="typing-label">{{ 'assistant.thinking' | translate }}</span>
         </div>
       </div>
     }
   </div>
 
-  <!-- Quick Prompts Chips Carousel -->
+  <!-- Quick Prompts Examples (Clean row without scrolling carousel) -->
   <div class="quick-prompts-bar">
-    <span class="quick-prompts-title">Questions suggérées :</span>
-    <div class="quick-prompts-scroll">
-      @for (p of quickPrompts; track p) {
-        <button type="button" class="quick-prompt-btn" (click)="selectQuickPrompt(p)">
-          {{ p }}
+    <div class="quick-prompts-row">
+      <span class="quick-prompts-hint">{{ 'assistant.examples_label' | translate }}</span>
+      @for (p of quickPrompts; track p.label) {
+        <button type="button" class="quick-prompt-btn" (click)="selectQuickPrompt(p.label)">
+          <span class="chip-icon">{{ p.icon }}</span>
+          <span class="chip-text">{{ p.label | translate }}</span>
         </button>
       }
     </div>
@@ -202,9 +179,10 @@
         rows="1" 
         [(ngModel)]="userInput" 
         (keydown.enter)="$event.preventDefault(); sendMessage()" 
-        placeholder="Posez votre question (ex: bruit suspect, voyant, prix de pièce...)"
+        [placeholder]="'assistant.input_placeholder' | translate"
         class="chat-textarea"
         id="assistant-user-input"
+        [attr.aria-label]="'assistant.input_placeholder' | translate"
       ></textarea>
 
       <button 
@@ -212,7 +190,8 @@
         class="chat-send-btn" 
         [disabled]="!userInput.trim() || isThinking" 
         (click)="sendMessage()"
-        title="Envoyer le message"
+        [title]="'assistant.send' | translate"
+        [attr.aria-label]="'assistant.send' | translate"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="22" y1="2" x2="11" y2="13"/>
@@ -223,3 +202,117 @@
   </div>
 
 </div>
+
+<!-- Settings Glassmorphic Modal Overlay (Independent of chat layout) -->
+@if (showSettings) {
+  <div class="settings-modal-backdrop" (click)="showSettings = false">
+    <div class="settings-modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="settings-modal-header">
+        <div class="modal-title-box">
+          <span class="modal-title-icon">⚙️</span>
+          <div>
+            <h3 class="settings-modal-title" id="settings-title">{{ 'Configuration Moteur AutoDiag IA' | translate }}</h3>
+            <p class="settings-modal-sub">{{ 'Sélectionnez le runtime d\'inférence pour votre assistant' | translate }}</p>
+          </div>
+        </div>
+        <button type="button" class="drawer-close-btn" (click)="showSettings = false" [attr.aria-label]="'Fermer' | translate">✕</button>
+      </div>
+
+      <div class="settings-modal-body">
+        <div class="settings-banner-info">
+          <span class="banner-icon">⚡</span>
+          <span>{{ 'Pour un diagnostic 100% gratuit et instantané, nous recommandons Groq Cloud (DeepSeek-R1 70B, sans carte bancaire).' | translate }}</span>
+        </div>
+
+        <!-- Provider Radio Selection -->
+        <div class="provider-radio-group">
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'groq'">
+            <input type="radio" name="provider" value="groq" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <div class="provider-line">
+                <span class="provider-name">{{ 'Groq Cloud (Recommandé)' | translate }}</span>
+                <span class="badge-free">{{ 'GRATUIT' | translate }}</span>
+              </div>
+              <span class="provider-desc">{{ 'Modèle DeepSeek-R1 70B ultra-rapide (~500 tokens/sec)' | translate }}</span>
+            </div>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'deepseek'">
+            <input type="radio" name="provider" value="deepseek" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">{{ 'DeepSeek API Officielle' | translate }}</span>
+              <span class="provider-desc">{{ 'Modèle deepseek-chat officiel (platform.deepseek.com)' | translate }}</span>
+            </div>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'openrouter'">
+            <input type="radio" name="provider" value="openrouter" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <div class="provider-line">
+                <span class="provider-name">OpenRouter</span>
+                <span class="badge-free">{{ 'GRATUIT' | translate }}</span>
+              </div>
+              <span class="provider-desc">{{ 'Modèle deepseek/deepseek-r1:free' | translate }}</span>
+            </div>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'openai'">
+            <input type="radio" name="provider" value="openai" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <span class="provider-name">OpenAI (ChatGPT)</span>
+              <span class="provider-desc">{{ 'Modèle gpt-4o-mini (api.openai.com)' | translate }}</span>
+            </div>
+          </label>
+
+          <label class="provider-radio-item" [class.selected]="selectedProvider === 'local'">
+            <input type="radio" name="provider" value="local" [(ngModel)]="selectedProvider" (change)="updateModelLabel()"/>
+            <div class="provider-radio-content">
+              <div class="provider-line">
+                <span class="provider-name">{{ 'AutoDiag IA Locale (Qwen2.5)' | translate }}</span>
+                <span class="badge-offline">{{ '100% HORS-LIGNE' | translate }}</span>
+              </div>
+              <span class="provider-desc">{{ 'Aucune clé API requise · Données strictement privées' | translate }}</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- API Key Input Field -->
+        @if (selectedProvider !== 'local') {
+          <div class="key-input-group">
+            <label class="key-input-label" for="custom-ai-key">
+              {{ 'Clé d\'API' | translate }} {{ selectedProvider === 'groq' ? 'Groq (gsk_...)' : (selectedProvider === 'deepseek' ? 'DeepSeek (sk-...)' : 'API Key') }} :
+            </label>
+            <div class="key-input-wrapper">
+              <input 
+                id="custom-ai-key"
+                type="password" 
+                [(ngModel)]="customApiKey" 
+                [placeholder]="'Collez votre clé API ici...' | translate"
+                class="key-text-input"
+              />
+              @if (customApiKey) {
+                <button type="button" class="key-clear-btn" (click)="customApiKey = ''">{{ 'Effacer' | translate }}</button>
+              }
+            </div>
+            <div class="key-help-link">
+              @if (selectedProvider === 'groq') {
+                <span>💡 {{ 'Clé gratuite disponible en 30s sur' | translate }} <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></span>
+              } @else if (selectedProvider === 'deepseek') {
+                <span>💡 {{ 'Clé disponible sur' | translate }} <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a></span>
+              } @else if (selectedProvider === 'openrouter') {
+                <span>💡 {{ 'Clé sur' | translate }} <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="settings-modal-footer">
+        <button type="button" class="btn-secondary" (click)="showSettings = false">{{ 'Annuler' | translate }}</button>
+        <button type="button" class="btn-primary settings-save-btn" (click)="saveSettings()">
+          {{ 'Enregistrer & Appliquer' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

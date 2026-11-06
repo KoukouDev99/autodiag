@@ -5,10 +5,10 @@
     <div class="header-titles">
       <div class="badge-pill">
         <span class="badge-dot"></span>
-        <span>Espace Conducteur Sécurisé</span>
+        <span>{{ 'Espace Conducteur Sécurisé' | translate }}</span>
       </div>
-      <h1 class="page-title">Mon Profil <span class="amp">&</span> Compte</h1>
-      <p class="page-subtitle">Gérez vos identifiants, vos véhicules connectés et vos préférences de diagnostic.</p>
+      <h1 class="page-title">{{ 'profile.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'profile.subtitle' | translate }}</p>
     </div>
 
     @if (currentUser()) {
@@ -18,7 +18,7 @@
         <span class="user-name-mini">{{ currentUser()?.name }}</span>
         <span class="user-email-mini">{{ currentUser()?.email }}</span>
       </div>
-      <button class="btn-logout-mini" (click)="onLogout()" title="Déconnexion">
+      <button class="btn-logout-mini" (click)="onLogout()" [title]="'nav.logout' | translate">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
           <polyline points="16 17 21 12 16 7" />
@@ -34,8 +34,8 @@
   <div class="alert-box alert-error">
     <div class="alert-icon">⚠️</div>
     <div class="alert-content">
-      <strong>Attention</strong>
-      <span>{{ errorMessage() }}</span>
+      <strong>{{ 'Attention' | translate }}</strong>
+      <span>{{ errorMessage()! | translate }}</span>
     </div>
     <button class="alert-dismiss" (click)="errorMessage.set(null)">✕</button>
   </div>
@@ -45,8 +45,8 @@
   <div class="alert-box alert-success">
     <div class="alert-icon">✅</div>
     <div class="alert-content">
-      <strong>Succès</strong>
-      <span>{{ successMessage() }}</span>
+      <strong>{{ 'Succès' | translate }}</strong>
+      <span>{{ successMessage()! | translate }}</span>
     </div>
     <button class="alert-dismiss" (click)="successMessage.set(null)">✕</button>
   </div>
@@ -70,7 +70,7 @@
             <polyline points="10 17 15 12 10 7" />
             <line x1="15" y1="12" x2="3" y2="12" />
           </svg>
-          <span>Se connecter</span>
+          <span>{{ 'Se connecter' | translate }}</span>
         </button>
 
         <button 
@@ -83,7 +83,7 @@
             <line x1="20" y1="8" x2="20" y2="14" />
             <line x1="23" y1="11" x2="17" y2="11" />
           </svg>
-          <span>Créer un compte</span>
+          <span>{{ 'Créer un compte' | translate }}</span>
         </button>
       </div>
 
@@ -96,22 +96,22 @@
           <div class="demo-quick-info">
             <span class="demo-icon">⚡</span>
             <div>
-              <strong>Compte Démo Testeur</strong>
-              <div class="demo-sub">Connectez-vous instantanément avec le compte pré-configuré</div>
+              <strong>{{ 'Compte Démo Testeur' | translate }}</strong>
+              <div class="demo-sub">{{ 'Connectez-vous instantanément avec le compte pré-configuré' | translate }}</div>
             </div>
           </div>
           <button class="btn-demo-quick" (click)="quickDemoLogin()" [disabled]="isLoading()">
-            Connexion Démo (Thomas)
+            {{ 'Connexion Démo (Thomas)' | translate }}
           </button>
         </div>
 
         <div class="separator-row">
-          <span>ou avec vos identifiants</span>
+          <span>{{ 'ou avec vos identifiants' | translate }}</span>
         </div>
 
         <form (ngSubmit)="onLogin()" class="form-grid">
           <div class="form-group">
-            <label class="form-label" for="login-email">Adresse Email</label>
+            <label class="form-label" for="login-email">{{ 'Adresse Email' | translate }}</label>
             <div class="input-with-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
                 <rect width="20" height="16" x="2" y="4" rx="2" />
@@ -121,7 +121,7 @@
                 id="login-email"
                 type="email" 
                 class="form-input" 
-                placeholder="votre-email@exemple.fr"
+                [placeholder]="'votre-email@exemple.fr' | translate"
                 [(ngModel)]="loginEmail" 
                 name="loginEmail" 
                 required />
@@ -130,7 +130,7 @@
 
           <div class="form-group">
             <div class="label-row">
-              <label class="form-label" for="login-password">Mot de passe</label>
+              <label class="form-label" for="login-password">{{ 'Mot de passe' | translate }}</label>
             </div>
             <div class="input-with-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
@@ -141,11 +141,11 @@
                 id="login-password"
                 [type]="showPassword() ? 'text' : 'password'" 
                 class="form-input" 
-                placeholder="Votre mot de passe"
+                [placeholder]="'Votre mot de passe' | translate"
                 [(ngModel)]="loginPassword" 
                 name="loginPassword" 
                 required />
-              <button type="button" class="btn-toggle-pwd" (click)="togglePasswordVisibility()" title="Afficher/Masquer">
+              <button type="button" class="btn-toggle-pwd" (click)="togglePasswordVisibility()" [title]="'Afficher/Masquer' | translate">
                 @if (showPassword()) {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
@@ -166,28 +166,28 @@
           <div class="form-actions-row">
             <label class="remember-label">
               <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
-              <span>Rester connecté</span>
+              <span>{{ 'Rester connecté' | translate }}</span>
             </label>
           </div>
 
           <button type="submit" class="btn-primary-submit" [disabled]="isLoading()">
             @if (isLoading()) {
             <span class="btn-spinner"></span>
-            <span>Connexion en cours...</span>
+            <span>{{ 'Connexion en cours...' | translate }}</span>
             } @else {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
               <polyline points="10 17 15 12 10 7" />
               <line x1="15" y1="12" x2="3" y2="12" />
             </svg>
-            <span>Se connecter à AutoDiag</span>
+            <span>{{ 'Se connecter à AutoDiag' | translate }}</span>
             }
           </button>
         </form>
 
         <div class="auth-switch-footer">
-          <span>Vous n'avez pas encore de compte ?</span>
-          <button class="btn-link" (click)="setAuthTab('register')">Créer un compte gratuitement</button>
+          <span>{{ 'Vous n\'avez pas encore de compte ?' | translate }}</span>
+          <button class="btn-link" (click)="setAuthTab('register')">{{ 'Créer un compte gratuitement' | translate }}</button>
         </div>
 
       </div>
@@ -200,14 +200,14 @@
         <div class="register-welcome-box">
           <div class="reg-welcome-icon">🚘</div>
           <div>
-            <strong>Créez votre profil en 30 secondes</strong>
-            <p>Accédez à tous vos diagnostics sauvegardés, le carnet de santé de votre véhicule et l'analyse de pannes.</p>
+            <strong>{{ 'Créez votre profil en 30 secondes' | translate }}</strong>
+            <p>{{ 'Accédez à tous vos diagnostics sauvegardés, le carnet de santé de votre véhicule et l\'analyse de pannes.' | translate }}</p>
           </div>
         </div>
 
         <form (ngSubmit)="onRegister()" class="form-grid">
           <div class="form-group">
-            <label class="form-label" for="reg-name">Nom complet *</label>
+            <label class="form-label" for="reg-name">{{ 'Nom complet *' | translate }}</label>
             <div class="input-with-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
                 <circle cx="12" cy="8" r="4" />
@@ -217,7 +217,7 @@
                 id="reg-name"
                 type="text" 
                 class="form-input" 
-                placeholder="ex. Sophie Martin"
+                [placeholder]="'ex. Sophie Martin' | translate"
                 [(ngModel)]="regName" 
                 name="regName" 
                 required />
@@ -225,7 +225,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="reg-email">Adresse Email *</label>
+            <label class="form-label" for="reg-email">{{ 'Adresse Email *' | translate }}</label>
             <div class="input-with-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
                 <rect width="20" height="16" x="2" y="4" rx="2" />
@@ -235,7 +235,7 @@
                 id="reg-email"
                 type="email" 
                 class="form-input" 
-                placeholder="votre-email@domaine.fr"
+                [placeholder]="'votre-email@domaine.fr' | translate"
                 [(ngModel)]="regEmail" 
                 name="regEmail" 
                 required />
@@ -243,7 +243,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="reg-password">Mot de passe *</label>
+            <label class="form-label" for="reg-password">{{ 'Mot de passe *' | translate }}</label>
             <div class="input-with-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="input-icon">
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
@@ -253,7 +253,7 @@
                 id="reg-password"
                 type="password" 
                 class="form-input" 
-                placeholder="Au moins 6 caractères"
+                [placeholder]="'Au moins 6 caractères' | translate"
                 [(ngModel)]="regPassword" 
                 name="regPassword" 
                 required />
@@ -262,7 +262,7 @@
 
           <div class="form-row-2col">
             <div class="form-group">
-              <label class="form-label" for="reg-phone">Téléphone</label>
+              <label class="form-label" for="reg-phone">{{ 'Téléphone' | translate }}</label>
               <input 
                 id="reg-phone"
                 type="tel" 
@@ -273,12 +273,12 @@
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="reg-city">Ville</label>
+              <label class="form-label" for="reg-city">{{ 'Ville' | translate }}</label>
               <input 
                 id="reg-city"
                 type="text" 
                 class="form-input" 
-                placeholder="ex. Lyon, Marseille"
+                [placeholder]="'ex. Lyon, Marseille' | translate"
                 [(ngModel)]="regCity" 
                 name="regCity" />
             </div>
@@ -287,26 +287,26 @@
           <div class="feature-perk-card">
             <span class="perk-icon">✨</span>
             <div class="perk-text">
-              <strong>Configuration initiale incluse</strong> : un véhicule de démonstration (Peugeot 208) sera automatiquement associé à votre compte pour démarrer immédiatement vos diagnostics.
+              <strong>{{ 'Configuration initiale incluse' | translate }}</strong> : {{ 'un véhicule de démonstration (Peugeot 208) sera automatiquement associé à votre compte pour démarrer immédiatement vos diagnostics.' | translate }}
             </div>
           </div>
 
           <button type="submit" class="btn-primary-submit" [disabled]="isLoading()">
             @if (isLoading()) {
             <span class="btn-spinner"></span>
-            <span>Création en cours...</span>
+            <span>{{ 'Création en cours...' | translate }}</span>
             } @else {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12" />
             </svg>
-            <span>Créer mon compte et accéder à AutoDiag</span>
+            <span>{{ 'Créer mon compte et accéder à AutoDiag' | translate }}</span>
             }
           </button>
         </form>
 
         <div class="auth-switch-footer">
-          <span>Vous avez déjà un compte ?</span>
-          <button class="btn-link" (click)="setAuthTab('login')">Se connecter ici</button>
+          <span>{{ 'Vous avez déjà un compte ?' | translate }}</span>
+          <button class="btn-link" (click)="setAuthTab('login')">{{ 'Se connecter ici' | translate }}</button>
         </div>
 
       </div>
@@ -327,7 +327,7 @@
       <div class="hero-left">
         <div class="avatar-wrapper">
           <div class="user-avatar-hero">{{ getUserInitials() }}</div>
-          <span class="online-indicator" title="Compte Actif"></span>
+          <span class="online-indicator" [title]="'Compte Actif' | translate"></span>
         </div>
         <div class="hero-details">
           <div class="hero-name-row">
@@ -336,7 +336,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
-              Conducteur Certifié
+              {{ 'Conducteur Certifié' | translate }}
             </span>
           </div>
 
@@ -371,7 +371,7 @@
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
           </svg>
-          <span>{{ isEditing() ? 'Fermer l\'édition' : 'Modifier mes infos' }}</span>
+          <span>{{ (isEditing() ? 'Fermer l\'édition' : 'Modifier mes infos') | translate }}</span>
         </button>
 
         <button class="btn-action-logout" (click)="onLogout()">
@@ -380,7 +380,7 @@
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          <span>Déconnexion</span>
+          <span>{{ 'nav.logout' | translate }}</span>
         </button>
       </div>
     </div>
@@ -399,10 +399,10 @@
         </div>
         <div class="kpi-data">
           <span class="kpi-number">{{ currentUser()?.vehicles_count || vehicles().length || 1 }}</span>
-          <span class="kpi-label">Véhicule(s) Enregistré(s)</span>
+          <span class="kpi-label">{{ 'Véhicule(s) Enregistré(s)' | translate }}</span>
         </div>
         <div class="kpi-link-arrow">
-          <span>Gérer le garage</span>
+          <span>{{ 'Gérer le garage' | translate }}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -418,10 +418,10 @@
         </div>
         <div class="kpi-data">
           <span class="kpi-number">{{ currentUser()?.diagnostics_count || 6 }}</span>
-          <span class="kpi-label">Diagnostics Réalisés</span>
+          <span class="kpi-label">{{ 'Diagnostics Réalisés' | translate }}</span>
         </div>
         <div class="kpi-link-arrow">
-          <span>Voir l'historique</span>
+          <span>{{ 'Voir l\'historique' | translate }}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -436,10 +436,10 @@
         </div>
         <div class="kpi-data">
           <span class="kpi-number">98%</span>
-          <span class="kpi-label">Score Sérénité Véhicule</span>
+          <span class="kpi-label">{{ 'Score Sérénité Véhicule' | translate }}</span>
         </div>
         <div class="kpi-link-arrow text-emerald">
-          <span>Protégé & Synchro</span>
+          <span>{{ 'Protégé & Synchro' | translate }}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="20 6 9 17 4 12" />
           </svg>
@@ -451,11 +451,11 @@
     <div class="content-section-card">
       <div class="section-title-row">
         <div>
-          <h3 class="section-title">Coordonnées du conducteur</h3>
-          <p class="section-desc">Informations associées à vos devis mécaniques et prises de rendez-vous.</p>
+          <h3 class="section-title">{{ 'Coordonnées du conducteur' | translate }}</h3>
+          <p class="section-desc">{{ 'Informations associées à vos devis mécaniques et prises de rendez-vous.' | translate }}</p>
         </div>
         <button class="btn-toggle-inline" (click)="isEditing.set(!isEditing())">
-          {{ isEditing() ? 'Annuler' : 'Modifier' }}
+          {{ (isEditing() ? 'Annuler' : 'Modifier') | translate }}
         </button>
       </div>
 
@@ -463,7 +463,7 @@
         <div class="fields-grid-2">
           
           <div class="form-group">
-            <label class="form-label" for="edit-name">Nom complet</label>
+            <label class="form-label" for="edit-name">{{ 'Nom complet' | translate }}</label>
             <input 
               id="edit-name"
               type="text" 
@@ -475,7 +475,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-email">Adresse Email</label>
+            <label class="form-label" for="edit-email">{{ 'Adresse Email' | translate }}</label>
             <input 
               id="edit-email"
               type="email" 
@@ -487,7 +487,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-phone">Téléphone Mobile</label>
+            <label class="form-label" for="edit-phone">{{ 'Téléphone Mobile' | translate }}</label>
             <input 
               id="edit-phone"
               type="tel" 
@@ -498,7 +498,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="edit-city">Ville / Région</label>
+            <label class="form-label" for="edit-city">{{ 'Ville / Région' | translate }}</label>
             <input 
               id="edit-city"
               type="text" 
@@ -510,7 +510,7 @@
 
           @if (isEditing()) {
           <div class="form-group full-width">
-            <label class="form-label" for="edit-pwd">Nouveau mot de passe (laisser vide pour ne pas changer)</label>
+            <label class="form-label" for="edit-pwd">{{ 'Nouveau mot de passe (laisser vide pour ne pas changer)' | translate }}</label>
             <input 
               id="edit-pwd"
               type="password" 
@@ -526,19 +526,19 @@
         @if (isEditing()) {
         <div class="form-save-bar">
           <button type="button" class="btn-secondary" (click)="isEditing.set(false)">
-            Annuler
+            {{ 'Annuler' | translate }}
           </button>
           <button type="submit" class="btn-primary-save" [disabled]="isLoading()">
             @if (isLoading()) {
             <span class="btn-spinner"></span>
-            <span>Enregistrement...</span>
+            <span>{{ 'Enregistrement...' | translate }}</span>
             } @else {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
               <polyline points="17 21 17 13 7 13 7 21" />
               <polyline points="7 3 7 8 15 8" />
             </svg>
-            <span>Enregistrer les modifications</span>
+            <span>{{ 'profile.save' | translate }}</span>
             }
           </button>
         </div>
@@ -550,11 +550,11 @@
     <div class="content-section-card">
       <div class="section-title-row">
         <div>
-          <h3 class="section-title">Véhicule Connecté Principal</h3>
-          <p class="section-desc">Ce véhicule est utilisé par défaut pour les calculs de diagnostic guidé.</p>
+          <h3 class="section-title">{{ 'Véhicule Connecté Principal' | translate }}</h3>
+          <p class="section-desc">{{ 'Ce véhicule est utilisé par défaut pour les calculs de diagnostic guidé.' | translate }}</p>
         </div>
         <a routerLink="/vehicle" class="btn-outline-link">
-          <span>Ouvrir la Fiche Véhicule</span>
+          <span>{{ 'Ouvrir la Fiche Véhicule' | translate }}</span>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -577,7 +577,7 @@
             </div>
             <div class="veh-specs-tags">
               @if (primaryVehicle.fuel) {
-                <span class="spec-tag">{{ primaryVehicle.fuel }}</span>
+                <span class="spec-tag">{{ primaryVehicle.fuel | translate }}</span>
               }
               @if (primaryVehicle.engine) {
                 <span class="spec-tag">{{ primaryVehicle.engine }}</span>
@@ -595,7 +595,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="9 18 15 12 9 6" />
               </svg>
-              <span>Gérer</span>
+              <span>{{ 'Gérer' | translate }}</span>
             </a>
           </div>
         </div>
@@ -606,13 +606,13 @@
           </div>
           <div class="veh-summary-info">
             <div class="veh-title-row">
-              <h4 class="veh-title">Aucun véhicule enregistré</h4>
+              <h4 class="veh-title">{{ 'Aucun véhicule enregistré' | translate }}</h4>
             </div>
-            <p class="section-desc" style="margin: 0; font-size: 0.85rem;">Ajoutez votre premier véhicule dans votre garage pour vos diagnostics.</p>
+            <p class="section-desc" style="margin: 0; font-size: 0.85rem;">{{ 'Ajoutez votre premier véhicule dans votre garage pour vos diagnostics.' | translate }}</p>
           </div>
           <div class="veh-actions">
             <a routerLink="/vehicle" class="btn-start-diag-quick">
-              <span>+ Ajouter</span>
+              <span>{{ '+ Ajouter' | translate }}</span>
             </a>
           </div>
         </div>
@@ -623,8 +623,8 @@
     <div class="content-section-card">
       <div class="section-title-row">
         <div>
-          <h3 class="section-title">Préférences <span class="amp">&</span> Paramètres Système</h3>
-          <p class="section-desc">Sécurité du compte, alertes d'entretien et synchronisation en direct.</p>
+          <h3 class="section-title">{{ 'Préférences & Paramètres Système' | translate }}</h3>
+          <p class="section-desc">{{ 'Sécurité du compte, alertes d\'entretien et synchronisation en direct.' | translate }}</p>
         </div>
       </div>
 
@@ -632,8 +632,8 @@
         
         <div class="pref-item">
           <div class="pref-text">
-            <strong>Alertes de révision <span class="amp">&</span> rappels mécaniques</strong>
-            <p>Recevoir une alerte proactive quand l'intervalle kilométrique est atteint (vidange, bougies, plaquettes).</p>
+            <strong>{{ 'Alertes de révision & rappels mécaniques' | translate }}</strong>
+            <p>{{ 'Recevoir une alerte proactive quand l\'intervalle kilométrique est atteint (vidange, bougies, plaquettes).' | translate }}</p>
           </div>
           <button 
             type="button" 
@@ -646,8 +646,8 @@
 
         <div class="pref-item">
           <div class="pref-text">
-            <strong>Synchronisation cloud en temps réel</strong>
-            <p>Sauvegarde continue des sessions de diagnostic avec la base locale MySQL.</p>
+            <strong>{{ 'Synchronisation cloud en temps réel' | translate }}</strong>
+            <p>{{ 'Sauvegarde continue des sessions de diagnostic avec la base locale MySQL.' | translate }}</p>
           </div>
           <button 
             type="button" 
@@ -660,8 +660,8 @@
 
         <div class="pref-item">
           <div class="pref-text">
-            <strong>Notifications push <span class="amp">&</span> SMS d'urgence</strong>
-            <p>Permettre au copilote d'envoyer les coordonnées de dépannage lors d'une alerte critique.</p>
+            <strong>{{ 'Notifications push & SMS d\'urgence' | translate }}</strong>
+            <p>{{ 'Permettre à AutoDiag IA d\'envoyer les coordonnées de dépannage lors d\'une alerte critique.' | translate }}</p>
           </div>
           <button 
             type="button" 
@@ -677,8 +677,8 @@
       <!-- Quick Session Logout Row -->
       <div class="danger-zone-bar">
         <div>
-          <strong>Session Sécurisée</strong>
-          <p>Dernière connexion active sur cette machine. Token JWT chiffré.</p>
+          <strong>{{ 'Session Sécurisée' | translate }}</strong>
+          <p>{{ 'Dernière connexion active sur cette machine. Token JWT chiffré.' | translate }}</p>
         </div>
         <button class="btn-danger-logout" (click)="onLogout()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -686,7 +686,7 @@
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          <span>Fermer la session</span>
+          <span>{{ 'Fermer la session' | translate }}</span>
         </button>
       </div>
 

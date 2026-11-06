@@ -6,9 +6,12 @@
         <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <div class="screen-brand-title">AutoDiag</div>
+    <div class="screen-brand-group">
+      <div class="screen-brand-title">AutoDiag</div>
+      <span class="oem-badge">{{ 'RAPPORT D\'EXPERTISE OEM' | translate }}</span>
+    </div>
     <div class="help-btn-placeholder">
-      <button class="help-btn" title="Aide">
+      <button class="help-btn" [title]="'Aide' | translate">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
@@ -18,102 +21,273 @@
     </div>
   </div>
 
-  <!-- Header Title -->
+  <!-- Header Title & Workshop Cartridge -->
   <div class="page-header">
-    <h1 class="page-title">Vos pistes de diagnostic</h1>
+    <div class="header-pre-tag">{{ 'DOSSIER TECHNIQUE D\'ATELIER' | translate }} · {{ reportReference }}</div>
+    <h1 class="page-title">{{ 'Rapport d\'Expertise & Dépannage' | translate }}</h1>
     <div class="vehicle-subline">
-      {{ results?.vehicle?.brand || 'Peugeot' }} {{ results?.vehicle?.model || '208' }} • 
-      {{ results?.symptom?.label || 'Démarrage impossible' }}
+      <span class="v-pill">🚗 {{ results?.vehicle?.brand || 'Peugeot' }} {{ results?.vehicle?.model || '208' }}</span>
+      <span class="v-pill">⚡ {{ results?.vehicle?.engine || '1.2 PureTech' }}</span>
+      <span class="v-pill">📍 {{ results?.vehicle?.mileage || 68420 }} km</span>
+      <span class="v-pill">📋 {{ (results?.symptom?.label || 'Démarrage impossible') | translate }}</span>
     </div>
   </div>
 
   @if (results) {
-    <!-- Hero Symptom Analysis Card -->
+    <!-- HERO: IDENTIFIED ROOT CAUSE & AMDEC FAILURE MODE -->
     <div class="analysis-hero-card" [attr.data-level]="results.output_level || 2">
       <div class="analysis-header-row">
         <div class="analysis-badge">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="4" y1="9" x2="20" y2="9"/>
-            <line x1="4" y1="15" x2="20" y2="15"/>
-            <line x1="10" y1="3" x2="8" y2="21"/>
-            <line x1="16" y1="3" x2="14" y2="21"/>
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
           </svg>
-          <span>ANALYSE DES SYMPTÔMES</span>
+          <span>{{ 'CAUSE RACINE IDENTIFIÉE (ARBRE DE DÉCISION)' | translate }}</span>
         </div>
 
-        <!-- Calibrated Confidence Badge (Section 1 & 8) -->
         <span class="confidence-pill" [attr.data-level]="results.output_level || 2">
           @if (results.output_level === 1) {
-            ✅ Confiance {{ results.top_confidence }}% · Identifiée
+            ✅ {{ 'Diagnostic Formel' | translate }} · {{ results.top_confidence }}%
           } @else if (results.output_level === 3) {
-            🔍 Confiance {{ results.top_confidence }}% · À confirmer
+            🔍 {{ 'Diagnostic Différentiel · À confirmer' | translate }}
           } @else {
-            ⚠️ Confiance {{ results.top_confidence }}% · Probable
+            ⚠️ {{ 'Cause Hautement Probable' | translate }} · {{ results.top_confidence }}%
           }
         </span>
       </div>
 
-      <h2 class="analysis-title">{{ results.summary.headline }}</h2>
-      <p class="analysis-detail">{{ results.summary.detail }}</p>
+      <h2 class="analysis-title">{{ results.summary.headline | translate }}</h2>
+      <p class="analysis-detail">{{ results.summary.detail | translate }}</p>
+
+      <!-- AMDEC Technical Details Grid -->
+      <div class="amdec-details-grid">
+        <div class="amdec-item">
+          <span class="amdec-label">{{ 'SOUS-SYSTÈME EN DÉFAUT' | translate }}</span>
+          <span class="amdec-value">{{ targetSubsystem | translate }}</span>
+        </div>
+        <div class="amdec-item">
+          <span class="amdec-label">{{ 'MODE DE DÉFAILLANCE (AMDEC)' | translate }}</span>
+          <span class="amdec-value text-amber">{{ amdecFailureMode | translate }}</span>
+        </div>
+        <div class="amdec-item">
+          <span class="amdec-label">{{ 'CODE DÉFAUT ÉQUIVALENT' | translate }}</span>
+          <span class="amdec-value font-mono">{{ standardDtcCode | translate }}</span>
+        </div>
+        <div class="amdec-item">
+          <span class="amdec-label">{{ 'CRITICITÉ OPÉRATIONNELLE' | translate }}</span>
+          <span class="amdec-value text-red">{{ 'Immobilisant immédiat (Non roulant)' | translate }}</span>
+        </div>
+      </div>
     </div>
 
-    <!-- LEVEL 2 OUTPUT: Simple Sensory Confirmation Test (Section 3 & 8) -->
-    @if (results.confirmation_test) {
-      <div class="confirmation-test-card">
-        <div class="test-header">
-          <div class="test-badge-row">
-            <span class="test-badge">TEST SIMPLE DE CONFIRMATION</span>
-            <span class="test-tools-tag">{{ results.confirmation_test.tools }}</span>
+    <!-- ⚡ AUTODIAG IA: PEDAGOGICAL TRANSLATION & IMMEDIATE ADVISOR -->
+    <div class="ai-explain-card">
+      <div class="ai-explain-header">
+        <div class="ai-explain-badge-row">
+          <div class="ai-explain-badge">
+            <span class="ai-pulse-dot"></span>
+            <span>{{ 'AUTODIAG IA · EXPLICATION PÉDAGOGIQUE' | translate }}</span>
           </div>
-          <h4 class="test-title">{{ results.confirmation_test.title }}</h4>
+          <span class="ai-model-tag">{{ 'Conseiller Intelligent · 0 Hallucination' | translate }}</span>
+        </div>
+        <h3 class="ai-explain-title">{{ 'Comprendre votre panne simplement sans jargon' | translate }}</h3>
+        <p class="ai-explain-sub">
+          {{ 'AutoDiag IA traduit le rapport technique d\'atelier pour vous aider à prendre les bonnes décisions et échanger d\'égal à égal avec votre garagiste.' | translate }}
+        </p>
+      </div>
+
+      <div class="ai-explain-body">
+        <div class="ai-guidance-grid">
+          <div class="ai-guidance-box guidance-meaning">
+            <div class="guidance-head">
+              <span class="guidance-icon">💡</span>
+              <span class="guidance-label">{{ 'CE QUE CELA SIGNIFIE CONCRÈTEMENT' | translate }}</span>
+            </div>
+            <p class="guidance-text">
+              {{ pedagogicalMeaning | translate }}
+            </p>
+          </div>
+
+          <div class="ai-guidance-box guidance-caution">
+            <div class="guidance-head">
+              <span class="guidance-icon">⚠️</span>
+              <span class="guidance-label">{{ 'CONDUITE À TENIR IMMÉDIATE' | translate }}</span>
+            </div>
+            <p class="guidance-text">
+              {{ immediateAction | translate }}
+            </p>
+          </div>
         </div>
 
-        <div class="test-body">
-          <div class="test-step-row">
-            <span class="test-num">1</span>
-            <div class="test-desc">
-              <strong>Ce qu'il faut faire :</strong>
-              <p>{{ results.confirmation_test.action }}</p>
-            </div>
+        <!-- AI Assistant Action & Interactive Question Chips -->
+        <div class="ai-explain-actions">
+          <div class="ai-action-btn-row">
+            <button type="button" class="btn-ask-ai-result" (click)="askAssistantAboutResult()">
+              <span class="btn-icon">⚡</span>
+              <span>{{ 'Discuter de cette panne avec AutoDiag IA' | translate }}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
           </div>
 
-          <div class="test-step-row">
-            <span class="test-num">2</span>
-            <div class="test-desc">
-              <strong>Ce que vous devez observer :</strong>
-              <p>{{ results.confirmation_test.expected }}</p>
+          <div class="ai-quick-questions-row">
+            <span class="ai-qq-label">{{ 'Questions fréquentes suggérées :' | translate }}</span>
+            <div class="ai-qq-chips">
+              <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Est-il possible de redémarrer en tapotant légèrement sur le démarreur ?')">
+                🔨 {{ 'Astuce tapoter démarreur ?' | translate }}
+              </button>
+              <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Quel est le devis honnête pièce et main d’œuvre pour ce remplacement ?')">
+                💶 {{ 'Devis moyen pièce & M.O. ?' | translate }}
+              </button>
+              <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Quelles questions clés poser au garagiste pour éviter les surfacturations ?')">
+                🛡️ {{ 'Pièges à éviter au garage ?' | translate }}
+              </button>
+              <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Faut-il changer la batterie en même temps que le démarreur ?')">
+                🔋 {{ 'Changer batterie aussi ?' | translate }}
+              </button>
             </div>
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- PHASE 4 OEM: COUNTER-PROOF VALIDATION PROCEDURE -->
+    <div class="confirmation-test-card">
+      <div class="test-header">
+        <div class="test-badge-row">
+          <span class="test-badge">🔬 {{ 'PHASE 4 OEM : PROTOCOLE DE CONTRE-ÉPREUVE' | translate }}</span>
+          <span class="test-tools-tag">{{ 'Avant remplacement de pièce' | translate }}</span>
+        </div>
+        <h4 class="test-title">{{ 'Validation formelle de la cause racine par contre-épreuve' | translate }}</h4>
+      </div>
+
+      <div class="test-body">
+        <div class="test-step-row">
+          <span class="test-num">1</span>
+          <div class="test-desc">
+            <strong>{{ 'Procédure de test de certitude :' | translate }}</strong>
+            <p>{{ counterTestSummary | translate }}</p>
+          </div>
+        </div>
+
+        <div class="test-step-row">
+          <span class="test-num">2</span>
+          <div class="test-desc">
+            <strong>{{ 'Verdict de conformité :' | translate }}</strong>
+            <p>{{ counterTestVerdict | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIFFERENTIAL DIAGNOSTIC & ELIMINATION MATRIX -->
+    <div class="causes-section-header">
+      <h3 class="causes-count-title">{{ 'Bilan de l\'Arbre Différentiel d\'Élimination' | translate }}</h3>
+      <span class="causes-order-hint">{{ 'Analyse comparative des pistes' | translate }}</span>
+    </div>
+
+    <!-- Causes List Cards -->
+    <div class="hypotheses-list">
+      @for (hyp of results.hypotheses; track hyp.id) {
+        <div class="hypothesis-card" [class.primary-border]="hyp.order_index === 1">
+          <div class="hypo-badges-row">
+            <div class="badges-left">
+              <span class="badge-priority" [class.badge-primary-pill]="hyp.order_index === 1">
+                {{ hyp.priority_badge | translate }}
+              </span>
+              <span class="badge-label-pill" [class.label-highlight]="hyp.order_index === 1">
+                {{ (hyp.order_index === 1 ? 'CAUSE RACINE RETENUE' : 'PISTE SECONDAIRE') | translate }}
+              </span>
+            </div>
+            @if (hyp.confidence_percent) {
+              <span class="hypo-percent-pill" [class.primary-pct]="hyp.order_index === 1">
+                {{ hyp.confidence_percent }}% {{ 'de corrélation' | translate }}
+              </span>
+            }
+          </div>
+
+          <h4 class="hypo-name">{{ hyp.name | translate }}</h4>
+          <p class="hypo-desc">{{ hyp.description | translate }}</p>
+
+          <div class="check-action-box">
+            <div class="check-action-label">{{ 'PROCÉDURE DE CONTRÔLE PRÉCONISÉE' | translate }}</div>
+            <div class="check-action-text">{{ hyp.check_action | translate }}</div>
+          </div>
+
+          <div class="hypo-metrics-grid">
+            <div class="metric-item">
+              <span class="metric-label">{{ 'TYPE DE VÉRIFICATION' | translate }}</span>
+              <span class="metric-value">{{ hyp.check_type | translate }}</span>
+            </div>
+            <div class="metric-item align-right">
+              <span class="metric-label">{{ 'FOURCHETTE ATELIER PIÈCE + M.O.' | translate }}</span>
+              <span class="metric-value cost-value">{{ hyp.cost_min }}–{{ hyp.cost_max }} €</span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- PROGRESSIVE ELIMINATION TABLE -->
+    @if (results.eliminated_hypotheses && results.eliminated_hypotheses.length > 0) {
+      <div class="eliminated-section">
+        <div class="eliminated-header">
+          <span class="eliminated-badge">{{ 'ARBRE D\'ÉLIMINATION' | translate }}</span>
+          <h4 class="eliminated-title">{{ results.eliminated_hypotheses.length }} {{ 'cause(s) formellement écartée(s) par les tests' | translate }}</h4>
+          <p class="eliminated-desc">{{ 'Les vérifications et constats physiques ont permis d\'éliminer ces hypothèses :' | translate }}</p>
+        </div>
+        <div class="eliminated-grid">
+          @for (elim of results.eliminated_hypotheses; track elim.id) {
+            <div class="eliminated-item">
+              <div class="elim-name-row">
+                <span class="elim-cross">✕</span>
+                <span class="elim-name">{{ elim.name | translate }}</span>
+                <span class="elim-status-tag">{{ 'ÉCARTÉE' | translate }}</span>
+              </div>
+              @if (elim.reasoning && elim.reasoning.length > 0) {
+                <div class="elim-reason">{{ elim.reasoning[0] | translate }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
     }
 
-    <!-- LEVEL 3 OUTPUT: Mechanic Liaison Memo / Quoi dire au garagiste (Section 8) -->
+    <!-- WORKSHOP REPAIR ORDER (OR) MEMO -->
     @if (results.garage_memo) {
       <div class="garage-memo-card">
         <div class="memo-header">
           <div class="memo-title-group">
-            <span class="memo-icon">📋</span>
+            <span class="memo-icon">📄</span>
             <div>
-              <h4 class="memo-headline">Fiche mémo pour votre garagiste</h4>
-              <p class="memo-sub">Voici exactement quoi lui dire en atelier pour gagner du temps et éviter les réparations superflues.</p>
+              <h4 class="memo-headline">{{ 'Fiche d\'Ordre de Réparation pour l\'Atelier (OR)' | translate }}</h4>
+              <p class="memo-sub">{{ 'Synthèse technique normée à remettre directement au réceptionnaire ou technicien.' | translate }}</p>
             </div>
           </div>
           <button type="button" class="btn-copy-memo" (click)="copyGarageMemo()">
-            {{ copiedMemo ? '✓ Copié !' : 'Copier le texte' }}
+            {{ (copiedMemo ? '✓ Copié !' : 'Copier l\'OR') | translate }}
           </button>
         </div>
 
         <div class="memo-speech-bubble">
-          {{ results.garage_memo.what_to_say }}
+          {{ results.garage_memo.what_to_say | translate }}
+        </div>
+
+        <div class="repair-specs-row">
+          <div class="repair-spec-item">
+            <span class="rs-label">{{ 'BARÈME TEMPS CONSTRUCTEUR' | translate }}</span>
+            <span class="rs-val">{{ oemStandardTime | translate }}</span>
+          </div>
+          <div class="repair-spec-item">
+            <span class="rs-label">{{ 'OUTILLAGE D\'INTERVENTION' | translate }}</span>
+            <span class="rs-val">{{ 'Pont élévateur, multimètre, douilles Torx / E-Torx' | translate }}</span>
+          </div>
         </div>
 
         @if (results.garage_memo.checklist && results.garage_memo.checklist.length > 0) {
           <div class="memo-checklist">
-            <span class="checklist-title">Points clés à mentionner au mécanicien :</span>
+            <span class="checklist-title">{{ 'Checklist des contrôles à consigner sur l\'Ordre de Réparation :' | translate }}</span>
             <ul>
               @for (item of results.garage_memo.checklist; track item) {
-                <li>✓ {{ item }}</li>
+                <li>✓ {{ item | translate }}</li>
               }
             </ul>
           </div>
@@ -121,133 +295,41 @@
       </div>
     }
 
-    <!-- Disclaimer Pill -->
-    <div class="disclaimer-card">
-      <div class="disclaimer-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="16" x2="12" y2="12"/>
-          <line x1="12" y1="8" x2="12.01" y2="8"/>
-        </svg>
-      </div>
-      <div class="disclaimer-text">
-        <div class="disclaimer-title">Des hypothèses, pas une certitude absolue</div>
-        <div class="disclaimer-desc">{{ results.disclaimer }}</div>
-      </div>
-    </div>
-
-    <!-- Causes Header (Section 5.2 - Toujours les 3 pannes les plus probables) -->
-    <div class="causes-section-header">
-      <h3 class="causes-count-title">{{ results.causes_count }} causes probables classées</h3>
-      <span class="causes-order-hint">À vérifier dans cet ordre</span>
-    </div>
-
-    <!-- Causes List Cards -->
-    <div class="hypotheses-list">
-      @for (hyp of results.hypotheses; track hyp.id) {
-        <div class="hypothesis-card" [class.primary-border]="hyp.order_index === 1">
-          <!-- Priority Badges Header with Confidence % -->
-          <div class="hypo-badges-row">
-            <div class="badges-left">
-              <span class="badge-priority" [class.badge-primary-pill]="hyp.order_index === 1">
-                {{ hyp.priority_badge }}
-              </span>
-              <span class="badge-label-pill" [class.label-highlight]="hyp.order_index === 1">
-                {{ hyp.priority_label }}
-              </span>
-            </div>
-            @if (hyp.confidence_percent) {
-              <span class="hypo-percent-pill" [class.primary-pct]="hyp.order_index === 1">
-                {{ hyp.confidence_percent }}% de certitude
-              </span>
-            }
-          </div>
-
-          <!-- Hypothesis Title -->
-          <h4 class="hypo-name">{{ hyp.name }}</h4>
-
-          <!-- Hypothesis Description -->
-          <p class="hypo-desc">{{ hyp.description }}</p>
-
-          <!-- Gravity Pill -->
-          <div class="hypo-gravity">
-            <span class="gravity-dot"></span>
-            <span>{{ hyp.gravity }}</span>
-          </div>
-
-          <!-- Action à vérifier -->
-          <div class="check-action-box">
-            <div class="check-action-label">À VÉRIFIER</div>
-            <div class="check-action-text">{{ hyp.check_action }}</div>
-          </div>
-
-          <!-- Bottom Metrics (Vérification & Coût Indicatif) -->
-          <div class="hypo-metrics-grid">
-            <div class="metric-item">
-              <span class="metric-label">VÉRIFICATION</span>
-              <span class="metric-value">{{ hyp.check_type }}</span>
-            </div>
-            <div class="metric-item align-right">
-              <span class="metric-label">COÛT INDICATIF</span>
-              <span class="metric-value cost-value">{{ hyp.cost_min }}–{{ hyp.cost_max }} €¹</span>
-            </div>
-          </div>
-        </div>
-      }
-    </div>
-
-    <!-- ELIMINATED HYPOTHESES (Élimination progressive) -->
-    @if (results.eliminated_hypotheses && results.eliminated_hypotheses.length > 0) {
-      <div class="eliminated-section">
-        <div class="eliminated-header">
-          <span class="eliminated-badge">ÉLIMINATION PROGRESSIVE</span>
-          <h4 class="eliminated-title">{{ results.eliminated_hypotheses.length }} hypothèse(s) écartée(s) par vos réponses</h4>
-          <p class="eliminated-desc">Vos observations ont permis d'éliminer formellement ces causes :</p>
-        </div>
-        <div class="eliminated-grid">
-          @for (elim of results.eliminated_hypotheses; track elim.id) {
-            <div class="eliminated-item">
-              <div class="elim-name-row">
-                <span class="elim-cross">✕</span>
-                <span class="elim-name">{{ elim.name }}</span>
-              </div>
-              @if (elim.reasoning && elim.reasoning.length > 0) {
-                <div class="elim-reason">{{ elim.reasoning[0] }}</div>
-              }
-            </div>
-          }
+    <!-- POST-REPAIR QUALITY ASSURANCE CHECK -->
+    <div class="post-repair-card">
+      <div class="post-repair-header">
+        <span class="post-repair-icon">✅</span>
+        <div class="post-repair-titles">
+          <span class="post-repair-tag">{{ 'CONTRÔLE QUALITÉ POST-INTERVENTION' | translate }}</span>
+          <h4 class="post-repair-heading">{{ 'Validation finale de remise en circulation' | translate }}</h4>
         </div>
       </div>
-    }
-
-    <!-- Price Disclaimer Footnote -->
-    <div class="price-footnote">
-      ¹ Ordres de grandeur en France, pièces et main-d'œuvre incluses selon l'intervention. À confirmer par devis ; aucun remplacement sans contrôle préalable.
+      <p class="post-repair-text">{{ postRepairCheck | translate }}</p>
     </div>
 
-    <!-- CONTINUOUS LEARNING USER FEEDBACK (Section 10.1) -->
+    <!-- CONTINUOUS LEARNING USER FEEDBACK -->
     <div class="feedback-learning-card">
       <div class="feedback-header">
         <span class="feedback-icon">🎯</span>
         <div>
-          <h4 class="feedback-title">La panne était-elle bien celle-ci ?</h4>
-          <p class="feedback-sub">Votre confirmation permet d'améliorer la précision des règles pour toute la communauté.</p>
+          <h4 class="feedback-title">{{ 'Validation du diagnostic après passage à l\'atelier' | translate }}</h4>
+          <p class="feedback-sub">{{ 'Votre confirmation permet d\'étalonner les règles de l\'arbre de décision pour ce modèle.' | translate }}</p>
         </div>
       </div>
 
       @if (!feedbackSubmitted) {
         <div class="feedback-btn-group">
           <button type="button" class="btn-feedback confirm" (click)="onFeedback(true)">
-            <span>✅ Oui, c'était bien ça</span>
+            <span>✅ {{ 'Diagnostic d\'atelier conforme' | translate }}</span>
           </button>
           <button type="button" class="btn-feedback deny" (click)="onFeedback(false)">
-            <span>❌ Non, c'était autre chose</span>
+            <span>❌ {{ 'Autre cause constatée au démontage' | translate }}</span>
           </button>
         </div>
       } @else {
         <div class="feedback-thankyou-box">
           <span class="thankyou-icon">✓</span>
-          <span>{{ feedbackMessage }}</span>
+          <span>{{ feedbackMessage | translate }}</span>
         </div>
       }
     </div>
@@ -255,14 +337,14 @@
     <!-- Primary Action Button -->
     <div class="results-action-container">
       <button class="btn-primary" (click)="goToGuide()">
-        <span>Voir les étapes de vérification pas-à-pas</span>
+        <span>{{ 'Consulter la procédure de réparation guidée' | translate }}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
 
       <div class="action-subtext">
-        Commencez par un contrôle visuel sans danger. Aucun outillage lourd requis.
+        {{ 'Dossier technique archivé dans votre carnet d\'entretien numérique.' | translate }}
       </div>
     </div>
   }

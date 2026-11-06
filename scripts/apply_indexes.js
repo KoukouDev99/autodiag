@@ -33,7 +33,11 @@ async function applyPerformanceIndexes() {
 
     // 6. Tests & Solutions
     { table: 'diagnostic_tests', name: 'idx_dt_fault', sql: 'ALTER TABLE diagnostic_tests ADD INDEX idx_dt_fault (fault_id)' },
-    { table: 'solutions', name: 'idx_sol_fault', sql: 'ALTER TABLE solutions ADD INDEX idx_sol_fault (fault_id)' }
+    { table: 'solutions', name: 'idx_sol_fault', sql: 'ALTER TABLE solutions ADD INDEX idx_sol_fault (fault_id)' },
+
+    // 7. Engine Specs & Knowledge Base
+    { table: 'car_specs_engines', name: 'idx_engines_brand_model', sql: 'ALTER TABLE car_specs_engines ADD INDEX idx_engines_brand_model (brand_name(50), model_family(50))' },
+    { table: 'diagnostic_kb', name: 'idx_kb_category', sql: 'ALTER TABLE diagnostic_kb ADD INDEX idx_kb_category (category_id, category(50))' }
   ];
 
   let addedCount = 0;

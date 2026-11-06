@@ -715,11 +715,451 @@
   text-decoration: line-through;
 }
 
+.elim-status-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
 .elim-reason {
   font-size: 11.5px;
   color: #94a3b8;
   font-style: italic;
   text-align: right;
 }
+
+/* ==========================================================================
+   OEM WORKSHOP REPORT & AMDEC SPECIFICATIONS
+   ========================================================================== */
+.screen-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oem-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.header-pre-tag {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.vehicle-subline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.v-pill {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* AMDEC Details Grid */
+.amdec-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.amdec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.amdec-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.amdec-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.35;
+}
+
+.amdec-value.text-amber {
+  color: #fbbf24;
+}
+
+.amdec-value.text-red {
+  color: #f87171;
+}
+
+.amdec-value.font-mono {
+  font-family: monospace;
+  color: #38bdf8;
+}
+
+/* Repair Specs Row */
+.repair-specs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin-top: 10px;
+}
+
+.repair-spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rs-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.rs-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Post Repair Quality Check Card */
+.post-repair-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.post-repair-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-repair-icon {
+  font-size: 18px;
+}
+
+.post-repair-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.post-repair-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #15803d;
+  text-transform: uppercase;
+}
+
+.post-repair-heading {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #166534;
+  margin: 0;
+}
+
+.post-repair-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #166534;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   ⚡ AUTODIAG IA: PEDAGOGICAL EXPLANATION & INTERACTIVE ADVISOR
+   ========================================================================== */
+.ai-explain-card {
+  background: linear-gradient(145deg, #091322, #0d1e36);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 10px 30px -8px rgba(2, 132, 199, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-explain-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ai-explain-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-explain-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-explain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.ai-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  animation: pulse 1.8s infinite;
+}
+
+.ai-model-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-explain-title {
+  margin: 2px 0 0 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.ai-explain-sub {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.ai-explain-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ai-guidance-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 680px) {
+  .ai-guidance-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ai-guidance-box {
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-guidance-box.guidance-meaning {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.ai-guidance-box.guidance-caution {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.guidance-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.guidance-icon {
+  font-size: 15px;
+}
+
+.guidance-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.guidance-meaning .guidance-label {
+  color: #38bdf8;
+}
+
+.guidance-caution .guidance-label {
+  color: #fbbf24;
+}
+
+.guidance-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+/* AI Explain Actions */
+.ai-explain-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ai-action-btn-row {
+  display: flex;
+}
+
+.btn-ask-ai-result {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-ask-ai-result:hover {
+  background: linear-gradient(135deg, #0369a1, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+}
+
+.btn-ask-ai-result .btn-icon {
+  font-size: 16px;
+}
+
+.ai-quick-questions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-qq-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-qq-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ai-qq-chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ai-qq-chip:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   LAPTOP & DESKTOP LAYOUT (>= 880px)
+   ========================================================================== */
+@media (min-width: 880px) {
+  .screen-content {
+    padding: 28px 32px 44px 32px;
+    gap: 24px;
+  }
+
+  .screen-brand-group {
+    display: none;
+  }
+}
+
+
 
 

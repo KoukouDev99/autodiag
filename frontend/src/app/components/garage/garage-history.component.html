@@ -6,26 +6,26 @@
         <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
-    <div class="screen-brand-title">Mon Garage & Outils</div>
+    <div class="screen-brand-title">{{ 'Mon Garage & Outils' | translate }}</div>
     <div class="help-btn-placeholder"></div>
   </div>
 
   <!-- Page Header -->
   <div class="page-header">
-    <h1 class="page-title">Historique & Véhicule</h1>
-    <p class="page-subtitle">Suivi complet de votre Peugeot 208 et diagnostics enregistrés.</p>
+    <h1 class="page-title">{{ 'garage.title' | translate }}</h1>
+    <p class="page-subtitle">{{ 'garage.subtitle' | translate }}</p>
   </div>
 
   <!-- Segmented Tabs Switcher -->
   <div class="tab-switcher">
     <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setTab('history')">
-      Diagnostics
+      {{ 'Diagnostics' | translate }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'maintenance'" (click)="setTab('maintenance')">
-      Carnet d’entretien
+      {{ 'Carnet d’entretien' | translate }}
     </button>
     <button class="tab-btn" [class.active]="activeTab === 'dtc'" (click)="setTab('dtc')">
-      Codes DTC OBD2
+      {{ 'Codes DTC OBD2' | translate }}
     </button>
   </div>
 
@@ -33,8 +33,8 @@
   @if (activeTab === 'history') {
     <div class="tab-pane">
       <div class="pane-title-row">
-        <h3 class="pane-title">Sessions de diagnostic</h3>
-        <span class="pane-badge">{{ diagnostics.length }} session(s)</span>
+        <h3 class="pane-title">{{ 'Sessions de diagnostic' | translate }}</h3>
+        <span class="pane-badge">{{ diagnostics.length }} {{ 'session(s)' | translate }}</span>
       </div>
 
       <div class="history-cards-list">
@@ -42,20 +42,20 @@
           <div class="history-item-card">
             <div class="history-card-top">
               <span class="status-badge" [ngClass]="diag.status === 'in_progress' ? 'badge-in-progress' : 'badge-archived'">
-                {{ diag.status === 'in_progress' ? 'En cours' : 'Archivé' }}
+                {{ (diag.status === 'in_progress' ? 'En cours' : 'Archivé') | translate }}
               </span>
               <span class="history-date">
-                {{ diag.status === 'in_progress' ? 'Aujourd’hui' : '12 septembre 2026' }}
+                {{ (diag.status === 'in_progress' ? 'Aujourd’hui' : '12 septembre 2026') | translate }}
               </span>
             </div>
 
             <div class="history-card-body">
-              <h4 class="history-diag-title">{{ diag.summary_title }}</h4>
-              <p class="history-diag-desc">{{ diag.summary_desc }}</p>
+              <h4 class="history-diag-title">{{ diag.summary_title | translate }}</h4>
+              <p class="history-diag-desc">{{ diag.summary_desc | translate }}</p>
               
               <div class="history-vehicle-pill">
                 <img [src]="getBrandLogoUrl(diag.vehicle_brand)" class="history-mini-brand-logo" alt="" (error)="onLogoError($event)" />
-                <span>{{ diag.vehicle_brand }} {{ diag.vehicle_model }} • Symptôme : {{ diag.symptom_label }}</span>
+                <span>{{ diag.vehicle_brand }} {{ diag.vehicle_model }} • {{ 'Symptôme :' | translate }} {{ diag.symptom_label | translate }}</span>
               </div>
             </div>
           </div>
@@ -68,7 +68,7 @@
   @if (activeTab === 'maintenance') {
     <div class="tab-pane">
       <div class="pane-title-row">
-        <h3 class="pane-title">Carnet d’entretien numérique</h3>
+        <h3 class="pane-title">{{ 'Carnet d’entretien numérique' | translate }}</h3>
         <span class="pane-badge">{{ vehicle?.brand }} {{ vehicle?.model }}</span>
       </div>
 
@@ -83,13 +83,13 @@
 
             <div class="maint-details">
               <div class="maint-header-row">
-                <h4 class="maint-type">{{ record.service_type }}</h4>
+                <h4 class="maint-type">{{ record.service_type | translate }}</h4>
                 <span class="maint-cost">{{ record.cost }} €</span>
               </div>
               <div class="maint-subline">
                 <span>{{ record.service_date | date:'mediumDate' }}</span> • <span>{{ record.mileage | number:'1.0-0' }} km</span>
               </div>
-              <p class="maint-notes">{{ record.notes }}</p>
+              <p class="maint-notes">{{ record.notes | translate }}</p>
             </div>
           </div>
         }
@@ -101,10 +101,10 @@
   @if (activeTab === 'dtc') {
     <div class="tab-pane">
       <div class="pane-title-row">
-        <h3 class="pane-title">Décodeur de codes défaut (DTC)</h3>
+        <h3 class="pane-title">{{ 'Décodeur de codes défaut (DTC)' | translate }}</h3>
       </div>
       <p class="dtc-intro-p">
-        Renseignez le code lu sur votre valise OBD-II (ex: P0300, P0420, P0562) pour obtenir une explication claire sans jargon.
+        {{ 'Renseignez le code lu sur votre valise OBD-II (ex: P0300, P0420, P0562) pour obtenir une explication claire sans jargon.' | translate }}
       </p>
 
       <!-- Search Input -->
@@ -117,13 +117,13 @@
           (keydown.enter)="searchDtc()"
         />
         <button class="btn-primary dtc-search-btn" (click)="searchDtc()">
-          Chercher
+          {{ 'Chercher' | translate }}
         </button>
       </div>
 
       <!-- Quick suggestions -->
       <div class="dtc-chips-row">
-        <span class="chip-hint">Suggestions :</span>
+        <span class="chip-hint">{{ 'Suggestions :' | translate }}</span>
         <button class="dtc-chip" (click)="dtcInput = 'P0300'; searchDtc('P0300')">P0300</button>
         <button class="dtc-chip" (click)="dtcInput = 'P0420'; searchDtc('P0420')">P0420</button>
         <button class="dtc-chip" (click)="dtcInput = 'P0562'; searchDtc('P0562')">P0562</button>
@@ -135,35 +135,35 @@
           <div class="dtc-result-header">
             <div class="dtc-code-badge">{{ searchedDtc.code }}</div>
             <span class="dtc-urgency-badge" [ngClass]="'urgency-' + searchedDtc.urgency.toLowerCase()">
-              Urgence {{ searchedDtc.urgency }}
+              {{ 'Urgence' | translate }} {{ searchedDtc.urgency | translate }}
             </span>
           </div>
 
-          <h4 class="dtc-result-title">{{ searchedDtc.title }}</h4>
-          <div class="dtc-system-tag">Système : {{ searchedDtc.system }}</div>
-          <p class="dtc-result-desc">{{ searchedDtc.description }}</p>
+          <h4 class="dtc-result-title">{{ searchedDtc.title | translate }}</h4>
+          <div class="dtc-system-tag">{{ 'Système :' | translate }} {{ searchedDtc.system | translate }}</div>
+          <p class="dtc-result-desc">{{ searchedDtc.description | translate }}</p>
 
           <!-- Causes possibles -->
           <div class="dtc-causes-section">
-            <div class="dtc-causes-label">Causes probables identifiées :</div>
+            <div class="dtc-causes-label">{{ 'Causes probables identifiées :' | translate }}</div>
             <ul class="dtc-causes-list">
               @for (cause of searchedDtc.possible_causes; track cause) {
-                <li>{{ cause }}</li>
+                <li>{{ cause | translate }}</li>
               }
             </ul>
           </div>
 
           <!-- Conseils garage -->
           <div class="dtc-advice-box">
-            <div class="advice-header">Conseil pour votre garagiste :</div>
-            <div class="advice-content">{{ searchedDtc.garage_advice }}</div>
+            <div class="advice-header">{{ 'Conseil pour votre garagiste :' | translate }}</div>
+            <div class="advice-content">{{ searchedDtc.garage_advice | translate }}</div>
           </div>
         </div>
       }
 
       @if (dtcError) {
         <div class="alert-box alert-warning">
-          <div class="alert-text">{{ dtcError }}</div>
+          <div class="alert-text">{{ dtcError | translate }}</div>
         </div>
       }
     </div>

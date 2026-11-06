@@ -41,5 +41,19 @@ _______________
 1 afiche la voiture principal toujour en tete.
 2 quand en appue sue ajouter un vihucle sur la page acceuil ou nouveau en cours sur la page vihucle il faut focus sur le formulare de replire marque modell ...
 3 le botton nouveau en cours il faut devient ajouter un vihicule
-
+______________________________
+1 dans la section que se passe t il je veux afficher par categorer
+2 dans autodiag ia laisser juste les information de vihucle le reste masquer le et rajouter icon de robot danns la descution et optimiser le UX IU parceque en mode smartphne je vois rien 
+3 optimiser la reponse de autodiag ia et la bien structurer pour etre clair a lire et pro   
+_____________________________________
+1 dans la page de autodiag ia le icon de la voiture je veux que soit le logo selon la marque
+2 pour immatriculation et kilometrage rajoute que sont optionnale 
+3  dans la page autodiag ia masquer le botton moteur ia et groq cloud / deepseek gratuit)
+4 le message de autodiag ia je veux que sarrete au mécanique intelligent. le reste suprime le 
+5 pour les sugention enlve le carocel laisse juste un peu pour exemple
+_______________________________
+1 en mode width 375 dans menu le lien de autodiag ia et decaler mes les en meme ligne
+2 en mode smartphone la page autodiag ia est pas responsive optimiser UI UX et mantrer le max de descution et suprime les exemples pour que le descution soit visible
+3 rajoute un botton de langue et ajouter le francais le englias et espangole et italier et almange et portogus comme  lange et achaque foit la langue changer tous laplication devent en cette langue 
+3 
 

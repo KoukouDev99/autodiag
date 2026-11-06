@@ -1,12 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DiagnosticService, Question, QuestionOption } from '../../services/diagnostic.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-diagnostic-quiz',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './diagnostic-quiz.component.html',
   styleUrls: ['./diagnostic-quiz.component.css']
 })
@@ -30,8 +32,129 @@ export class DiagnosticQuizComponent implements OnInit {
   showWhyAsk = true;
   isUnknownSelected = false;
 
-  defaultReformulation = 'Quand vous tournez la clé, observez simplement si les voyants ou les phares s\'allument, ou si le tableau de bord reste complètement éteint.';
-  defaultWhyAsk = 'Cette question permet d\'isoler immédiatement si le problème provient de la batterie ou du démarreur pour éviter tout démontage inutile.';
+  // AI Advisor on Step
+  showAiAdvisor = false;
+  aiAdvisorQuestion = '';
+  aiAdvisorThinking = false;
+  aiAdvisorMessages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+
+  toggleAiAdvisor(): void {
+    this.showAiAdvisor = !this.showAiAdvisor;
+    if (this.showAiAdvisor && this.aiAdvisorMessages.length === 0) {
+      this.initAiAdvisorTip();
+    }
+  }
+
+  initAiAdvisorTip(): void {
+    const qTitle = this.currentQuestion?.title || 'ce test';
+    this.aiAdvisorMessages = [
+      {
+        role: 'assistant',
+        content: `💡 **Conseil AutoDiag IA :** Pour ce test (« ${qTitle} »), privilégiez une observation douce sans forcer. Si vous hésitez entre deux constatations, décrivez-moi ce que vous entendez ou ressentez ci-dessous.`
+      }
+    ];
+  }
+
+  askAiAdvisor(presetQuery?: string): void {
+    const query = presetQuery || this.aiAdvisorQuestion;
+    if (!query || !query.trim() || this.aiAdvisorThinking) return;
+
+    this.aiAdvisorMessages.push({ role: 'user', content: query.trim() });
+    this.aiAdvisorQuestion = '';
+    this.aiAdvisorThinking = true;
+
+    const payload = {
+      message: `Sur mon véhicule (${this.sessionData?.vehicle_brand || 'Peugeot'} ${this.sessionData?.vehicle_model || '208'}), lors du test "${this.currentQuestion?.title || ''}", voici mon interrogation : ${query.trim()}`,
+      vehicle: {
+        id: 1,
+        user_id: 1,
+        brand: this.sessionData?.vehicle_brand || 'Peugeot',
+        model: this.sessionData?.vehicle_model || '208',
+        year: this.sessionData?.vehicle_year || 2019,
+        fuel: this.sessionData?.vehicle_fuel || 'Essence',
+        engine: '1.2 PureTech',
+        mileage: 68420,
+        license_plate: '',
+        is_primary: true
+      }
+    };
+
+    this.diagnosticService.chatWithAssistant(payload).subscribe({
+      next: (res) => {
+        this.aiAdvisorThinking = false;
+        this.aiAdvisorMessages.push({
+          role: 'assistant',
+          content: res.reply || 'Conseil pratique : Ne prenez aucun risque mécanique. Si vous n’êtes pas certain(e), sélectionnez « Contrôle impossible sans outillage ».'
+        });
+      },
+      error: () => {
+        this.aiAdvisorThinking = false;
+        this.aiAdvisorMessages.push({
+          role: 'assistant',
+          content: 'Conseil pratique : Ne prenez aucun risque mécanique. Si le test est ambigu, choisissez « Contrôle impossible / Données insuffisantes » pour préserver l’intégrité du diagnostic.'
+        });
+      }
+    });
+  }
+
+  openFullAssistantWithQuestion(q?: string): void {
+    const text = q || `Je suis sur l'étape de diagnostic : ${this.currentQuestion?.title || ''}`;
+    this.router.navigate(['/assistant'], { queryParams: { prompt: text } });
+  }
+
+  // OEM Guided Troubleshooting Phases
+  readonly OEM_PHASES = [
+    { id: 1, code: 'context', label: '1. Contexte & Freeze Frame', icon: '❄️' },
+    { id: 2, code: 'precheck', label: '2. Pré-contrôles sensoriels', icon: '👁️' },
+    { id: 3, code: 'targeted', label: '3. Tests différentiels', icon: '⚡' },
+    { id: 4, code: 'counter', label: '4. Contre-épreuve', icon: '🔬' }
+  ];
+
+  get currentPhase(): number {
+    if (this.stepNum <= 1) return 1;
+    if (this.stepNum === 2) return 2;
+    if (this.stepNum === 3) return 3;
+    return 4;
+  }
+
+  get currentPhaseInfo() {
+    return this.OEM_PHASES[this.currentPhase - 1] || this.OEM_PHASES[1];
+  }
+
+  get targetSubsystem(): string {
+    const title = (this.currentQuestion?.title || '').toLowerCase();
+    const desc = (this.currentQuestion?.description || '').toLowerCase();
+    if (title.includes('démarre') || title.includes('clic') || desc.includes('batterie') || desc.includes('phare')) {
+      return 'Circuit de Puissance & Démarrage (Basse Tension 12V)';
+    }
+    if (title.includes('bruit') || title.includes('tourne') || title.includes('claquement')) {
+      return 'Liaison Mécanique & Train Roulant';
+    }
+    if (title.includes('fumée') || title.includes('carburant') || title.includes('cale')) {
+      return 'Alimentation Carburant & Injection';
+    }
+    return this.stepCategory || 'Groupe Motopropulseur';
+  }
+
+  get targetSpecification(): string {
+    if (this.currentPhase === 1) {
+      return 'Consigne nominale : Déterminer la plage de régime et température où le défaut est reproductible.';
+    }
+    if (this.currentPhase === 2) {
+      return 'Critère conforme : Tension repos > 12.4V, intégrité des cosses, absence de fuite visible ou sifflement anormal.';
+    }
+    if (this.currentPhase === 3) {
+      return 'Critère conforme : Démarreur entraîné à >200 tr/min sans effondrement de tension sous 10.0V.';
+    }
+    return 'Validation de contre-épreuve : La commande directe de l’organe doit confirmer la panne sans équivoque.';
+  }
+
+  get stepCode(): string {
+    return `OEM-STEP 0${this.currentPhase}.${this.stepNum}`;
+  }
+
+  defaultReformulation = 'Observez attentivement le comportement des voyants et le bruit sous capot lors de l\'action sur la clé de contact.';
+  defaultWhyAsk = 'Cette étape de diagnostic différentiel permet d\'écarter immédiatement l\'hypothèse de batterie pour cibler le démarreur ou le relais de commande.';
 
   get progressPct(): number {
     return Math.min(100, Math.round((this.stepNum / Math.max(this.totalSteps, 1)) * 100));
@@ -61,7 +184,7 @@ export class DiagnosticQuizComponent implements OnInit {
         this.currentQuestion = res.question;
         this.stepNum = res.question.step_num || 2;
         this.totalSteps = res.question.total_steps || 5;
-        this.stepCategory = res.question.category || 'Le démarrage';
+        this.stepCategory = res.question.category || 'Circuit de démarrage';
 
         // Pre-select default or first option
         if (this.currentQuestion?.options && this.currentQuestion.options.length > 0) {
@@ -72,7 +195,6 @@ export class DiagnosticQuizComponent implements OnInit {
       error: (err) => {
         console.error('Error fetching question:', err);
         this.loading = false;
-        // Fallback default mock for Peugeot 208 if session was mock
         this.setupFallbackQuestion();
       }
     });
@@ -84,29 +206,29 @@ export class DiagnosticQuizComponent implements OnInit {
       vehicle_model: '208',
       vehicle_year: 2019,
       vehicle_fuel: 'Essence',
-      symptom_label: 'la voiture ne démarre pas'
+      symptom_label: 'Démarrage impossible'
     };
     this.stepNum = 2;
-    this.totalSteps = 5;
-    this.stepCategory = 'Le démarrage';
+    this.totalSteps = 4;
+    this.stepCategory = 'Circuit de charge & démarrage';
     this.currentQuestion = {
       id: 1,
       symptom_id: 1,
       step_num: 2,
-      total_steps: 5,
-      category: 'Le démarrage',
-      title: 'Que se passe-t-il quand vous essayez de démarrer ?',
-      description: 'Choisissez la réponse qui ressemble le plus à ce que vous avez déjà observé.',
-      warning_text: 'Inutile de réessayer plusieurs fois. Ne forcez pas le démarrage. En cas d’odeur de brûlé ou de fumée, arrêtez immédiatement.',
-      why_ask: 'Cette question permet de savoir immédiatement si le problème vient de l\'alimentation électrique (batterie) ou de la mécanique du moteur.',
-      reformulation: 'Quand vous tournez la clé, entendez-vous le moteur tourner rapidement dans le vide sans démarrer, ou est-ce le silence complet / un simple clic ?',
-      test_action: 'Mettez le contact sans forcer et écoutez le bruit sous le capot.',
+      total_steps: 4,
+      category: 'Circuit de charge & démarrage',
+      title: 'Contrôle sous action démarreur : Réaction du combiné et acoustique capot',
+      description: 'Observez la ligne de bordure électrique et le compartiment moteur lors de la tentative de mise en rotation.',
+      warning_text: 'Ne tentez pas d’action prolongée (> 5 secondes). En cas d’odeur de surchauffe électrique ou de fumée, coupez immédiatement le contact.',
+      why_ask: 'Ce test différentiel permet de dissocier une décharge d\'accumulateur (chute de tension) d\'un blocage de solénoïde ou de charbons de démarreur.',
+      reformulation: 'À la mise sous contact et en position démarrage, écoutez si un claquement sec métallique survient ou si les feux s\'effondrent complètement.',
+      test_action: 'Placez la clé en position démarrage pendant 2 secondes et observez les témoins du combiné.',
       test_type: 'observation',
       options: [
-        { id: 1, question_id: 1, title: 'Des clics, mais rien ne démarre', subtitle: 'Les voyants faiblissent en même temps.', icon: 'speaker', is_default: true },
-        { id: 2, question_id: 1, title: 'Le moteur tourne sans démarrer', subtitle: 'Vous entendez un bruit régulier.', icon: 'rotate', is_default: false },
-        { id: 3, question_id: 1, title: 'Aucun bruit, aucun voyant', subtitle: 'Le tableau de bord reste éteint.', icon: 'power', is_default: false },
-        { id: 4, question_id: 1, title: 'Je ne sais pas', subtitle: 'Pas de souci, on vous accompagne.', icon: 'help', is_default: false }
+        { id: 1, question_id: 1, title: 'Clic sec unique, démarreur inerte', subtitle: 'Témoins allumés mais chute d\'intensité minime. Démarreur non entraîné.', icon: 'speaker', is_default: true },
+        { id: 2, question_id: 1, title: 'Entraînement démarreur nominal sans allumage', subtitle: 'Le moteur tourne à vitesse normale (~250 tr/min) mais sans amorce.', icon: 'rotate', is_default: false },
+        { id: 3, question_id: 1, title: 'Effondrement électrique complet (black-out)', subtitle: 'Extinction immédiate des voyants et claquements en rafale du relais.', icon: 'zap', is_default: false },
+        { id: 4, question_id: 1, title: 'Contrôle impossible / Données insuffisantes', subtitle: 'Nécessite une mesure au voltmètre ou assistance d’atelier.', icon: 'help', is_default: false }
       ]
     };
     this.selectedOptionId = 1;
@@ -115,8 +237,23 @@ export class DiagnosticQuizComponent implements OnInit {
 
   selectOption(option: QuestionOption): void {
     this.selectedOptionId = option.id;
-    const isUnknown = option.title.toLowerCase().includes('ne sais pas') || option.icon === 'help';
+    const isUnknown = this.isIndeterminateOption(option);
     this.isUnknownSelected = isUnknown;
+  }
+
+  isIndeterminateOption(opt: QuestionOption): boolean {
+    const t = (opt.title || '').toLowerCase();
+    return opt.icon === 'help' || t.includes('impossible') || t.includes('inconnu') || t.includes('unknown') || t.includes('je ne sais pas') || t.includes('don\'t know') || t.includes('données insuffisantes') || t.includes('insufficient');
+  }
+
+  isPassOption(opt: QuestionOption): boolean {
+    const t = (opt.title || '').toLowerCase();
+    return !this.isIndeterminateOption(opt) && (t.includes('conforme') || t.includes('compliant') || t.includes('pass') || t.includes('normal') || t.includes('vifs et stables') || t.includes('bright and steady') || t.includes('aucun bruit') || t.includes('no sound') || t.includes('intact') || t.includes('fonctionne') || t.includes('properly'));
+  }
+
+  isFailOption(opt: QuestionOption): boolean {
+    const t = (opt.title || '').toLowerCase();
+    return !this.isIndeterminateOption(opt) && !this.isPassOption(opt) && (t.includes('non conforme') || t.includes('non-compliant') || t.includes('fail') || t.includes('clic') || t.includes('click') || t.includes('éteignent') || t.includes('dim') || t.includes('faibl') || t.includes('bruit') || t.includes('grillé') || t.includes('blown') || t.includes('fumée') || t.includes('smoke') || t.includes('fuite') || t.includes('leak') || t.includes('défaut') || opt.id === 1);
   }
 
   toggleWhyAsk(): void {
@@ -130,13 +267,11 @@ export class DiagnosticQuizComponent implements OnInit {
     this.diagnosticService.submitAnswer(this.sessionId, this.currentQuestion.id, this.selectedOptionId).subscribe({
       next: () => {
         this.submitting = false;
-        // Load next question or transition to results
         this.loadQuestion();
       },
       error: (err) => {
         console.error('Error submitting answer:', err);
         this.submitting = false;
-        // Navigate to results
         this.router.navigate(['/results', this.sessionId]);
       }
     });

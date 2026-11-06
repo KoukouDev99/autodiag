@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { DiagnosticService, UserProfile, Vehicle } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

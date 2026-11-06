@@ -7,6 +7,8 @@ import { findMake, VehicleMakes, VehicleMake } from 'node-vehicle-logos';
 export class VehicleLogoService {
   private readonly logoBasePath = 'assets/vehicle-logos';
   private readonly defaultCarIcon = 'assets/simple-car.svg';
+  private readonly logoUrlCache = new Map<string, string>();
+  private readonly makeInfoCache = new Map<string, Readonly<VehicleMake> | undefined>();
 
   // Manual fallback map for brand variations, accents or regional names
   private readonly customBrandMap: Record<string, string> = {
@@ -46,47 +48,64 @@ export class VehicleLogoService {
     const clean = brandName.trim();
     const cleanLower = clean.toLowerCase();
 
+    const cached = this.logoUrlCache.get(cleanLower);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    let resolvedUrl = this.defaultCarIcon;
+
     // 1. Direct check in custom alias map
     if (this.customBrandMap[cleanLower]) {
-      return `${this.logoBasePath}/${this.customBrandMap[cleanLower]}.svg`;
+      resolvedUrl = `${this.logoBasePath}/${this.customBrandMap[cleanLower]}.svg`;
+      this.logoUrlCache.set(cleanLower, resolvedUrl);
+      return resolvedUrl;
     }
 
     // 2. Try findMake full match
     let match = findMake(clean, VehicleMakes);
     if (match) {
-      return `${this.logoBasePath}/${match.logo}.svg`;
+      resolvedUrl = `${this.logoBasePath}/${match.logo}.svg`;
+      this.logoUrlCache.set(cleanLower, resolvedUrl);
+      return resolvedUrl;
     }
 
     // 3. Try findMake contains match
     match = findMake(clean, VehicleMakes, 'contains');
     if (match) {
-      return `${this.logoBasePath}/${match.logo}.svg`;
+      resolvedUrl = `${this.logoBasePath}/${match.logo}.svg`;
+      this.logoUrlCache.set(cleanLower, resolvedUrl);
+      return resolvedUrl;
     }
 
     // 4. Try normalized without accents / special chars
     const unaccented = clean.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     if (unaccented !== clean) {
-      if (this.customBrandMap[unaccented.toLowerCase()]) {
-        return `${this.logoBasePath}/${this.customBrandMap[unaccented.toLowerCase()]}.svg`;
+      const unaccentedLower = unaccented.toLowerCase();
+      if (this.customBrandMap[unaccentedLower]) {
+        resolvedUrl = `${this.logoBasePath}/${this.customBrandMap[unaccentedLower]}.svg`;
+        this.logoUrlCache.set(cleanLower, resolvedUrl);
+        return resolvedUrl;
       }
-      match = findMake(unaccented, VehicleMakes);
+      match = findMake(unaccented, VehicleMakes) || findMake(unaccented, VehicleMakes, 'contains');
       if (match) {
-        return `${this.logoBasePath}/${match.logo}.svg`;
-      }
-      match = findMake(unaccented, VehicleMakes, 'contains');
-      if (match) {
-        return `${this.logoBasePath}/${match.logo}.svg`;
+        resolvedUrl = `${this.logoBasePath}/${match.logo}.svg`;
+        this.logoUrlCache.set(cleanLower, resolvedUrl);
+        return resolvedUrl;
       }
     }
 
     // 5. Try slugify (e.g. "Alfa Romeo" -> "alfa-romeo")
     const slug = cleanLower.replace(/\s+/g, '-');
     if (this.customBrandMap[slug]) {
-      return `${this.logoBasePath}/${this.customBrandMap[slug]}.svg`;
+      resolvedUrl = `${this.logoBasePath}/${this.customBrandMap[slug]}.svg`;
+      this.logoUrlCache.set(cleanLower, resolvedUrl);
+      return resolvedUrl;
     }
 
     // Fallback: return default vehicle icon
-    return this.defaultCarIcon;
+    this.logoUrlCache.set(cleanLower, resolvedUrl);
+    return resolvedUrl;
   }
 
   /**
@@ -94,6 +113,12 @@ export class VehicleLogoService {
    */
   getMakeInfo(brandName: string): Readonly<VehicleMake> | undefined {
     if (!brandName) return undefined;
-    return findMake(brandName, VehicleMakes) || findMake(brandName, VehicleMakes, 'contains');
+    const key = brandName.trim().toLowerCase();
+    if (this.makeInfoCache.has(key)) {
+      return this.makeInfoCache.get(key);
+    }
+    const found = findMake(brandName, VehicleMakes) || findMake(brandName, VehicleMakes, 'contains');
+    this.makeInfoCache.set(key, found);
+    return found;
   }
 }

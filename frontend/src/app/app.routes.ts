@@ -1,26 +1,54 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './components/home/home.component';
-import { VehicleComponent } from './components/vehicle/vehicle.component';
-import { DiagnosticQuizComponent } from './components/quiz/diagnostic-quiz.component';
-import { DiagnosticResultsComponent } from './components/results/diagnostic-results.component';
-import { RepairGuideComponent } from './components/guide/repair-guide.component';
-import { GarageHistoryComponent } from './components/garage/garage-history.component';
-import { DesignSystemComponent } from './components/design-system/design-system.component';
-import { ProfileComponent } from './components/profile/profile.component';
-import { AssistantComponent } from './components/assistant/assistant.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent, title: 'AutoDiag · Accueil' },
-  { path: 'assistant', component: AssistantComponent, title: 'AutoDiag · Copilote IA & Assistant Mécanique' },
+  {
+    path: '',
+    loadComponent: () => import('./components/home/home.component').then(m => m.HomeComponent),
+    title: 'AutoDiag · Accueil'
+  },
+  {
+    path: 'assistant',
+    loadComponent: () => import('./components/assistant/assistant.component').then(m => m.AssistantComponent),
+    title: 'AutoDiag · AutoDiag IA & Assistant Mécanique'
+  },
   { path: 'chat', redirectTo: 'assistant' },
-  { path: 'vehicle', component: VehicleComponent, title: 'AutoDiag · Mon Véhicule' },
-  { path: 'diagnostic/:sessionId', component: DiagnosticQuizComponent, title: 'AutoDiag · Diagnostic Guidé' },
-  { path: 'results/:sessionId', component: DiagnosticResultsComponent, title: 'AutoDiag · Vos Pistes de Diagnostic' },
-  { path: 'guide/:guideId', component: RepairGuideComponent, title: 'AutoDiag · Guide de Réparation' },
-  { path: 'garage', component: GarageHistoryComponent, title: 'AutoDiag · Mon Garage & Historique' },
-  { path: 'profil', component: ProfileComponent, title: 'AutoDiag · Mon Profil & Connexion' },
+  {
+    path: 'vehicle',
+    loadComponent: () => import('./components/vehicle/vehicle.component').then(m => m.VehicleComponent),
+    title: 'AutoDiag · Mon Véhicule'
+  },
+  {
+    path: 'diagnostic/:sessionId',
+    loadComponent: () => import('./components/quiz/diagnostic-quiz.component').then(m => m.DiagnosticQuizComponent),
+    title: 'AutoDiag · Diagnostic Guidé'
+  },
+  {
+    path: 'results/:sessionId',
+    loadComponent: () => import('./components/results/diagnostic-results.component').then(m => m.DiagnosticResultsComponent),
+    title: 'AutoDiag · Vos Pistes de Diagnostic'
+  },
+  {
+    path: 'guide/:guideId',
+    loadComponent: () => import('./components/guide/repair-guide.component').then(m => m.RepairGuideComponent),
+    title: 'AutoDiag · Guide de Réparation'
+  },
+  {
+    path: 'garage',
+    loadComponent: () => import('./components/garage/garage-history.component').then(m => m.GarageHistoryComponent),
+    title: 'AutoDiag · Mon Garage & Historique'
+  },
+  {
+    path: 'profil',
+    loadComponent: () => import('./components/profile/profile.component').then(m => m.ProfileComponent),
+    title: 'AutoDiag · Mon Profil & Connexion'
+  },
   { path: 'profile', redirectTo: 'profil' },
-  { path: 'design-system', component: DesignSystemComponent, title: 'AutoDiag · Design System 1.0' },
+  {
+    path: 'design-system',
+    loadComponent: () => import('./components/design-system/design-system.component').then(m => m.DesignSystemComponent),
+    title: 'AutoDiag · Design System 1.0'
+  },
   { path: '**', redirectTo: '' }
 ];
+
 

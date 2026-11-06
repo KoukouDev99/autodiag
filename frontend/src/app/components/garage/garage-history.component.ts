@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DiagnosticService, RecentDiagnostic, DtcCode, Vehicle } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-garage-history',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './garage-history.component.html',
   styleUrls: ['./garage-history.component.css']
 })

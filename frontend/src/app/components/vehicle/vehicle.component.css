@@ -535,7 +535,7 @@ body.dark-theme .btn-row-delete:hover {
   box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
 }
 
-body.dark-theme .form-hero-logo-box.is-new-mode {
+:host-context(body.dark-theme) .form-hero-logo-box.is-new-mode {
   background: rgba(14, 165, 233, 0.22);
   border-color: rgba(56, 189, 248, 0.6);
   box-shadow: 0 4px 14px rgba(56, 189, 248, 0.2);
@@ -650,6 +650,15 @@ body.dark-theme .form-hero-logo-box.is-new-mode {
 
 .label-row .form-label {
   margin-bottom: 0;
+}
+
+.optional-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+  opacity: 0.9;
+  margin-left: 6px;
+  font-style: italic;
 }
 
 .loading-hint {
@@ -819,7 +828,7 @@ body.dark-theme .form-hero-logo-box.is-new-mode {
   pointer-events: none;
 }
 
-body.dark-theme .custom-select-trigger.disabled {
+:host-context(body.dark-theme) .custom-select-trigger.disabled {
   background-color: rgba(30, 41, 59, 0.4);
   border-color: rgba(255, 255, 255, 0.08);
 }
@@ -1327,18 +1336,18 @@ body.dark-theme .custom-select-trigger.disabled {
   isolation: isolate;
 }
 
-body.dark-theme .country-flag-icon {
+:host-context(body.dark-theme) .country-flag-icon {
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-body.dark-theme .plate-country-selector-btn {
+:host-context(body.dark-theme) .plate-country-selector-btn {
   background: var(--c-surface);
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-body.dark-theme .country-dropdown-menu {
+:host-context(body.dark-theme) .country-dropdown-menu {
   background: var(--c-surface);
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
@@ -1563,8 +1572,9 @@ body.dark-theme .country-dropdown-menu {
   top: calc(100% + 6px);
   right: 0;
   z-index: 150;
-  min-width: 290px;
-  max-width: 330px;
+  min-width: 260px;
+  max-width: min(330px, calc(100vw - 32px));
+  box-sizing: border-box;
   background: var(--c-surface);
   border: 1.5px solid var(--c-border);
   border-radius: 14px;
@@ -2007,7 +2017,7 @@ body.dark-theme .country-dropdown-menu {
   box-shadow: 0 4px 16px rgba(220, 38, 38, 0.25) !important;
 }
 
-body.dark-theme .save-toast.error-toast {
+:host-context(body.dark-theme) .save-toast.error-toast {
   background-color: rgba(220, 38, 38, 0.2) !important;
   border-color: #ef4444 !important;
   color: #fca5a5 !important;
@@ -2018,7 +2028,7 @@ body.dark-theme .save-toast.error-toast {
    ============================================ */
 @media (min-width: 880px) {
   .screen-content {
-    padding: 24px 28px 40px 28px;
+    padding: 28px 32px 44px 32px;
     gap: 20px;
   }
 

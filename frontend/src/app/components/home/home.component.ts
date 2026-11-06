@@ -6,11 +6,21 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DiagnosticService, Symptom, Vehicle, RecentDiagnostic, DtcCode, AiNormalizeResult, AiSafetyResult } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
+export interface SymptomCategoryGroup {
+  id: string;
+  name: string;
+  icon: string;
+  count: number;
+  symptoms: Symptom[];
+}
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -18,10 +28,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   readonly Math = Math;
   private diagnosticService = inject(DiagnosticService);
   private vehicleLogoService = inject(VehicleLogoService);
+  translationService = inject(TranslationService);
   private router = inject(Router);
 
   private dtcSearch$ = new Subject<string>();
   private dtcSub?: Subscription;
+  private dtcReqSub?: Subscription;
 
   // IA Copilote Search
   aiSearchQuery = '';
@@ -30,6 +42,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   aiSafetyAlert: AiSafetyResult | null = null;
   private aiSearch$ = new Subject<string>();
   private aiSub?: Subscription;
+  private aiSafetyReqSub?: Subscription;
+  private aiNormReqSub?: Subscription;
+
+  // Memoization cache for categoryGroups & displayedCategoryGroups
+  private _lastSymptomsRef: Symptom[] | null = null;
+  private _lastLang = '';
+  private _cachedCategoryGroups: SymptomCategoryGroup[] = [];
+  private _lastDisplayedSymptomsRef: Symptom[] | null = null;
+  private _lastDisplayedLang = '';
+  private _lastSelectedCategory = '';
+  private _lastSymptomSearchQuery = '';
+  private _cachedDisplayedGroups: SymptomCategoryGroup[] = [];
 
   aiExamplePrompts = [
     'Pédale de frein molle',
@@ -40,11 +64,154 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
 
   symptoms: Symptom[] = [];
+  selectedCategory = 'TOUTES';
+  symptomSearchQuery = '';
+
   vehicles: Vehicle[] = [];
   vehicle: Vehicle | null = null;
   activeVehicleIndex = 0;
   recentDiagnostics: RecentDiagnostic[] = [];
   loading = true;
+
+  get categoryGroups(): SymptomCategoryGroup[] {
+    const lang = this.translationService.currentLang();
+    if (this._lastSymptomsRef === this.symptoms && this._lastLang === lang) {
+      return this._cachedCategoryGroups;
+    }
+
+    const map = new Map<string, SymptomCategoryGroup>();
+
+    for (const symptom of this.symptoms) {
+      const meta = this.resolveCategoryMeta(symptom.category);
+      if (!map.has(meta.id)) {
+        map.set(meta.id, {
+          id: meta.id,
+          name: meta.name,
+          icon: meta.icon,
+          count: 0,
+          symptoms: []
+        });
+      }
+      const grp = map.get(meta.id)!;
+      grp.symptoms.push(symptom);
+      grp.count++;
+    }
+
+    const priorityOrder = [
+      'electrique',
+      'moteur',
+      'freinage',
+      'refroidissement',
+      'echappement',
+      'carburant',
+      'transmission',
+      'direction',
+      'roues',
+      'climatisation',
+      'autre'
+    ];
+
+    this._lastSymptomsRef = this.symptoms;
+    this._lastLang = lang;
+    this._cachedCategoryGroups = Array.from(map.values()).sort((a, b) => {
+      const ia = priorityOrder.indexOf(a.id);
+      const ib = priorityOrder.indexOf(b.id);
+      if (ia !== -1 && ib !== -1) return ia - ib;
+      if (ia !== -1) return -1;
+      if (ib !== -1) return 1;
+      return a.name.localeCompare(b.name);
+    });
+
+    return this._cachedCategoryGroups;
+  }
+
+  get displayedCategoryGroups(): SymptomCategoryGroup[] {
+    const baseGroups = this.categoryGroups;
+    const lang = this.translationService.currentLang();
+    if (
+      this._lastDisplayedSymptomsRef === this.symptoms &&
+      this._lastDisplayedLang === lang &&
+      this._lastSelectedCategory === this.selectedCategory &&
+      this._lastSymptomSearchQuery === this.symptomSearchQuery
+    ) {
+      return this._cachedDisplayedGroups;
+    }
+
+    let groups = baseGroups;
+
+    if (this.selectedCategory !== 'TOUTES') {
+      groups = groups.filter(g => g.id === this.selectedCategory);
+    }
+
+    if (this.symptomSearchQuery.trim()) {
+      const q = this.symptomSearchQuery.trim().toLowerCase();
+      groups = groups.map(g => {
+        const gNameTranslated = this.translationService.t(g.name).toLowerCase();
+        const matches = g.symptoms.filter(s => {
+          const lbl = (s.label || '').toLowerCase();
+          const lblTr = this.translationService.t(s.label || '').toLowerCase();
+          const desc = (s.description || '').toLowerCase();
+          const descTr = this.translationService.t(s.description || '').toLowerCase();
+          return lbl.includes(q) || lblTr.includes(q) || desc.includes(q) || descTr.includes(q) || g.name.toLowerCase().includes(q) || gNameTranslated.includes(q);
+        });
+        return {
+          ...g,
+          count: matches.length,
+          symptoms: matches
+        };
+      }).filter(g => g.symptoms.length > 0);
+    }
+
+    this._lastDisplayedSymptomsRef = this.symptoms;
+    this._lastDisplayedLang = lang;
+    this._lastSelectedCategory = this.selectedCategory;
+    this._lastSymptomSearchQuery = this.symptomSearchQuery;
+    this._cachedDisplayedGroups = groups;
+
+    return this._cachedDisplayedGroups;
+  }
+
+  selectCategory(catId: string): void {
+    this.selectedCategory = catId;
+  }
+
+  private resolveCategoryMeta(categoryRaw: string | undefined): { id: string; name: string; icon: string } {
+    const c = (categoryRaw || '').toLowerCase();
+    if (c.includes('start') || c.includes('démarrage') || c.includes('starter') || c.includes('battery') || c.includes('batterie') || c.includes('electr')) {
+      return { id: 'electrique', name: 'Démarrage & Électrique', icon: '⚡' };
+    }
+    if (c.includes('brak') || c.includes('frein') || c.includes('abs') || c.includes('sécurité') || c.includes('security')) {
+      return { id: 'freinage', name: 'Freinage & Sécurité', icon: '🛑' };
+    }
+    if (c.includes('cool') || c.includes('refroidiss') || c.includes('surchauff') || c.includes('overheat') || c.includes('radiator')) {
+      return { id: 'refroidissement', name: 'Refroidissement & Température', icon: '🌡️' };
+    }
+    if (c.includes('exhaust') || c.includes('échapp') || c.includes('emiss') || c.includes('smoke') || c.includes('fumée') || c.includes('pollution')) {
+      return { id: 'echappement', name: 'Échappement & Antipollution', icon: '💨' };
+    }
+    if (c.includes('fuel') || c.includes('carbur') || c.includes('intake') || c.includes('inject') || c.includes('essence') || c.includes('diesel')) {
+      return { id: 'carburant', name: 'Carburant & Injection', icon: '⛽' };
+    }
+    if (c.includes('transm') || c.includes('boite') || c.includes('boîte') || c.includes('clutch') || c.includes('embray') || c.includes('drivetrain')) {
+      return { id: 'transmission', name: 'Transmission & Boîte', icon: '🔄' };
+    }
+    if (c.includes('steer') || c.includes('direct') || c.includes('volant')) {
+      return { id: 'direction', name: 'Direction & Tenue de route', icon: '🎯' };
+    }
+    if (c.includes('wheel') || c.includes('tire') || c.includes('roue') || c.includes('pneu') || c.includes('bearing') || c.includes('roulem')) {
+      return { id: 'roues', name: 'Roues, Pneus & Roulements', icon: '🛞' };
+    }
+    if (c.includes('air cond') || c.includes('climat') || c.includes('heater') || c.includes('chauffage') || c.includes('climate')) {
+      return { id: 'climatisation', name: 'Climatisation & Chauffage', icon: '❄️' };
+    }
+    if (c.includes('moteur') || c.includes('engine') || c.includes('valv') || c.includes('oil') || c.includes('huile')) {
+      return { id: 'moteur', name: 'Moteur & Allumage', icon: '⚙️' };
+    }
+    if (c.includes('sound') || c.includes('bruit') || c.includes('mécaniq') || c.includes('mechanic')) {
+      return { id: 'moteur', name: 'Moteur & Mécanique', icon: '🔧' };
+    }
+    return { id: 'autre', name: categoryRaw ? (categoryRaw.charAt(0).toUpperCase() + categoryRaw.slice(1)) : 'Autres anomalies', icon: '🔧' };
+  }
 
   // DTC Quick Search & Inspector
   dtcSearchQuery = '';
@@ -94,7 +261,10 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.dtcSub?.unsubscribe();
+    this.dtcReqSub?.unsubscribe();
     this.aiSub?.unsubscribe();
+    this.aiSafetyReqSub?.unsubscribe();
+    this.aiNormReqSub?.unsubscribe();
   }
 
   loadData(): void {
@@ -232,12 +402,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/garage']);
   }
 
+  openAssistantWithPrompt(promptText?: string): void {
+    if (promptText && promptText.trim()) {
+      this.router.navigate(['/assistant'], { queryParams: { prompt: promptText.trim() } });
+    } else {
+      this.router.navigate(['/assistant']);
+    }
+  }
+
   // --- DTC OBD-II Search & Inspection (Optimized with RxJS debounceTime 300ms) ---
   onDtcSearchInput(): void {
     this.dtcSearch$.next(this.dtcSearchQuery.trim());
   }
 
   private executeDtcSearch(q: string): void {
+    this.dtcReqSub?.unsubscribe();
     if (q.length < 2) {
       this.dtcSearchResults = [];
       this.isSearchingDtc = false;
@@ -245,7 +424,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
     this.isSearchingDtc = true;
     const make = (this.dtcSelectedMake && this.dtcSelectedMake !== 'TOUTES') ? this.dtcSelectedMake : undefined;
-    this.diagnosticService.searchDtc(q, undefined, make, 12).subscribe({
+    this.dtcReqSub = this.diagnosticService.searchDtc(q, undefined, make, 12).subscribe({
       next: (results) => {
         this.dtcSearchResults = results || [];
         this.isSearchingDtc = false;
@@ -297,6 +476,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   clearAiSearch(): void {
+    this.aiSafetyReqSub?.unsubscribe();
+    this.aiNormReqSub?.unsubscribe();
     this.aiSearchQuery = '';
     this.aiMatchedSymptom = null;
     this.aiSafetyAlert = null;
@@ -304,6 +485,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private executeAiSearch(q: string): void {
+    this.aiSafetyReqSub?.unsubscribe();
+    this.aiNormReqSub?.unsubscribe();
     if (q.length < 3) {
       this.aiMatchedSymptom = null;
       this.aiSafetyAlert = null;
@@ -313,7 +496,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.isAnalyzingAi = true;
 
     // 1. Garde-fou Sécurité (IA #5)
-    this.diagnosticService.checkSafety(q).subscribe({
+    this.aiSafetyReqSub = this.diagnosticService.checkSafety(q).subscribe({
       next: (safe) => {
         this.aiSafetyAlert = safe && safe.is_danger ? safe : null;
       },
@@ -323,7 +506,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
 
     // 2. Normalisation Sémantique (IA #1)
-    this.diagnosticService.normalizeSymptom(q).subscribe({
+    this.aiNormReqSub = this.diagnosticService.normalizeSymptom(q).subscribe({
       next: (result) => {
         this.aiMatchedSymptom = result;
         this.isAnalyzingAi = false;

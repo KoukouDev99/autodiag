@@ -3,6 +3,10 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* Greeting */
@@ -128,8 +132,39 @@
   flex-direction: column;
 }
 
-.hero-btn {
+.hero-cta-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 12px;
+}
+
+.hero-btn {
+  flex: 1;
+  min-width: 180px;
+  margin-bottom: 0;
+}
+
+.hero-ai-btn {
+  padding: 12px 18px;
+  border-radius: var(--radius-pill, 9999px);
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-ai-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  color: #ffffff;
 }
 
 .hero-footer-text {
@@ -140,7 +175,127 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 24px; /* Padding confortable avant l'image de la 208 en version smartphone */
+  margin-bottom: 24px;
+}
+
+/* ⚡ AutoDiag IA Dedicated Assistant Banner */
+.ai-assistant-shortcut-card {
+  background: linear-gradient(135deg, #090e1a, #0f172a);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-shortcut-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-shortcut-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-shortcut-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(14, 165, 233, 0.18);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #38bdf8;
+}
+
+.ai-shortcut-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-shortcut-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 2px 0 0 0;
+}
+
+.ai-shortcut-cta {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: #0284c7;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ai-shortcut-cta:hover {
+  background: #0369a1;
+}
+
+.ai-shortcut-prompts {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ai-shortcut-prompts::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-chip {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ai-chip:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.ai-chat-shortcut-btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ai-chat-shortcut-btn:hover {
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
 /* Sections */
@@ -148,6 +303,9 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .section-header {
@@ -188,11 +346,345 @@
   text-decoration: underline;
 }
 
+/* ==========================================================================
+   Categorized Symptoms Layout & Navigation Pills
+   ========================================================================== */
+.symptoms-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.total-symptoms-badge {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--c-primary);
+  background: var(--c-primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+:host-context(body.dark-theme) .total-symptoms-badge {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+/* Category Filter Pills */
+.category-pills-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 4px 2px 8px 2px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-pills-bar::-webkit-scrollbar {
+  height: 4px;
+}
+.category-pills-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+:host-context(body.dark-theme) .category-pills-bar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--c-surface);
+  color: var(--c-text-secondary);
+  border: 1px solid var(--c-border);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.category-pill:hover {
+  color: var(--c-text-primary);
+  border-color: var(--c-primary);
+  transform: translateY(-1px);
+}
+
+.category-pill.active {
+  background: linear-gradient(135deg, var(--c-primary), #1d4ed8);
+  color: #ffffff;
+  border-color: var(--c-primary);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
+:host-context(body.dark-theme) .category-pill {
+  background: #111827;
+  border-color: #1f2937;
+  color: #94a3b8;
+}
+
+:host-context(body.dark-theme) .category-pill:hover {
+  background: #1e293b;
+  color: #f1f5f9;
+  border-color: #38bdf8;
+}
+
+:host-context(body.dark-theme) .category-pill.active {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+.pill-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pill-title {
+  font-weight: 700;
+}
+
+.pill-count {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* Symptom Quick Search Input */
+.symptom-search-bar {
+  margin-top: 4px;
+}
+
+.symptom-search-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.symptom-search-input-wrap .search-svg {
+  position: absolute;
+  left: 12px;
+  color: var(--c-text-secondary);
+  pointer-events: none;
+}
+
+.symptom-search-input {
+  width: 100%;
+  padding: 8px 36px 8px 36px;
+  border-radius: 12px;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  color: var(--c-text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.symptom-search-input:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+:host-context(body.dark-theme) .symptom-search-input {
+  background: #111827;
+  border-color: #1f2937;
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .symptom-search-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+.symptom-search-clear {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--c-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+/* Category Groups Container & Cards */
+.category-groups-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.category-group-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:host-context(body.dark-theme) .category-group-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.category-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.cat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-group-icon {
+  font-size: 16px;
+}
+
+.cat-group-title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--c-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.cat-group-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-secondary);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+:host-context(body.dark-theme) .cat-group-count {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.no-symptoms-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--c-text-secondary);
+  font-size: 13.5px;
+}
+
+.no-symp-icon {
+  font-size: 28px;
+}
+
+.btn-reset-filters {
+  background: var(--c-primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  color: var(--c-primary);
+  font-weight: 700;
+  font-size: 12.5px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+
+:host-context(body.dark-theme) .btn-reset-filters {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+}
+
+.critical-indicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  padding: 1px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.symptom-card {
+  position: relative;
+}
+
 /* Symptoms Grid */
 .symptoms-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .symptoms-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .symptom-card {
+    padding: 12px 6px 10px 6px;
+    min-height: 94px;
+    border-radius: 14px;
+  }
+  .symptom-label {
+    font-size: 12px;
+  }
+  .symptom-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+  .category-group-card {
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+  .cat-group-title {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .symptoms-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .symptom-card {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    min-height: 58px;
+    gap: 12px;
+  }
+  .symptom-label {
+    text-align: left;
+  }
 }
 
 .symptom-card {
@@ -235,22 +727,22 @@
   color: var(--c-primary);
 }
 
-body.dark-theme .symptom-card {
+:host-context(body.dark-theme) .symptom-card {
   background: #111827;
   border-color: #1f2937;
   color: #f8fafc;
 }
 
-body.dark-theme .symptom-card:hover {
+:host-context(body.dark-theme) .symptom-card:hover {
   background: #1e293b;
   border-color: #3b82f6;
 }
 
-body.dark-theme .symptom-label {
+:host-context(body.dark-theme) .symptom-label {
   color: #f8fafc;
 }
 
-body.dark-theme .symptom-card:hover .symptom-label {
+:host-context(body.dark-theme) .symptom-card:hover .symptom-label {
   color: #60a5fa;
 }
 
@@ -898,7 +1390,7 @@ body.dark-theme .symptom-card:hover .symptom-label {
    ============================================ */
 @media (min-width: 880px) {
   .screen-content {
-    padding: 24px 28px 40px 28px;
+    padding: 28px 32px 44px 32px;
     gap: 28px;
   }
 

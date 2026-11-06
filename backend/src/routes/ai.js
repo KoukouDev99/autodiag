@@ -1,6 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const { getPool } = require('../db/db');
+const { appCache } = require('../utils/cache');
+
+// Circuit-breaker for optional local FastAPI AI microservice (avoids 2-3s TCP timeout per keystroke when offline)
+let aiServiceOfflineUntil = 0;
+
+async function fetchLocalAiService(path, payload, timeoutMs = 2500) {
+  if (Date.now() < aiServiceOfflineUntil) {
+    return null;
+  }
+  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
+  try {
+    const aiResponse = await fetch(`${aiServiceUrl}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+    if (aiResponse.ok) {
+      aiServiceOfflineUntil = 0;
+      return await aiResponse.json();
+    }
+  } catch (aiErr) {
+    aiServiceOfflineUntil = Date.now() + 15000; // 15s circuit breaker cooldown
+    console.warn(`[AI Service] FastAPI offline (${path}), using deterministic fallback for 15s.`);
+  }
+  return null;
+}
 
 // IA #1: Semantic Symptom Normalization (FastAPI microservice proxy + deterministic fallback)
 router.post('/normalize-symptom', async (req, res) => {
@@ -21,26 +48,20 @@ router.post('/normalize-symptom', async (req, res) => {
       });
     }
 
-    // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
-    const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
-    try {
-      const aiResponse = await fetch(`${aiServiceUrl}/api/normalize-symptom`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, threshold, top_k }),
-        signal: AbortSignal.timeout(3000)
-      });
-      if (aiResponse.ok) {
-        const data = await aiResponse.json();
-        return res.json(data);
-      }
-    } catch (aiErr) {
-      console.warn('[AI Service] FastAPI offline or timed out, executing deterministic keyword fallback:', aiErr.message);
+    // 1. Try local FastAPI microservice (with circuit breaker)
+    const aiData = await fetchLocalAiService('/api/normalize-symptom', { text, threshold, top_k }, 2500);
+    if (aiData) {
+      return res.json(aiData);
     }
 
-    // 2. Deterministic Fallback if AI service is offline
+    // 2. Deterministic Fallback if AI service is offline (using cached symptoms list)
     const pool = getPool();
-    const [symptoms] = await pool.query('SELECT id, code, label, category, description FROM symptoms');
+    let symptoms = appCache.get('symptoms:all');
+    if (!symptoms) {
+      const [rows] = await pool.query('SELECT * FROM symptoms ORDER BY id ASC');
+      symptoms = rows;
+      appCache.set('symptoms:all', symptoms, 3600);
+    }
     const qLower = text.toLowerCase();
 
     const scored = symptoms.map(s => {
@@ -91,21 +112,10 @@ router.post('/reformulate-question', async (req, res) => {
     });
   }
 
-  // 1. Try local FastAPI microservice (port 8001 or AI_SERVICE_URL)
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
-  try {
-    const aiResponse = await fetch(`${aiServiceUrl}/api/reformulate-question`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, context, options }),
-      signal: AbortSignal.timeout(3000)
-    });
-    if (aiResponse.ok) {
-      const data = await aiResponse.json();
-      return res.json(data);
-    }
-  } catch (aiErr) {
-    console.warn('[AI Service] FastAPI offline or timed out for reformulation, applying fallback:', aiErr.message);
+  // 1. Try local FastAPI microservice (with circuit breaker)
+  const aiData = await fetchLocalAiService('/api/reformulate-question', { question, context, options }, 2500);
+  if (aiData) {
+    return res.json(aiData);
   }
 
   // 2. Deterministic Fallback: return original question with hint
@@ -137,20 +147,9 @@ router.post('/retrieve-context', async (req, res) => {
     });
   }
 
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
-  try {
-    const aiResponse = await fetch(`${aiServiceUrl}/api/retrieve-context`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, top_k, min_score, filter_doc_type }),
-      signal: AbortSignal.timeout(3000)
-    });
-    if (aiResponse.ok) {
-      const data = await aiResponse.json();
-      return res.json(data);
-    }
-  } catch (aiErr) {
-    console.warn('[AI Service] FastAPI offline or timed out for RAG, applying fallback:', aiErr.message);
+  const aiData = await fetchLocalAiService('/api/retrieve-context', { query, top_k, min_score, filter_doc_type }, 2500);
+  if (aiData) {
+    return res.json(aiData);
   }
 
   // Deterministic SQL Fallback
@@ -194,20 +193,9 @@ router.post('/retrieve-context', async (req, res) => {
 router.post('/explain-diagnosis', async (req, res) => {
   const { fault_code, fault_name, symptoms, context, top_k_rag = 3 } = req.body;
 
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
-  try {
-    const aiResponse = await fetch(`${aiServiceUrl}/api/explain-diagnosis`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fault_code, fault_name, symptoms, context, top_k_rag }),
-      signal: AbortSignal.timeout(5000)
-    });
-    if (aiResponse.ok) {
-      const data = await aiResponse.json();
-      return res.json(data);
-    }
-  } catch (aiErr) {
-    console.warn('[AI Service] FastAPI offline or timed out for explanation, applying fallback:', aiErr.message);
+  const aiData = await fetchLocalAiService('/api/explain-diagnosis', { fault_code, fault_name, symptoms, context, top_k_rag }, 4000);
+  if (aiData) {
+    return res.json(aiData);
   }
 
   // Deterministic Fallback: 4 mandatory sections + confidence <= 95%
@@ -246,20 +234,9 @@ router.post('/explain-diagnosis', async (req, res) => {
 router.post('/check-safety', async (req, res) => {
   const { text, fault_code, system, is_danger_known, symptoms, context } = req.body;
 
-  const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8001';
-  try {
-    const aiResponse = await fetch(`${aiServiceUrl}/api/check-safety`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, fault_code, system, is_danger_known, symptoms, context }),
-      signal: AbortSignal.timeout(3000)
-    });
-    if (aiResponse.ok) {
-      const data = await aiResponse.json();
-      return res.json(data);
-    }
-  } catch (aiErr) {
-    console.warn('[AI Service] FastAPI offline or timed out for safety check, applying local fallback:', aiErr.message);
+  const aiData = await fetchLocalAiService('/api/check-safety', { text, fault_code, system, is_danger_known, symptoms, context }, 2500);
+  if (aiData) {
+    return res.json(aiData);
   }
 
   // Deterministic Fallback : evaluate critical regex patterns
@@ -400,13 +377,23 @@ async function retrieveDatabaseContext(pool, message, vehicle) {
 }
 
 // Helper: Build tailored system prompt based on user vehicle and database context
-function buildVehicleSystemPrompt(vehicle, dbContext = '') {
+function buildVehicleSystemPrompt(vehicle, dbContext = '', language = 'fr') {
   let vehDesc = 'Non renseigné (conseils généralistes)';
   if (vehicle && vehicle.brand) {
     vehDesc = `${vehicle.brand} ${vehicle.model || ''} (${vehicle.year || 'Année non précisée'})
 - Motorisation : ${vehicle.engine || 'Standard'} (${vehicle.fuel || 'Non spécifié'})
 - Kilométrage compteur : ${vehicle.mileage ? Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : 'Non précisé'}`;
   }
+
+  const langMap = {
+    fr: 'français (French)',
+    en: 'anglais (English)',
+    es: 'espagnol (Spanish)',
+    it: 'italien (Italian)',
+    de: 'allemand (German)',
+    pt: 'portugais (Portuguese)'
+  };
+  const targetLanguage = langMap[language] || 'français (French)';
 
   let prompt = `Tu es "AutoDiag Copilote", un mécanicien automobile expert, courtois, pédagogue et bienveillant.
 Tu réponds aux questions des automobilistes en adaptant précisément tes explications selon le profil et le véhicule de l'utilisateur.
@@ -420,12 +407,31 @@ ${dbContext}
 (Consigne : Utilise ces données officielles de la base pour appuyer tes explications, tes prix et tes causes probables !)`;
   }
 
-  prompt += `\n\nRÈGLES D'OR DE RÉPONSE :
-1. Personnalisation : Réponds TOUJOURS en tenant compte des spécificités du véhicule de l'utilisateur (motorisation essence vs diesel vs hybride, kilométrage d'usure, problèmes connus du modèle).
-2. Pédagogie sans jargon : Explique simplement ce qui se passe sous le capot avec des métaphores intuitives.
-3. Estimations de coûts transparentes : Donne des fourchettes tarifaires réalistes en euros (€) pour les pièces et la main d'œuvre (fourchettes garagiste indépendant vs concession).
-4. Sécurité & Urgence : Si la question concerne le freinage, la direction, la surchauffe ou une fuite inflammable, ordonne immédiatement l'arrêt en sécurité.
-5. Sois concis, structuré (utilise des listes à puces et du texte en gras) et réponds directement en français.`;
+  prompt += `\n\nSTRUCTURE DE RÉPONSE OBLIGATOIRE (STANDARD PROFESSIONNEL D'ATELIER) :
+Pour que ta réponse soit ultra-claire, rassurante, facile à lire et directement exploitable, structure OBLIGATOIREMENT ta réponse avec ces 5 sections markdown distinctes :
+
+### 🔍 Analyse & Diagnostic Probable
+Explique avec clarté, bienveillance et précision le phénomène mécanique constaté, en citant spécifiquement le véhicule de l'utilisateur (${vehDesc.split('\n')[0]}).
+
+### ⚠️ Niveau d'Urgence & Sécurité
+- **Gravité :** [Faible | Modérée | Élevée | Critique]
+- **Peut-on rouler :** [Oui sans danger immédiat | Vigilance : trajet court vers garage | Arrêt immédiat impératif]
+
+### 🛠️ Causes Principales à Contrôler
+- **1. [Composant 1] :** [Description concise du dysfonctionnement]
+- **2. [Composant 2] :** [Description concise du dysfonctionnement]
+
+### 💡 Conseils & Actions Recommandées
+- **Contrôle personnel :** [Ce que le conducteur peut vérifier lui-même sans démonter]
+- **Intervention atelier :** [Les tests ou opérations précis à demander au mécanicien]
+
+### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
+- **Fourchette moyenne constatée :** [Prix réalistes en euros €, comparaison indépendant vs concession]
+
+Règles de style : sois direct, aéré, évite les pavés de texte indigestes et utilise du gras sur les mots clés techniques.
+
+CONSIGNE DE LANGUE STRICTE ET OBLIGATOIRE :
+Tu dois impérativement rédiger l'intégralité de ta réponse en ${targetLanguage}. Adapte la langue des titres et des explications à celle demandée.`;
 
   return prompt;
 }
@@ -439,7 +445,8 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       history = [],
       api_key = null,
       provider = null,
-      model = null
+      model = null,
+      language = 'fr'
     } = req.body;
 
     if (!message || !message.trim()) {
@@ -448,7 +455,7 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
 
     const pool = getPool();
     const dbContext = await retrieveDatabaseContext(pool, message, vehicle);
-    const systemPrompt = buildVehicleSystemPrompt(vehicle, dbContext);
+    const systemPrompt = buildVehicleSystemPrompt(vehicle, dbContext, language);
 
     // 1. Resolve API key and Base URL
     let resolvedKey = (api_key && api_key.trim()) ||
@@ -535,28 +542,103 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       }
     }
 
-    // 4. Intelligent Local Fallback (adapted to user vehicle)
+    // 4. Intelligent Local Fallback (adapted to user vehicle & strictly structured)
     const vehName = vehicle && vehicle.brand ? `${vehicle.brand} ${vehicle.model || ''}` : 'votre véhicule';
+    const vehSpec = `${vehName} (${vehicle?.engine || 'motorisation standard'}${vehicle?.mileage ? ', ' + Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : ''})`;
     const qLower = message.toLowerCase();
-    let fallbackReply = `Pour **${vehName}** (${vehicle?.engine || 'motorisation standard'}, ${vehicle?.year || 'année courante'}), voici mes conseils mécaniques :\n\n`;
+    let fallbackReply = '';
 
     if (/frein|plaquette|disque/.test(qLower)) {
-      fallbackReply += `🛑 **Système de freinage :**\n- Des bruits métalliques ou une pédale molle indiquent une usure avancée des plaquettes ou un niveau de liquide de frein bas.\n- **Coût estimé :** Comptez entre **80 € et 180 €** pour un jeu de plaquettes avant, et environ **220 € à 350 €** avec les disques.\n- ⚠️ **Sécurité :** Ne roulez pas si la pédale s'enfonce anormalement.`;
+      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+Sur votre **${vehSpec}**, un comportement anormal de la pédale de frein ou des bruits métalliques au ralentissement indiquent généralement une usure critique des garnitures de friction ou une baisse de pression dans le circuit hydraulique.
+
+### ⚠️ Niveau d'Urgence & Sécurité
+- **Gravité :** Élevée
+- **Peut-on rouler :** Vigilance : trajet court vers garage à allure réduite, arrêt immédiat si la pédale s'enfonce à fond.
+
+### 🛠️ Causes Principales à Contrôler
+- **1. Plaquettes de frein usées :** Le témoin d'usure ou le support métallique frotte contre la piste du disque.
+- **2. Baisse de liquide DOT4 :** Fuite sur un flexible de frein ou étrier grippé nécessitant purge.
+
+### 💡 Conseils & Actions Recommandées
+- **Contrôle personnel :** Ouvrez le capot et inspectez le bocal de liquide de frein (niveau entre MIN et MAX). Regardez à travers les jantes l'épaisseur restante des plaquettes (> 3 mm).
+- **Intervention atelier :** Demandez un contrôle de l'épaisseur des disques au palmer et le remplacement du train de plaquettes avant.
+
+### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
+- **Fourchette moyenne constatée :** **80 € à 160 €** pour les plaquettes avant seules, ou **220 € à 340 €** pour le kit disques + plaquettes monté.`;
     } else if (/courroie|distribution/.test(qLower)) {
       const isPuretech = (vehicle?.engine || '').toLowerCase().includes('puretech');
-      fallbackReply += `⚙️ **Courroie de distribution :**\n`;
-      if (isPuretech) {
-        fallbackReply += `- Sur le moteur **1.2 PureTech**, la courroie est immergée dans l'huile. Contrôlez régulièrement son état lors de chaque vidange (préconisation : remplacement tous les **6 ans ou 100 000 km**).\n`;
-      } else {
-        fallbackReply += `- La préconisation générale est un remplacement tous les **5 à 6 ans ou entre 100 000 et 160 000 km** selon constructeur.\n`;
-      }
-      fallbackReply += `- **Coût estimé :** Entre **450 € et 850 €** kit complet avec pompe à eau.`;
+      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+Pour votre **${vehSpec}**, la distribution assure la synchronisation vitale entre les soupapes et les pistons. Une défaillance entraîne la casse moteur instantanée.
+
+### ⚠️ Niveau d'Urgence & Sécurité
+- **Gravité :** Élevée
+- **Peut-on rouler :** Oui si aucune alerte voyant d'huile ou claquement, mais respectez scrupuleusement l'échéance temporelle.
+
+### 🛠️ Causes Principales à Contrôler
+- **1. Échéance kilométrique / âge :** ${isPuretech ? 'Sur le 1.2 PureTech à courroie humide, la préconisation officielle est de **6 ans ou 100 000 km** avec contrôle de la largeur de courroie à chaque vidange.' : 'La préconisation standard est de **5 à 6 ans ou 100 000 à 150 000 km** selon constructeur.'}
+- **2. Usure de la pompe à eau :** Risque de jeu ou de fuite sur le roulement entraîné par la courroie.
+
+### 💡 Conseils & Actions Recommandées
+- **Contrôle personnel :** Vérifiez votre carnet d'entretien pour retrouver la date et le kilométrage de la dernière intervention.
+- **Intervention atelier :** Demandez un forfait kit de distribution complet (courroie + galets tendeurs + pompe à eau + purge liquide de refroidissement).
+
+### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
+- **Fourchette moyenne constatée :** **450 € à 750 €** chez un garagiste indépendant (**650 € à 950 €** en réseau constructeur).`;
     } else if (/vidange|huile|entretien/.test(qLower)) {
-      fallbackReply += `🛢️ **Entretien & Vidange :**\n- Intervalle recommandé : tous les **15 000 à 20 000 km ou 1 an** avec une huile homologuée constructeur (ex: 0W20 ou 5W30).\n- Remplacez systématiquement le filtre à huile et le joint de bouchon de carter.\n- **Coût moyen :** Entre **70 € et 140 €** en atelier indépendant.`;
-    } else if (/voyant.*moteur|voyant.*orange/.test(qLower)) {
-      fallbackReply += `⚠️ **Voyant moteur allumé :**\n- S'il est **orange fixe**, le calculateur signale une anomalie (antipollution, sonde lambda, allumage). Vous pouvez rouler prudemment jusqu'au garage le plus proche.\n- S'il **clignote**, arrêtez-vous rapidement pour ne pas endommager le pot catalytique.\n- **Diagnostic à la valise OBD-II :** entre **40 € et 80 €**.`;
+      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+Sur votre **${vehSpec}**, la vidange régulière garantit la lubrification sous haute pression des paliers de turbo, des cylindres et de l'arbre à cames.
+
+### ⚠️ Niveau d'Urgence & Sécurité
+- **Gravité :** Modérée
+- **Peut-on rouler :** Oui si le niveau à la jauge est suffisant et le voyant rouge d'huile éteint.
+
+### 🛠️ Causes Principales à Contrôler
+- **1. Dégradation de l'huile moteur :** Perte de viscosité et accumulation de suies (dépassement d'intervalle > 1 an ou 15 000 km).
+- **2. Colmatage du filtre à huile :** Réduction du débit d'huile vers les parties hautes du moteur.
+
+### 💡 Conseils & Actions Recommandées
+- **Contrôle personnel :** Moteur froid sur sol plat, tirez la jauge manuelle : l'huile doit se situer entre les repères MIN et MAX, de teinte dorée à ambrée (noire normale sur diesel).
+- **Intervention atelier :** Vidange par gravitation, remplacement systématique du filtre à huile, du joint de carter et remise à zéro de l'indicateur de maintenance.
+
+### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
+- **Fourchette moyenne constatée :** **75 € à 140 €** pour un forfait vidange + filtre (huile 100% synthèse homologuée constructeur).`;
+    } else if (/voyant.*moteur|voyant.*orange|check engine/.test(qLower)) {
+      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+L'allumage du témoin moteur sur votre **${vehSpec}** indique qu'un code défaut (DTC) a été mémorisé dans le calculateur d'injection (anomalie de combustion, capteur lambda, injection ou dépollution).
+
+### ⚠️ Niveau d'Urgence & Sécurité
+- **Gravité :** ${message.toLowerCase().includes('clignot') ? 'Critique (Risque destruction catalyseur)' : 'Modérée à Élevée'}
+- **Peut-on rouler :** ${message.toLowerCase().includes('clignot') ? 'Arrêt immédiat requis : ne pas continuer à rouler.' : 'Oui avec modération à allure stabilisée jusqu\'au garage le plus proche.'}
+
+### 🛠️ Causes Principales à Contrôler
+- **1. Système d'allumage ou d'injection :** Ratés de combustion, bobines ou bougies encrassées.
+- **2. Circuit de dépollution / sonde Lambda :** Sonde O2 amont, vanne EGR ou filtre à particules colmaté.
+
+### 💡 Conseils & Actions Recommandées
+- **Contrôle personnel :** Vérifiez si le moteur tremble ou subit une perte de puissance en côte (mode dégradé).
+- **Intervention atelier :** Diagnostic électronique complet à la valise OBD-II pour relever les codes DTC (P0xxx) et figer les paramètres en temps réel.
+
+### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
+- **Fourchette moyenne constatée :** **35 € à 65 €** pour la lecture valise de diagnostic seule (**120 € à 380 €** selon le capteur à remplacer).`;
     } else {
-      fallbackReply += `🔍 **Conseil mécanique :**\n- Pour votre question sur ce véhicule, je vous recommande d'inspecter visuellement les niveaux de fluides sous le capot (huile, liquide de refroidissement, liquide de frein).\n- N'hésitez pas à lancer un **diagnostic guidé** dans l'application pour identifier précisément les causes probables et les tests à réaliser.`;
+      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+Pour votre **${vehSpec}**, ce symptôme signale une anomalie mécanique ou électrique nécessitant une identification ciblée des organes en mouvement.
+
+### ⚠️ Niveau d'Urgence & Sécurité
+- **Gravité :** Modérée
+- **Peut-on rouler :** Oui avec vigilance si aucun voyant rouge ne s'allume au combiné d'instruments.
+
+### 🛠️ Causes Principales à Contrôler
+- **1. Organes périphériques moteur :** Courroie d'accessoires, galets, durites d'admission d'air ou de suralimentation.
+- **2. Liaisons au sol ou alimentation :** Silentblocs, roulements de roues ou capteurs électroniques de gestion moteur.
+
+### 💡 Conseils & Actions Recommandées
+- **Contrôle personnel :** Contrôlez visuellement les niveaux de fluides (refroidissement, huile, freins) et notez les conditions précises du bruit (à froid, au braquage, en accélération).
+- **Intervention atelier :** Réalisez le test guidé dans AutoDiag ou confiez le véhicule pour un examen sur pont élévateur.
+
+### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
+- **Fourchette moyenne constatée :** Diagnostic mécanique atelier : **40 € à 70 €** selon le temps passé en recherche de panne.`;
     }
 
     return res.json({

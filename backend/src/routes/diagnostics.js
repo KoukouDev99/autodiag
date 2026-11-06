@@ -3,6 +3,24 @@ const router = express.Router();
 const { getPool } = require('../db/db');
 const DiagnosticEngine = require('../services/diagnosticEngine');
 const { appCache } = require('../utils/cache');
+const { HybridDiagnosticOrchestrator } = require('../diagnostic/orchestrator');
+
+const orchestrator = new HybridDiagnosticOrchestrator();
+
+/**
+ * Middleware / helper attaching source provenance metadata
+ */
+function attachProvenanceMeta(payload, source = 'rules', model = null) {
+  const isAiEnabled = process.env.AI_ENABLED === 'true' || process.env.AI_ENABLED === '1';
+  return {
+    ...payload,
+    meta: {
+      source: source || 'rules',
+      model: isAiEnabled ? (model || process.env.AI_MODEL || 'ollama/qwen2.5:3b') : null,
+      ai_enabled: isAiEnabled
+    }
+  };
+}
 
 // Helper: Cached fault_vehicles to avoid repeating full table query on every question/result
 async function getFaultVehiclesCached(pool) {
@@ -39,76 +57,78 @@ async function getHypothesesForSymptom(pool, symptomId) {
     appCache.set(cacheKey, rows, 600); // 10 min TTL
     return rows;
   }
-  const [legacy] = await pool.query('SELECT * FROM hypotheses WHERE symptom_id = ? ORDER BY order_index ASC', [symptomId]);
+  const [legacy] = await pool.query('SELECT * FROM legacy_hypotheses WHERE symptom_id = ? ORDER BY order_index ASC', [symptomId]);
   appCache.set(cacheKey, legacy, 600);
   return legacy;
 }
 
-// Helper: Get diagnostic questions with options (B2: BATCHED query, NO N+1 loop)
+// Helper: Get diagnostic questions with options (B2: BATCHED query, NO N+1 loop + In-Memory Cache)
 async function getQuestionsForSymptom(pool, symptomId, answeredIds = []) {
-  const [diagCount] = await pool.query('SELECT COUNT(*) as count FROM diagnostic_questions WHERE symptom_id = ?', [symptomId]);
-  if (diagCount[0].count > 0) {
-    let sql = `SELECT id, symptom_id, step_num, category, title, description, why_ask, image_url, reformulation, test_action, test_type
-               FROM diagnostic_questions WHERE symptom_id = ?`;
-    const params = [symptomId];
-    if (answeredIds.length > 0) {
-      sql += ` AND id NOT IN (${answeredIds.map(() => '?').join(',')})`;
-      params.push(...answeredIds);
-    }
-    sql += ' ORDER BY step_num ASC, id ASC';
-    const [rows] = await pool.query(sql, params);
+  const cacheKey = `questions:symptom:${symptomId}`;
+  let allQuestions = appCache.get(cacheKey);
 
-    if (rows.length === 0) return [];
-
-    // B2 FIX: Batch fetch all answer_options in ONE single query instead of looping N times
-    const qIds = rows.map(q => q.id);
-    const [options] = await pool.query(
-      `SELECT id, question_id, label as title, subtitle, icon, is_default, order_index
-       FROM answer_options
-       WHERE question_id IN (${qIds.map(() => '?').join(',')})
-       ORDER BY order_index ASC, id ASC`,
-      qIds
+  if (!allQuestions) {
+    const [rows] = await pool.query(
+      `SELECT id, symptom_id, step_num, category, title, description, why_ask, image_url, reformulation, test_action, test_type
+       FROM diagnostic_questions WHERE symptom_id = ?
+       ORDER BY step_num ASC, id ASC`,
+      [symptomId]
     );
 
-    const optionsByQ = {};
-    for (const opt of options) {
-      if (!optionsByQ[opt.question_id]) optionsByQ[opt.question_id] = [];
-      optionsByQ[opt.question_id].push(opt);
+    if (rows.length > 0) {
+      const qIds = rows.map(q => q.id);
+      const [options] = await pool.query(
+        `SELECT id, question_id, label as title, subtitle, icon, is_default, order_index
+         FROM answer_options
+         WHERE question_id IN (${qIds.map(() => '?').join(',')})
+         ORDER BY order_index ASC, id ASC`,
+        qIds
+      );
+
+      const optionsByQ = {};
+      for (const opt of options) {
+        if (!optionsByQ[opt.question_id]) optionsByQ[opt.question_id] = [];
+        optionsByQ[opt.question_id].push(opt);
+      }
+
+      for (const q of rows) {
+        q.options = optionsByQ[q.id] || [];
+      }
+      allQuestions = rows;
+      appCache.set(cacheKey, allQuestions, 600);
+    } else {
+      // Legacy fallback (also batched & cached)
+      const [legacyRows] = await pool.query(
+        'SELECT * FROM legacy_questions WHERE symptom_id = ? ORDER BY step_num ASC, id ASC',
+        [symptomId]
+      );
+      if (legacyRows.length > 0) {
+        const qIds = legacyRows.map(q => q.id);
+        const [options] = await pool.query(
+          `SELECT * FROM legacy_question_options WHERE question_id IN (${qIds.map(() => '?').join(',')}) ORDER BY id ASC`,
+          qIds
+        );
+
+        const optionsByQ = {};
+        for (const opt of options) {
+          if (!optionsByQ[opt.question_id]) optionsByQ[opt.question_id] = [];
+          optionsByQ[opt.question_id].push(opt);
+        }
+
+        for (const q of legacyRows) {
+          q.options = optionsByQ[q.id] || [];
+        }
+      }
+      allQuestions = legacyRows;
+      appCache.set(cacheKey, allQuestions, 600);
     }
-
-    for (const q of rows) {
-      q.options = optionsByQ[q.id] || [];
-    }
-    return rows;
   }
 
-  // Legacy fallback (also batched to avoid N+1)
-  let sql = 'SELECT * FROM questions WHERE symptom_id = ?';
-  const params = [symptomId];
-  if (answeredIds.length > 0) {
-    sql += ` AND id NOT IN (${answeredIds.map(() => '?').join(',')})`;
-    params.push(...answeredIds);
+  if (!answeredIds || answeredIds.length === 0) {
+    return allQuestions;
   }
-  sql += ' ORDER BY step_num ASC, id ASC';
-  const [rows] = await pool.query(sql, params);
-  if (rows.length === 0) return [];
-
-  const qIds = rows.map(q => q.id);
-  const [options] = await pool.query(
-    `SELECT * FROM question_options WHERE question_id IN (${qIds.map(() => '?').join(',')}) ORDER BY id ASC`,
-    qIds
-  );
-
-  const optionsByQ = {};
-  for (const opt of options) {
-    if (!optionsByQ[opt.question_id]) optionsByQ[opt.question_id] = [];
-    optionsByQ[opt.question_id].push(opt);
-  }
-
-  for (const q of rows) {
-    q.options = optionsByQ[q.id] || [];
-  }
-  return rows;
+  const answeredSet = new Set(answeredIds);
+  return allQuestions.filter(q => !answeredSet.has(q.id));
 }
 
 // Helper: Get session answers joining both answer_options and question_options
@@ -119,7 +139,7 @@ async function getAnswersForSession(pool, sessionId) {
             qo.hypothesis_weights
      FROM session_answers sa
      LEFT JOIN answer_options ao ON sa.option_id = ao.id
-     LEFT JOIN question_options qo ON sa.option_id = qo.id
+     LEFT JOIN legacy_question_options qo ON sa.option_id = qo.id
      WHERE sa.session_id = ?`,
     [sessionId]
   );
@@ -145,14 +165,40 @@ router.get('/diagnostics/recent', async (req, res) => {
   }
 });
 
+// 1b. Diagnostic Orchestrator Endpoint
+router.post('/diagnostic/orchestrate', async (req, res) => {
+  try {
+    const result = await orchestrator.runDiagnostic(req.body);
+    res.json(attachProvenanceMeta(result, result.source || 'rules'));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 2. Diagnostic flow: Start session
 router.post('/diagnostic/start', async (req, res) => {
   try {
     const pool = getPool();
-    const { symptom_id = 1, vehicle_id = 1, user_id = 1 } = req.body;
+    const { symptom_id, symptom_text, vehicle_id = 1, user_id = 1 } = req.body;
+
+    let targetSymptomId = symptom_id;
+
+    // Resolve symptom if text provided without explicit ID
+    if (!targetSymptomId && symptom_text) {
+      const [allSymps] = await pool.query('SELECT id, code, label FROM symptoms');
+      if (process.env.AI_ENABLED === 'true' || process.env.AI_ENABLED === '1') {
+        const norm = await orchestrator.aiEntry.normalizeSymptom(symptom_text, allSymps);
+        targetSymptomId = norm.symptomId;
+      } else {
+        const lower = symptom_text.toLowerCase();
+        const found = allSymps.find(s => lower.includes(s.label.toLowerCase()) || lower.includes(s.code.toLowerCase()));
+        targetSymptomId = found ? found.id : null;
+      }
+    }
+    if (!targetSymptomId) targetSymptomId = 1; // Default fallback
 
     // Get symptom
-    const [sympRows] = await pool.query('SELECT * FROM symptoms WHERE id = ? OR code = ?', [symptom_id, symptom_id]);
+    const [sympRows] = await pool.query('SELECT * FROM symptoms WHERE id = ? OR code = ?', [targetSymptomId, targetSymptomId]);
     if (sympRows.length === 0) return res.status(404).json({ error: 'Symptom not found' });
     const symptom = sympRows[0];
 
@@ -173,13 +219,36 @@ router.post('/diagnostic/start', async (req, res) => {
       }
     }
 
-    // Create session
-    const [sessionResult] = await pool.query(
-      `INSERT INTO diagnostic_sessions (user_id, vehicle_id, symptom_id, status, current_step, summary_title, summary_desc)
-       VALUES (?, ?, ?, 'in_progress', 1, ?, ?)`,
-      [user_id, targetVehicleId, symptom.id, symptom.label, 'Diagnostic en cours']
+    // Upfront Safety Rules Check (Hard Stop)
+    const safetyCheck = await orchestrator.checkSafetyRules(pool, symptom.code, symptom_text);
+
+    // Idempotence: Reuse existing in_progress session for (user_id, targetVehicleId)
+    const [existingSessions] = await pool.query(
+      `SELECT id FROM diagnostic_sessions
+       WHERE user_id = ? AND vehicle_id = ? AND status = 'in_progress'
+       ORDER BY id DESC LIMIT 1`,
+      [user_id, targetVehicleId]
     );
-    const sessionId = sessionResult.insertId;
+
+    let sessionId;
+    if (existingSessions.length > 0) {
+      sessionId = existingSessions[0].id;
+      await pool.query(
+        'UPDATE diagnostic_sessions SET symptom_id = ?, summary_title = ? WHERE id = ?',
+        [symptom.id, symptom.label, sessionId]
+      );
+    } else {
+      const [sessionResult] = await pool.query(
+        `INSERT INTO diagnostic_sessions (user_id, vehicle_id, symptom_id, status, current_step, summary_title, summary_desc)
+         VALUES (?, ?, ?, 'in_progress', 1, ?, ?)`,
+        [user_id, targetVehicleId, symptom.id, symptom.label, 'Diagnostic en cours']
+      );
+      sessionId = sessionResult.insertId;
+    }
+
+    if (safetyCheck.isSafetyAlert) {
+      await pool.query('UPDATE diagnostic_sessions SET status = "safety_stop" WHERE id = ?', [sessionId]);
+    }
 
     // Get first question (unified diagnostic_questions or fallback)
     const questions = await getQuestionsForSymptom(pool, symptom.id);
@@ -188,12 +257,13 @@ router.post('/diagnostic/start', async (req, res) => {
     // Vehicle details
     const [vRows] = await pool.query('SELECT * FROM vehicles WHERE id = ?', [targetVehicleId]);
 
-    res.json({
+    res.json(attachProvenanceMeta({
       session_id: sessionId,
       symptom,
       vehicle: vRows[0],
-      current_question: currentQuestion
-    });
+      current_question: currentQuestion,
+      safety_alert: safetyCheck.isSafetyAlert ? safetyCheck : null
+    }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -210,8 +280,8 @@ router.get('/diagnostic/:sessionId/question', async (req, res) => {
               v.brand as vehicle_brand, v.model as vehicle_model, v.year as vehicle_year,
               v.fuel as vehicle_fuel, v.mileage as vehicle_mileage
        FROM diagnostic_sessions d
-       JOIN symptoms s ON d.symptom_id = s.id
-       JOIN vehicles v ON d.vehicle_id = v.id
+       LEFT JOIN symptoms s ON d.symptom_id = s.id
+       LEFT JOIN vehicles v ON d.vehicle_id = v.id
        WHERE d.id = ?`,
       [sessionId]
     );
@@ -269,14 +339,26 @@ router.get('/diagnostic/:sessionId/question', async (req, res) => {
     const selection = DiagnosticEngine.selectNextQuestion(unansweredQuestions, evalResult, answers.length, lastAnswerRules);
 
     if (selection.shouldStopEarly || !selection.selectedQuestion) {
-      // Mark session as completed
-      await pool.query('UPDATE diagnostic_sessions SET status = "completed", completed_at = NOW() WHERE id = ?', [sessionId]);
-      return res.json({
-        completed: true,
-        session,
-        early_stopping: selection.reason === 'high_confidence_reached',
-        reason: selection.reason
-      });
+      // Migration 004 Fix: Ne marquer 'completed' QUE si l'utilisateur a répondu à au moins 1 question
+      if (answers.length >= 1) {
+        await pool.query('UPDATE diagnostic_sessions SET status = "completed", completed_at = NOW() WHERE id = ?', [sessionId]);
+        return res.json({
+          completed: true,
+          session,
+          early_stopping: selection.reason === 'high_confidence_reached',
+          reason: selection.reason
+        });
+      } else {
+        // Aucune question disponible pour ce symptôme : ne JAMAIS marquer 'completed' avec 0 réponse !
+        await pool.query('UPDATE diagnostic_sessions SET status = "no_questions_available" WHERE id = ?', [sessionId]);
+        return res.json({
+          completed: false,
+          no_questions: true,
+          status: 'no_questions_available',
+          session: { ...session, status: 'no_questions_available' },
+          reason: 'no_questions_available'
+        });
+      }
     }
 
     const question = selection.selectedQuestion;
@@ -337,8 +419,8 @@ router.get('/diagnostic/:sessionId/results', async (req, res) => {
               v.id as v_id, v.brand as vehicle_brand, v.model as vehicle_model, 
               v.year as vehicle_year, v.fuel as vehicle_fuel, v.engine as vehicle_engine, v.mileage as vehicle_mileage
        FROM diagnostic_sessions d
-       JOIN symptoms s ON d.symptom_id = s.id
-       JOIN vehicles v ON d.vehicle_id = v.id
+       LEFT JOIN symptoms s ON d.symptom_id = s.id
+       LEFT JOIN vehicles v ON d.vehicle_id = v.id
        WHERE d.id = ?`,
       [sessionId]
     );
@@ -388,8 +470,27 @@ router.get('/diagnostic/:sessionId/results', async (req, res) => {
     let structuredTest = evalResult.confirmation_test;
     let structuredSolution = null;
 
+    // Persist diagnostic results in diagnostic_results table (Phase 3)
+    if (rankedHypotheses && rankedHypotheses.length > 0) {
+      try {
+        await pool.query('DELETE FROM diagnostic_results WHERE session_id = ?', [sessionId]);
+        const insertRows = rankedHypotheses.map((h, index) => [
+          sessionId,
+          h.id,
+          h.confidence_percent !== undefined ? h.confidence_percent : (h.raw_score || 0),
+          index + 1
+        ]);
+        await pool.query(
+          'INSERT INTO diagnostic_results (session_id, fault_id, score, `rank`) VALUES ?',
+          [insertRows]
+        );
+      } catch (insertErr) {
+        console.warn('Warning inserting diagnostic_results:', insertErr.message);
+      }
+    }
+
     if (topHypothesis) {
-      const [guides] = await pool.query('SELECT id FROM repair_guides WHERE hypothesis_id = ? LIMIT 1', [topHypothesis.id]);
+      const [guides] = await pool.query('SELECT id FROM legacy_repair_guides WHERE hypothesis_id = ? LIMIT 1', [topHypothesis.id]);
       if (guides.length > 0) guideId = guides[0].id;
 
       // Try fetching from diagnostic_tests and solutions
@@ -417,7 +518,7 @@ router.get('/diagnostic/:sessionId/results', async (req, res) => {
       headline = `Diagnostic à confirmer : 3 causes possibles identifiées (confiance ${evalResult.top_confidence}%)`;
     }
 
-    res.json({
+    res.json(attachProvenanceMeta({
       session,
       vehicle,
       symptom: {
@@ -442,7 +543,7 @@ router.get('/diagnostic/:sessionId/results', async (req, res) => {
       garage_memo: evalResult.garage_memo,
       safety_alerts: safetyAlerts,
       guide_id: guideId || 1
-    });
+    }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -484,17 +585,22 @@ router.post('/diagnostic/:sessionId/feedback', async (req, res) => {
   }
 });
 
-// 7. Repair & Inspection Guide
+// 7. Repair & Inspection Guide (Cached for 10 min)
 router.get('/diagnostic/guide/:hypothesisId', async (req, res) => {
   try {
-    const pool = getPool();
     const { hypothesisId } = req.params;
+    const cacheKey = `guide:hypothesis:${hypothesisId}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
 
+    const pool = getPool();
     const [guides] = await pool.query(
       `SELECT rg.*, h.name as hypothesis_name, s.label as symptom_label,
               v.brand as vehicle_brand, v.model as vehicle_model
-       FROM repair_guides rg
-       JOIN hypotheses h ON rg.hypothesis_id = h.id
+       FROM legacy_repair_guides rg
+       JOIN legacy_hypotheses h ON rg.hypothesis_id = h.id
        JOIN symptoms s ON h.symptom_id = s.id
        LEFT JOIN vehicles v ON v.is_primary = TRUE
        WHERE rg.hypothesis_id = ? OR rg.id = ?
@@ -507,7 +613,7 @@ router.get('/diagnostic/guide/:hypothesisId', async (req, res) => {
 
     // Fetch steps
     const [steps] = await pool.query(
-      'SELECT * FROM repair_steps WHERE guide_id = ? ORDER BY step_num ASC',
+      'SELECT * FROM legacy_repair_steps WHERE guide_id = ? ORDER BY step_num ASC',
       [guide.id]
     );
 
@@ -518,11 +624,13 @@ router.get('/diagnostic/guide/:hypothesisId', async (req, res) => {
       tools = ['Lampe de poche', 'Notice du véhicule'];
     }
 
-    res.json({
+    const result = {
       ...guide,
       tools_needed: tools,
       steps
-    });
+    };
+    appCache.set(cacheKey, result, 600);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

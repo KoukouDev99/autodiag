@@ -6,9 +6,17 @@
 .profile-page-container {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
   gap: var(--space-6);
-  padding: var(--space-2) 0 var(--space-8) 0;
+  padding: 18px 16px 40px 16px;
   animation: fadeIn 0.3s ease-out;
+}
+
+@media (min-width: 880px) {
+  .profile-page-container {
+    padding: 28px 32px 44px 32px;
+  }
 }
 
 @keyframes fadeIn {

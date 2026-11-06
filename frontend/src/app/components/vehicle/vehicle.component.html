@@ -2,18 +2,18 @@
   <!-- Unified Header & Breadcrumb -->
   <div class="vehicle-page-header">
     <div class="vehicle-title-col">
-      <button class="back-btn-pill" (click)="goBack()" title="Retour à l’accueil">
+      <button class="back-btn-pill" (click)="goBack()" [title]="'nav.back_home' | translate">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span>Retour</span>
+        <span>{{ 'Retour' | translate }}</span>
       </button>
       <div>
-        <h1 class="page-title">{{ isNewMode ? 'Ajouter un véhicule' : 'Configuration Véhicule' }}</h1>
+        <h1 class="page-title">{{ (isNewMode ? 'Ajouter un véhicule' : 'Configuration Véhicule') | translate }}</h1>
         <p class="page-subtitle">
-          {{ isNewMode 
+          {{ (isNewMode 
             ? 'Renseignez les données techniques pour ajouter ce véhicule à votre garage.' 
-            : 'Fiche technique, motorisation et immatriculation certifiée pour le diagnostic.' 
+            : 'Fiche technique, motorisation et immatriculation certifiée pour le diagnostic.') | translate
           }}
         </p>
       </div>
@@ -22,14 +22,14 @@
     <div class="vehicle-top-actions">
       @if (isNewMode) {
         <button type="button" class="btn-cancel-new-mode" (click)="switchToVehicle(vehicles[0])">
-          Annuler
+          {{ 'Annuler' | translate }}
         </button>
       } @else {
         <button type="button" class="btn-add-vehicle-modern" (click)="startNewVehicle()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          <span>Ajouter un véhicule</span>
+          <span>{{ 'Ajouter un véhicule' | translate }}</span>
         </button>
       }
     </div>
@@ -50,9 +50,9 @@
             </svg>
           </div>
           <div>
-            <h2 class="garage-section-heading">Mon Garage Automobile</h2>
+            <h2 class="garage-section-heading">{{ 'vehicle.my_garage' | translate }}</h2>
             <p class="garage-section-sub">
-              {{ vehicles.length }} véhicule{{ vehicles.length > 1 ? 's' : '' }} enregistré{{ vehicles.length > 1 ? 's' : '' }} • Cliquez sur une ligne pour modifier
+              {{ vehicles.length }} {{ (vehicles.length > 1 ? 'véhicules enregistrés' : 'véhicule enregistré') | translate }} • {{ 'Cliquez sur une ligne pour modifier' | translate }}
             </p>
           </div>
         </div>
@@ -65,7 +65,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          <span>Ajouter un véhicule</span>
+          <span>{{ 'vehicle.add_vehicle' | translate }}</span>
         </button>
       </div>
 
@@ -92,16 +92,16 @@
               <div class="car-row-title">
                 <span class="car-row-name">{{ v.brand }} {{ v.model }}</span>
                 @if (v.is_primary) {
-                  <span class="badge-primary-star">⭐ Principal</span>
+                  <span class="badge-primary-star">⭐ {{ 'Principal' | translate }}</span>
                 }
                 @if (!isNewMode && v.id === vehicle.id) {
-                  <span class="badge-editing">✓ En édition</span>
+                  <span class="badge-editing">✓ {{ 'En édition' | translate }}</span>
                 }
               </div>
               <div class="car-row-meta">
                 <span>{{ v.year }}</span>
                 <span class="meta-separator">•</span>
-                <span>{{ v.fuel }}</span>
+                <span>{{ v.fuel | translate }}</span>
                 @if (v.license_plate) {
                   <span class="meta-separator">•</span>
                   <span class="car-row-plate-pill">
@@ -123,9 +123,9 @@
                   type="button" 
                   class="btn-row-make-primary" 
                   (click)="setAsPrimary(v, $event)"
-                  title="Définir comme véhicule principal"
+                  [title]="'Définir comme véhicule principal' | translate"
                 >
-                  ⭐ Principal
+                  ⭐ {{ 'Principal' | translate }}
                 </button>
               }
               <button 
@@ -134,14 +134,14 @@
                 [class.btn-row-active]="!isNewMode && v.id === vehicle.id"
                 (click)="switchToVehicle(v)"
               >
-                {{ (!isNewMode && v.id === vehicle.id) ? '✓ Sélectionné' : 'Modifier' }}
+                {{ ((!isNewMode && v.id === vehicle.id) ? '✓ Sélectionné' : 'Modifier') | translate }}
               </button>
 
               <button 
                 type="button" 
                 class="btn-row-delete" 
                 (click)="deleteVehicleFromList(v, $event)"
-                title="Supprimer ce véhicule du garage"
+                [title]="'Supprimer ce véhicule du garage' | translate"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
                   <polyline points="3 6 5 6 21 6"/>
@@ -149,7 +149,7 @@
                   <line x1="10" y1="11" x2="10" y2="17"/>
                   <line x1="14" y1="11" x2="14" y2="17"/>
                 </svg>
-                <span>Supprimer</span>
+                <span>{{ 'Supprimer' | translate }}</span>
               </button>
             </div>
           </div>
@@ -168,8 +168,8 @@
         </svg>
       </div>
       <div class="garage-empty-info">
-        <h3 class="garage-empty-title">Votre garage est vide</h3>
-        <p class="garage-empty-desc">Aucun véhicule enregistré pour le moment. Renseignez les informations ci-dessous pour enregistrer un véhicule.</p>
+        <h3 class="garage-empty-title">{{ 'Votre garage est vide' | translate }}</h3>
+        <p class="garage-empty-desc">{{ 'Aucun véhicule enregistré pour le moment. Renseignez les informations ci-dessous pour enregistrer un véhicule.' | translate }}</p>
       </div>
     </div>
   }
@@ -181,7 +181,7 @@
       <div class="form-hero-left">
         <div class="form-hero-logo-box" [class.is-new-mode]="isNewMode && !vehicle.brand">
           @if (isNewMode && !vehicle.brand) {
-            <img src="assets/simple-car.svg" alt="Nouveau véhicule" class="form-hero-simple-car-img" />
+            <img src="assets/simple-car.svg" [alt]="'Nouveau véhicule' | translate" class="form-hero-simple-car-img" />
           } @else {
             <img 
               [src]="getBrandLogoUrl(vehicle.brand)" 
@@ -193,13 +193,13 @@
         </div>
         <div class="form-hero-text">
           <h2 class="form-hero-title">
-            {{ isNewMode ? (vehicle.brand ? vehicle.brand + ' ' + (vehicle.model || '') : 'Nouveau véhicule') : (vehicle.brand + ' ' + vehicle.model) }}
+            {{ isNewMode ? (vehicle.brand ? vehicle.brand + ' ' + (vehicle.model || '') : ('Nouveau véhicule' | translate)) : (vehicle.brand + ' ' + vehicle.model) }}
           </h2>
           <div class="form-hero-meta">
             @if (isNewMode) {
-              <span class="badge-status-configuring">Configuration en cours</span>
+              <span class="badge-status-configuring">{{ 'Configuration en cours' | translate }}</span>
             } @else {
-              <span>{{ vehicle.year }} • {{ vehicle.fuel }} • {{ vehicle.engine || 'Motorisation à définir' }}</span>
+              <span>{{ vehicle.year }} • {{ vehicle.fuel | translate }} • {{ (vehicle.engine || 'Motorisation à définir') | translate }}</span>
             }
           </div>
         </div>
@@ -208,10 +208,10 @@
       <div class="form-hero-right">
         @if (!isNewMode) {
           @if (vehicle.is_primary) {
-            <span class="badge-primary-vehicle">⭐ Véhicule principal</span>
+            <span class="badge-primary-vehicle">⭐ {{ 'Véhicule principal' | translate }}</span>
           } @else {
             <button type="button" class="btn-make-primary-modern" (click)="setAsPrimary(vehicle, $event)">
-              Définir comme principal
+              {{ 'Définir comme principal' | translate }}
             </button>
           }
         }
@@ -220,8 +220,8 @@
 
     <!-- Section 1: Caractéristiques & Motorisation -->
     <div class="form-section-divider">
-      <span class="section-divider-title">01. Caractéristiques <span class="amp">&</span> Motorisation</span>
-      <span class="section-required-text">Données techniques</span>
+      <span class="section-divider-title">{{ 'vehicle.sec1_title' | translate }}</span>
+      <span class="section-required-text">{{ 'vehicle.sec1_sub' | translate }}</span>
     </div>
 
     <!-- Row 1: Marque & Modèle (2 Columns on Laptop) -->
@@ -229,11 +229,11 @@
       <!-- Marque (Custom Searchable & Scrollable Dropdown) -->
       <div class="form-group custom-dropdown-group">
         <div class="label-row">
-          <label class="form-label">Marque</label>
+          <label class="form-label">{{ 'vehicle.brand' | translate }}</label>
           @if (loadingBrands) {
-            <span class="loading-hint">Chargement du catalogue...</span>
+            <span class="loading-hint">{{ 'Chargement du catalogue...' | translate }}</span>
           } @else {
-            <span class="count-hint">{{ brands.length }} marques</span>
+            <span class="count-hint">{{ brands.length }} {{ 'marques' | translate }}</span>
           }
         </div>
 
@@ -255,7 +255,7 @@
               />
             }
             <span class="trigger-value" [class.placeholder]="!vehicle.brand">
-              {{ vehicle.brand || 'Sélectionner une marque' }}
+              {{ vehicle.brand || ('Sélectionner une marque' | translate) }}
             </span>
           </div>
           <div class="trigger-chevron" [class.rotated]="isBrandOpen">
@@ -275,7 +275,7 @@
               <input 
                 type="text" 
                 class="dropdown-search-input" 
-                placeholder="Rechercher une marque (ex: Peugeot, Audi...)" 
+                [placeholder]="'Rechercher une marque (ex: Peugeot, Audi...)' | translate" 
                 [(ngModel)]="brandSearch" 
                 name="brandSearchField"
                 autocomplete="off"
@@ -288,7 +288,7 @@
             <!-- Scrollable list with visible scrollbar -->
             <div class="scrollable-dropdown-list">
               @if (filteredBrands.length === 0) {
-                <div class="dropdown-empty-state">Aucune marque trouvée pour "{{ brandSearch }}"</div>
+                <div class="dropdown-empty-state">{{ 'Aucune marque trouvée pour' | translate }} "{{ brandSearch }}"</div>
               } @else {
                 @for (b of filteredBrands; track b) {
                   <button 
@@ -323,11 +323,11 @@
       <!-- Modèle (Custom Searchable & Scrollable Dropdown) -->
       <div class="form-group custom-dropdown-group">
         <div class="label-row">
-          <label class="form-label">Modèle</label>
+          <label class="form-label">{{ 'vehicle.model' | translate }}</label>
           @if (loadingModels) {
-            <span class="loading-hint">Chargement des modèles...</span>
+            <span class="loading-hint">{{ 'Chargement des modèles...' | translate }}</span>
           } @else if (models.length > 0) {
-            <span class="count-hint">{{ models.length }} modèles disponibles</span>
+            <span class="count-hint">{{ models.length }} {{ 'modèles disponibles' | translate }}</span>
           }
         </div>
 
@@ -338,7 +338,7 @@
           (click)="toggleModelDropdown($event)"
         >
           <span class="trigger-value" [class.placeholder]="!vehicle.model">
-            {{ vehicle.model || (loadingModels ? 'Chargement en cours...' : 'Sélectionner un modèle') }}
+            {{ vehicle.model || ((loadingModels ? 'Chargement en cours...' : 'Sélectionner un modèle') | translate) }}
           </span>
           <div class="trigger-chevron" [class.rotated]="isModelOpen">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -357,7 +357,7 @@
               <input 
                 type="text" 
                 class="dropdown-search-input" 
-                placeholder="Rechercher un modèle (ex: 208, Clio...)" 
+                [placeholder]="'Rechercher un modèle (ex: 208, Clio...)' | translate" 
                 [(ngModel)]="modelSearch" 
                 name="modelSearchField"
                 autocomplete="off"
@@ -370,7 +370,7 @@
             <!-- Scrollable list with visible scrollbar -->
             <div class="scrollable-dropdown-list">
               @if (filteredModels.length === 0) {
-                <div class="dropdown-empty-state">Aucun modèle trouvé pour "{{ modelSearch }}"</div>
+                <div class="dropdown-empty-state">{{ 'Aucun modèle trouvé pour' | translate }} "{{ modelSearch }}"</div>
               } @else {
                 @for (m of filteredModels; track m.id || m.model) {
                   <button 
@@ -382,7 +382,7 @@
                     <div class="model-item-info">
                       <span class="item-label">{{ m.model }}</span>
                       @if (m.year_start) {
-                        <span class="item-sub">({{ m.year_start }} - {{ m.year_end || 'aujourd’hui' }})</span>
+                        <span class="item-sub">({{ m.year_start }} - {{ m.year_end || ('aujourd’hui' | translate) }})</span>
                       }
                     </div>
                     @if (m.model === vehicle.model) {
@@ -404,7 +404,7 @@
       <!-- Année -->
       <div class="form-group custom-dropdown-group">
         <div class="label-row">
-          <label class="form-label">Année</label>
+          <label class="form-label">{{ 'vehicle.year' | translate }}</label>
           @if (loadingYears) {
             <span class="loading-hint">...</span>
           }
@@ -417,7 +417,7 @@
           (click)="toggleYearDropdown($event)"
         >
           <span class="trigger-value" [class.placeholder]="!vehicle.brand || !vehicle.year">
-            {{ (vehicle.brand && vehicle.year) ? vehicle.year : 'Sélectionner une année' }}
+            {{ (vehicle.brand && vehicle.year) ? vehicle.year : ('Sélectionner une année' | translate) }}
           </span>
           <div class="trigger-chevron" [class.rotated]="isYearOpen">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -452,9 +452,9 @@
       <!-- Carburant -->
       <div class="form-group custom-dropdown-group">
         <div class="label-row">
-          <label class="form-label">Carburant</label>
+          <label class="form-label">{{ 'Carburant' | translate }}</label>
           @if (engines.length > 0 && availableFuelTypes.length > 0) {
-            <span class="count-hint">{{ availableFuelTypes.length }} type{{ availableFuelTypes.length > 1 ? 's' : '' }}</span>
+            <span class="count-hint">{{ availableFuelTypes.length }} {{ (availableFuelTypes.length > 1 ? 'types' : 'type') | translate }}</span>
           }
         </div>
 
@@ -465,7 +465,7 @@
           (click)="toggleFuelDropdown($event)"
         >
           <span class="trigger-value" [class.placeholder]="!vehicle.brand || !vehicle.fuel">
-            {{ (vehicle.brand && vehicle.fuel) ? vehicle.fuel : 'Sélectionner un carburant' }}
+            {{ (vehicle.brand && vehicle.fuel) ? (vehicle.fuel | translate) : ('Sélectionner un carburant' | translate) }}
           </span>
           <div class="trigger-chevron" [class.rotated]="isFuelOpen">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -484,7 +484,7 @@
                   [class.selected]="f === vehicle.fuel"
                   (click)="selectFuel(f)"
                 >
-                  <span class="item-label">{{ f }}</span>
+                  <span class="item-label">{{ f | translate }}</span>
                   @if (f === vehicle.fuel) {
                     <svg class="item-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                       <path d="M20 6L9 17l-5-5"/>
@@ -501,13 +501,13 @@
     <!-- Motorisation & Options (Smart Dropdown from Database) -->
     <div class="form-group custom-dropdown-group">
       <div class="label-row">
-        <label class="form-label">Motorisation</label>
+        <label class="form-label">{{ 'Motorisation' | translate }}</label>
         @if (loadingEngines) {
-          <span class="loading-hint">Chargement des motorisations...</span>
+          <span class="loading-hint">{{ 'Chargement des motorisations...' | translate }}</span>
         } @else if (availableEnginesForFuel.length > 0) {
-          <span class="count-hint">{{ availableEnginesForFuel.length }} motorisation(s) {{ showAllFuels ? '(tous carburants)' : vehicle.fuel }}</span>
+          <span class="count-hint">{{ availableEnginesForFuel.length }} {{ 'motorisation(s)' | translate }} {{ showAllFuels ? ('(tous carburants)' | translate) : (vehicle.fuel | translate) }}</span>
         } @else if (engines.length > 0) {
-          <span class="count-hint fuel-none-warning">0 motorisation {{ vehicle.fuel }}</span>
+          <span class="count-hint fuel-none-warning">0 {{ 'motorisation' | translate }} {{ vehicle.fuel | translate }}</span>
         }
       </div>
 
@@ -519,8 +519,8 @@
       >
         <span class="trigger-value" [class.placeholder]="!vehicle.engine">
           {{ isEngineDisabled 
-            ? 'Sélectionner une motorisation' 
-            : (vehicle.engine || (loadingEngines ? 'Recherche des motorisations...' : 'Sélectionner une motorisation')) 
+            ? ('Sélectionner une motorisation' | translate) 
+            : (vehicle.engine || ((loadingEngines ? 'Recherche des motorisations...' : 'Sélectionner une motorisation') | translate)) 
           }}
         </span>
         <div class="trigger-chevron" [class.rotated]="isEngineOpen">
@@ -535,12 +535,12 @@
           <!-- Fuel Filter Indicator Banner -->
           <div class="dropdown-fuel-filter-bar">
             <span class="fuel-filter-pill">
-              ⛽ {{ showAllFuels ? 'Tous les carburants' : 'Filtre : ' + vehicle.fuel }}
+              ⛽ {{ showAllFuels ? ('Tous les carburants' | translate) : ('Filtre : ' | translate) + (vehicle.fuel | translate) }}
               ({{ availableEnginesForFuel.length }}/{{ engines.length }})
             </span>
             @if (engines.length > 0) {
               <button type="button" class="btn-toggle-fuel-filter" (click)="toggleAllFuelsFilter($event)">
-                {{ showAllFuels ? 'Filtrer sur ' + vehicle.fuel : 'Tous carburants (' + engines.length + ')' }}
+                {{ showAllFuels ? ('Filtrer sur ' | translate) + (vehicle.fuel | translate) : ('Tous carburants' | translate) + ' (' + engines.length + ')' }}
               </button>
             }
           </div>
@@ -553,7 +553,7 @@
             <input 
               type="text" 
               class="dropdown-search-input" 
-              placeholder="Rechercher une motorisation (ex: PureTech, 100 HP, TDI...)" 
+              [placeholder]="'Rechercher une motorisation (ex: PureTech, 100 HP, TDI...)' | translate" 
               [(ngModel)]="engineSearch" 
               name="engineSearchField"
               autocomplete="off"
@@ -567,12 +567,12 @@
             @if (filteredEngines.length === 0) {
               <div class="dropdown-empty-state">
                 @if (availableEnginesForFuel.length === 0 && !showAllFuels) {
-                  <div>Aucune motorisation <strong>{{ vehicle.fuel }}</strong> disponible pour ce modèle.</div>
+                  <div>{{ 'Aucune motorisation' | translate }} <strong>{{ vehicle.fuel | translate }}</strong> {{ 'disponible pour ce modèle.' | translate }}</div>
                   <button type="button" class="btn-toggle-fuel-filter mt-2" (click)="toggleAllFuelsFilter($event)">
-                    Afficher toutes les motorisations ({{ engines.length }})
+                    {{ 'Afficher toutes les motorisations' | translate }} ({{ engines.length }})
                   </button>
                 } @else {
-                  <span>Aucune motorisation trouvée pour "{{ engineSearch }}".</span>
+                  <span>{{ 'Aucune motorisation trouvée pour' | translate }} "{{ engineSearch }}".</span>
                 }
               </div>
             } @else {
@@ -593,7 +593,7 @@
                         <span class="spec-badge-pill">⚙️ {{ eng.displacement }}</span>
                       }
                       @if (eng.fuel) {
-                        <span class="spec-badge-pill">⛽ {{ eng.fuel }}</span>
+                        <span class="spec-badge-pill">⛽ {{ eng.fuel | translate }}</span>
                       }
                     </div>
                   </div>
@@ -614,62 +614,62 @@
     @if (selectedEngineSpec) {
       <div class="specs-summary-card">
         <div class="specs-card-header">
-          <div class="specs-badge-tag">CARACTÉRISTIQUES TECHNIQUES DÉTAILLÉES</div>
+          <div class="specs-badge-tag">{{ 'CARACTÉRISTIQUES TECHNIQUES DÉTAILLÉES' | translate }}</div>
           <div class="specs-engine-headline">{{ selectedEngineSpec.name }}</div>
         </div>
 
         <div class="specs-grid">
           @if (selectedEngineSpec.power_hp) {
             <div class="spec-tile">
-              <span class="spec-tile-label">⚡ Puissance</span>
+              <span class="spec-tile-label">⚡ {{ 'Puissance' | translate }}</span>
               <span class="spec-tile-value highlight">{{ selectedEngineSpec.power_hp }} ({{ selectedEngineSpec.power_kw || 'kW' }})</span>
             </div>
           }
           @if (selectedEngineSpec.torque_nm) {
             <div class="spec-tile">
-              <span class="spec-tile-label">🔄 Couple moteur</span>
+              <span class="spec-tile-label">🔄 {{ 'Couple moteur' | translate }}</span>
               <span class="spec-tile-value">{{ selectedEngineSpec.torque_nm }}</span>
             </div>
           }
           @if (selectedEngineSpec.displacement || selectedEngineSpec.cylinders) {
             <div class="spec-tile">
-              <span class="spec-tile-label">⚙️ Cylindrée <span class="amp">&</span> Cylindres</span>
-              <span class="spec-tile-value">{{ selectedEngineSpec.displacement || 'Électrique' }} {{ selectedEngineSpec.cylinders ? '(' + selectedEngineSpec.cylinders + ')' : '' }}</span>
+              <span class="spec-tile-label">⚙️ {{ 'Cylindrée' | translate }} <span class="amp">&</span> {{ 'Cylindres' | translate }}</span>
+              <span class="spec-tile-value">{{ (selectedEngineSpec.displacement || 'Électrique') | translate }} {{ selectedEngineSpec.cylinders ? '(' + selectedEngineSpec.cylinders + ')' : '' }}</span>
             </div>
           }
           @if (selectedEngineSpec.gearbox) {
             <div class="spec-tile">
-              <span class="spec-tile-label">🕹️ Boîte de vitesses</span>
-              <span class="spec-tile-value">{{ selectedEngineSpec.gearbox }}</span>
+              <span class="spec-tile-label">🕹️ {{ 'Boîte de vitesses' | translate }}</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.gearbox | translate }}</span>
             </div>
           }
           @if (selectedEngineSpec.drive_type) {
             <div class="spec-tile">
-              <span class="spec-tile-label">🚗 Transmission</span>
-              <span class="spec-tile-value">{{ selectedEngineSpec.drive_type }}</span>
+              <span class="spec-tile-label">🚗 {{ 'Transmission' | translate }}</span>
+              <span class="spec-tile-value">{{ selectedEngineSpec.drive_type | translate }}</span>
             </div>
           }
           @if (selectedEngineSpec.acceleration || selectedEngineSpec.top_speed) {
             <div class="spec-tile">
-              <span class="spec-tile-label">⏱️ Accélération <span class="amp">&</span> Vmax</span>
+              <span class="spec-tile-label">⏱️ {{ 'Accélération' | translate }} <span class="amp">&</span> Vmax</span>
               <span class="spec-tile-value">0-100: {{ selectedEngineSpec.acceleration || '-' }} | Vmax: {{ selectedEngineSpec.top_speed || '-' }}</span>
             </div>
           }
           @if (selectedEngineSpec.dimensions) {
             <div class="spec-tile">
-              <span class="spec-tile-label">📏 Dimensions (L × l × h)</span>
+              <span class="spec-tile-label">📏 {{ 'Dimensions (L × l × h)' | translate }}</span>
               <span class="spec-tile-value">{{ selectedEngineSpec.dimensions }}</span>
             </div>
           }
           @if (selectedEngineSpec.weight) {
             <div class="spec-tile">
-              <span class="spec-tile-label">⚖️ Poids à vide</span>
+              <span class="spec-tile-label">⚖️ {{ 'Poids à vide' | translate }}</span>
               <span class="spec-tile-value">{{ selectedEngineSpec.weight }}</span>
             </div>
           }
           @if (selectedEngineSpec.tires) {
             <div class="spec-tile">
-              <span class="spec-tile-label">🛞 Pneus d’origine</span>
+              <span class="spec-tile-label">🛞 {{ 'Pneus d’origine' | translate }}</span>
               <span class="spec-tile-value">{{ selectedEngineSpec.tires }}</span>
             </div>
           }
@@ -679,8 +679,8 @@
 
     <!-- Section 2: Identification & Compteur -->
     <div class="form-section-divider">
-      <span class="section-divider-title">02. Identification <span class="amp">&</span> Compteur</span>
-      <span class="section-required-text">Plaque certifiée <span class="amp">&</span> Kilométrage</span>
+      <span class="section-divider-title">{{ 'vehicle.sec2_title' | translate }}</span>
+      <span class="section-required-text">{{ 'vehicle.sec2_sub' | translate }} <span class="optional-tag">{{ 'vehicle.optional' | translate }}</span></span>
     </div>
 
     <!-- Plaque d'immatriculation & Kilométrage (2 Columns) -->
@@ -688,7 +688,9 @@
       <!-- Immatriculation avec pays dynamique et validation spécifique -->
       <div class="form-group plate-form-group">
         <div class="label-row">
-          <label class="form-label" for="plateInput">Immatriculation</label>
+          <label class="form-label" for="plateInput">
+            {{ 'vehicle.plate' | translate }} <span class="optional-tag">{{ 'vehicle.optional' | translate }}</span>
+          </label>
           
           <!-- Sélecteur de pays cliquable -->
           <div class="plate-country-selector-wrapper">
@@ -696,7 +698,7 @@
               type="button" 
               class="plate-country-selector-btn" 
               (click)="toggleCountryDropdown($event)"
-              title="Changer le pays de l’immatriculation"
+              [title]="'Changer le pays de l’immatriculation' | translate"
             >
               <span class="country-flag-icon flag-{{ selectedCountry.code.toLowerCase() }}"></span>
               <span class="country-code-pill">{{ selectedCountry.code }}</span>
@@ -708,7 +710,7 @@
 
             @if (isCountryOpen) {
               <div class="country-dropdown-menu" (click)="$event.stopPropagation()">
-                <div class="country-dropdown-header">Sélectionnez le pays d’immatriculation :</div>
+                <div class="country-dropdown-header">{{ 'Sélectionnez le pays d’immatriculation :' | translate }}</div>
                 <div class="country-dropdown-scroll">
                   @for (c of plateCountries; track c.code) {
                     <button 
@@ -743,7 +745,7 @@
             [class.swiss-band]="selectedCountry.code === 'CH'" 
             [class.non-euro-band]="!selectedCountry.isEuro"
             (click)="toggleCountryDropdown($event)"
-            [title]="'Pays : ' + selectedCountry.name + ' (Cliquez pour changer)'"
+            [title]="'Pays : ' + selectedCountry.name"
           >
             @if (selectedCountry.code === 'CH') {
               <!-- Croix suisse blanche -->
@@ -798,17 +800,19 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            <span>Format invalide (Exemple : {{ selectedCountry.example }})</span>
+            <span>{{ 'Format invalide' | translate }} ({{ 'Exemple :' | translate }} {{ selectedCountry.example }})</span>
           </div>
         } @else {
-          <div class="form-help">Exemple : {{ selectedCountry.example }}</div>
+          <div class="form-help">{{ 'Exemple :' | translate }} {{ selectedCountry.example }}</div>
         }
       </div>
 
       <!-- Kilométrage avec sélecteur d'unité km / miles (Optionnel) -->
       <div class="form-group mileage-form-group">
         <div class="label-row">
-          <label class="form-label" for="mileageInput">Compteur kilométrique</label>
+          <label class="form-label" for="mileageInput">
+            {{ 'vehicle.mileage' | translate }} <span class="optional-tag">{{ 'vehicle.optional' | translate }}</span>
+          </label>
           
           <!-- Toggle unité km vs miles -->
           <div class="unit-toggle-pill-group">
@@ -817,7 +821,7 @@
               class="unit-pill-btn" 
               [class.active]="(vehicle.mileage_unit || 'km') === 'km'"
               (click)="setMileageUnit('km')"
-              title="Afficher en kilomètres"
+              [title]="'Afficher en kilomètres' | translate"
             >
               km
             </button>
@@ -826,7 +830,7 @@
               class="unit-pill-btn" 
               [class.active]="vehicle.mileage_unit === 'mi'"
               (click)="setMileageUnit('mi')"
-              title="Afficher en miles"
+              [title]="'Afficher en miles' | translate"
             >
               miles
             </button>
@@ -853,7 +857,7 @@
           <span class="mileage-unit-tag">{{ vehicle.mileage_unit === 'mi' ? 'mi' : 'km' }}</span>
         </div>
         <div class="form-help">
-          Indiquez la valeur au compteur en {{ vehicle.mileage_unit === 'mi' ? 'miles' : 'kilomètres' }}.
+          {{ (vehicle.mileage_unit === 'mi' ? 'Indiquez la valeur au compteur en miles.' : 'Indiquez la valeur au compteur en kilomètres.') | translate }}
         </div>
       </div>
     </div>
@@ -864,7 +868,7 @@
         <label class="toggle-checkbox-label">
           <input type="checkbox" [(ngModel)]="vehicle.is_primary" name="isPrimaryCheck" />
           <span class="toggle-checkbox-text">
-            ⭐ Définir comme véhicule principal par défaut
+            {{ 'vehicle.set_primary' | translate }}
           </span>
         </label>
       </div>
@@ -884,14 +888,14 @@
             <path d="M20 6L9 17l-5-5"/>
           </svg>
         }
-        <span>{{ feedbackMessage || 'Opération réussie !' }}</span>
+        <span>{{ (feedbackMessage || 'Opération réussie !') | translate }}</span>
       </div>
     }
 
     <!-- Submit & Action Buttons -->
     <div class="form-actions-stack">
       <button type="submit" class="btn-primary" [disabled]="saving">
-        <span>{{ saving ? 'Enregistrement...' : (isNewMode ? 'Ajouter ce véhicule au garage' : 'Enregistrer les modifications') }}</span>
+        <span>{{ saving ? '...' : (isNewMode ? ('vehicle.btn_add' | translate) : ('vehicle.btn_save' | translate)) }}</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -904,14 +908,14 @@
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>
-            <span>Retirer ce véhicule</span>
+            <span>{{ 'vehicle.delete' | translate }}</span>
           </button>
         </div>
       }
     </div>
 
     <div class="form-footer-notice">
-      Vous pouvez ajouter plusieurs véhicules à tout moment.
+      {{ 'Vous pouvez ajouter plusieurs véhicules à tout moment.' | translate }}
     </div>
   </form>
 </div>

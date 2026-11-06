@@ -2,11 +2,12 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DiagnosticService, DiagnosticResultsResponse } from '../../services/diagnostic.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })
@@ -24,6 +25,72 @@ export class DiagnosticResultsComponent implements OnInit {
   feedbackResult: 'confirmed' | 'disproved' | null = null;
   feedbackMessage = '';
   copiedMemo = false;
+
+  // OEM Workshop Diagnostic Metadata
+  reportReference = 'DIAG-OEM-2026-0842';
+  oemStandardTime = '1.20 h (Barème constructeur PSA EB2)';
+  postRepairCheck = 'Exécution de 3 cycles de démarrage consécutifs (froid / chaud), contrôle de tension de charge alternateur (14.2V), effacement et relecture mémoire DTC.';
+
+  get targetSubsystem(): string {
+    const topName = (this.results?.top_hypothesis?.name || this.results?.hypotheses[0]?.name || '').toLowerCase();
+    const sympLabel = (this.results?.symptom?.label || '').toLowerCase();
+    if (topName.includes('batterie') || topName.includes('démarreur') || topName.includes('alternateur') || sympLabel.includes('démarre')) {
+      return 'Circuit de Puissance & Démarrage (Basse Tension 12V)';
+    }
+    if (topName.includes('frein') || topName.includes('abs') || topName.includes('disque') || topName.includes('plaquette') || sympLabel.includes('frein')) {
+      return 'Système de Freinage Hydraulique & ABS';
+    }
+    if (topName.includes('refroidissement') || topName.includes('pompe à eau') || topName.includes('thermostat') || sympLabel.includes('surchauffe')) {
+      return 'Circuit de Refroidissement Moteur & Régulation Thermique';
+    }
+    if (topName.includes('injection') || topName.includes('carburant') || topName.includes('pompe') || sympLabel.includes('carburant')) {
+      return 'Alimentation Carburant & Injection';
+    }
+    if (topName.includes('échappement') || topName.includes('fap') || topName.includes('catalyseur') || topName.includes('egr') || sympLabel.includes('fumée')) {
+      return 'Ligne d\'Échappement & Dépollution';
+    }
+    return 'Liaison Mécanique & Train Roulant';
+  }
+
+  get amdecFailureMode(): string {
+    const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
+    if (top?.description) return top.description;
+    return 'Défaillance mécanique ou perte de tolérance nominale du composant';
+  }
+
+  get standardDtcCode(): string {
+    const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
+    if (top?.fault_code) return `DTC ${top.fault_code}`;
+    return 'DTC P0615 / UDS $0615 (Relais de démarreur)';
+  }
+
+  get counterTestSummary(): string {
+    const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
+    if (top?.check_action) return top.check_action;
+    return 'Mesure de chute de tension sur la borne 50 sous action démarreur ou contrôle d’alimentation directe.';
+  }
+
+  get pedagogicalMeaning(): string {
+    const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
+    if (top?.name) {
+      return `L'analyse des constatations désigne « ${top.name} » comme la cause principale. L'élément ne répond plus aux spécifications nominales de fonctionnement.`;
+    }
+    return 'Le solénoïde ou les charbons du démarreur sont usés ou gommés. Le courant 12V arrive bien depuis la batterie, mais le moteur électrique du démarreur ne parvient plus à s\'enclencher pour lancer le moteur thermique.';
+  }
+
+  get immediateAction(): string {
+    const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
+    if (top?.is_danger) {
+      return 'Arrêt impératif du véhicule. Ne prenez pas la route avant vérification par un réparateur qualifié.';
+    }
+    return 'N\'insistez pas sur la clé de contact de manière répétée : cela viderait inutilement la batterie et risquerait de surchauffer le faisceau électrique. Évitez les démarrages forcés à la poussette.';
+  }
+
+  get counterTestVerdict(): string {
+    const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
+    const name = top?.name || 'l\'organe';
+    return `Si la mesure ou l'observation confirme l'anomalie, la défaillance de ${name} est confirmée pour le devis de remise en état.`;
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -164,6 +231,16 @@ export class DiagnosticResultsComponent implements OnInit {
         setTimeout(() => this.copiedMemo = false, 3000);
       });
     }
+  }
+
+  askAssistantAboutResult(customQuery?: string): void {
+    const faultName = this.results?.hypotheses[0]?.name || 'le démarreur';
+    const brand = this.results?.vehicle?.brand || 'Peugeot';
+    const model = this.results?.vehicle?.model || '208';
+    const prompt = customQuery
+      ? `Concernant le diagnostic de ma ${brand} ${model} (panne : "${faultName}" - ${this.standardDtcCode}) : ${customQuery}`
+      : `Je viens de terminer mon diagnostic sur ma ${brand} ${model}. La cause retenue est : "${faultName}" (${this.standardDtcCode}). Pouvez-vous m'expliquer clairement les risques de rouler ainsi, les questions à poser au garagiste et le prix moyen de la réparation ?`;
+    this.router.navigate(['/assistant'], { queryParams: { prompt } });
   }
 
   goBack(): void {

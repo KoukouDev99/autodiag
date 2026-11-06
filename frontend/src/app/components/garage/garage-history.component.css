@@ -427,35 +427,35 @@
   line-height: 1.4;
 }
 
-body.dark-theme .history-diag-title,
-body.dark-theme .maint-type,
-body.dark-theme .dtc-result-title,
-body.dark-theme .dtc-causes-label {
+:host-context(body.dark-theme) .history-diag-title,
+:host-context(body.dark-theme) .maint-type,
+:host-context(body.dark-theme) .dtc-result-title,
+:host-context(body.dark-theme) .dtc-causes-label {
   color: #f8fafc;
 }
 
-body.dark-theme .history-diag-desc,
-body.dark-theme .maint-notes,
-body.dark-theme .dtc-result-desc,
-body.dark-theme .dtc-causes-list {
+:host-context(body.dark-theme) .history-diag-desc,
+:host-context(body.dark-theme) .maint-notes,
+:host-context(body.dark-theme) .dtc-result-desc,
+:host-context(body.dark-theme) .dtc-causes-list {
   color: #94a3b8;
 }
 
-body.dark-theme .dtc-causes-section {
+:host-context(body.dark-theme) .dtc-causes-section {
   background-color: rgba(255, 255, 255, 0.04);
 }
 
-body.dark-theme .history-vehicle-pill {
+:host-context(body.dark-theme) .history-vehicle-pill {
   background-color: rgba(255, 255, 255, 0.05);
   color: #38bdf8;
 }
 
-body.dark-theme .dtc-advice-box {
+:host-context(body.dark-theme) .dtc-advice-box {
   background-color: rgba(56, 189, 248, 0.1);
   border-left-color: #38bdf8;
 }
 
-body.dark-theme .advice-content {
+:host-context(body.dark-theme) .advice-content {
   color: #bae6fd;
 }
 
@@ -464,7 +464,7 @@ body.dark-theme .advice-content {
    ============================================ */
 @media (min-width: 880px) {
   .screen-content {
-    padding: 24px 28px 40px 28px;
+    padding: 28px 32px 44px 32px;
     gap: 24px;
   }
 

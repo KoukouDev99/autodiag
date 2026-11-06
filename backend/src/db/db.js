@@ -1,7 +1,7 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const dbConfig = {
   host: process.env.DB_HOST || '127.0.0.1',
@@ -9,7 +9,15 @@ const dbConfig = {
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'autodiag',
-  multipleStatements: true
+  charset: 'utf8mb4',
+  multipleStatements: true,
+  waitForConnections: true,
+  connectionLimit: 10,
+  maxIdle: 10,
+  idleTimeout: 60000,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 };
 
 let pool = null;
@@ -335,6 +343,11 @@ async function seedCarCatalog(connection) {
 }
 
 module.exports = {
-  getPool: () => pool,
+  getPool: () => {
+    if (!pool) {
+      pool = mysql.createPool(dbConfig);
+    }
+    return pool;
+  },
   initDatabase
 };

@@ -73,12 +73,13 @@ router.get('/auth/profile/:id', async (req, res) => {
   try {
     const pool = getPool();
     const userId = req.params.id;
-    const [rows] = await pool.query('SELECT id, name, email, phone, city, created_at FROM users WHERE id = ?', [userId]);
+    const [[rows], [vCount], [dCount]] = await Promise.all([
+      pool.query('SELECT id, name, email, phone, city, created_at FROM users WHERE id = ?', [userId]),
+      pool.query('SELECT COUNT(*) as count FROM vehicles WHERE user_id = ?', [userId]),
+      pool.query('SELECT COUNT(*) as count FROM diagnostic_sessions WHERE user_id = ?', [userId])
+    ]);
     if (rows.length === 0) return res.status(404).json({ error: 'Utilisateur non trouvé' });
     const user = rows[0];
-
-    const [vCount] = await pool.query('SELECT COUNT(*) as count FROM vehicles WHERE user_id = ?', [userId]);
-    const [dCount] = await pool.query('SELECT COUNT(*) as count FROM diagnostic_sessions WHERE user_id = ?', [userId]);
 
     res.json({
       ...user,
@@ -120,17 +121,31 @@ router.get('/kb/unified/summary', async (req, res) => {
     if (cached) return res.json(cached);
 
     const pool = getPool();
-    const [sources] = await pool.query('SELECT * FROM data_sources ORDER BY id ASC');
-    const [symptoms] = await pool.query('SELECT COUNT(*) as count FROM symptoms');
-    const [faults] = await pool.query('SELECT COUNT(*) as count FROM faults');
-    const [faultSymptoms] = await pool.query('SELECT COUNT(*) as count FROM fault_symptoms');
-    const [faultVehicles] = await pool.query('SELECT COUNT(*) as count FROM fault_vehicles');
-    const [questions] = await pool.query('SELECT COUNT(*) as count FROM diagnostic_questions');
-    const [options] = await pool.query('SELECT COUNT(*) as count FROM answer_options');
-    const [rules] = await pool.query('SELECT COUNT(*) as count FROM diagnostic_rules');
-    const [tests] = await pool.query('SELECT COUNT(*) as count FROM diagnostic_tests');
-    const [solutions] = await pool.query('SELECT COUNT(*) as count FROM solutions');
-    const [sessions] = await pool.query('SELECT COUNT(*) as count FROM diagnostic_sessions');
+    const [
+      [sources],
+      [symptoms],
+      [faults],
+      [faultSymptoms],
+      [faultVehicles],
+      [questions],
+      [options],
+      [rules],
+      [tests],
+      [solutions],
+      [sessions]
+    ] = await Promise.all([
+      pool.query('SELECT * FROM data_sources ORDER BY id ASC'),
+      pool.query('SELECT COUNT(*) as count FROM symptoms'),
+      pool.query('SELECT COUNT(*) as count FROM faults'),
+      pool.query('SELECT COUNT(*) as count FROM fault_symptoms'),
+      pool.query('SELECT COUNT(*) as count FROM fault_vehicles'),
+      pool.query('SELECT COUNT(*) as count FROM diagnostic_questions'),
+      pool.query('SELECT COUNT(*) as count FROM answer_options'),
+      pool.query('SELECT COUNT(*) as count FROM diagnostic_rules'),
+      pool.query('SELECT COUNT(*) as count FROM diagnostic_tests'),
+      pool.query('SELECT COUNT(*) as count FROM solutions'),
+      pool.query('SELECT COUNT(*) as count FROM diagnostic_sessions')
+    ]);
 
     const summary = {
       architecture: 'Unified Automotive Diagnostic Knowledge Base & Deterministic Elimination Engine',

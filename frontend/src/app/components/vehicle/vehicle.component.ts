@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DiagnosticService, Vehicle, EngineSpecItem } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface CatalogModelItem {
   id: number;
@@ -26,13 +28,14 @@ export interface PlateCountryConfig {
 @Component({
   selector: 'app-vehicle',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './vehicle.component.html',
   styleUrls: ['./vehicle.component.css']
 })
 export class VehicleComponent implements OnInit {
   private diagnosticService = inject(DiagnosticService);
   private vehicleLogoService = inject(VehicleLogoService);
+  translationService = inject(TranslationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -533,6 +536,27 @@ export class VehicleComponent implements OnInit {
   modelSearch = '';
   engineSearch = '';
 
+  // Memoization caches for computed dropdown getters
+  private _lastBrandsRef: string[] | null = null;
+  private _lastBrandSearch = '';
+  private _cachedFilteredBrands: string[] = [];
+
+  private _lastModelsRef: CatalogModelItem[] | null = null;
+  private _lastModelSearch = '';
+  private _cachedFilteredModels: CatalogModelItem[] = [];
+
+  private _lastFuelEnginesRef: EngineSpecItem[] | null = null;
+  private _cachedAvailableFuelTypes: string[] = [];
+
+  private _lastEngRef: EngineSpecItem[] | null = null;
+  private _lastVehFuel = '';
+  private _lastShowAllFuels = false;
+  private _cachedAvailableEnginesForFuel: EngineSpecItem[] = [];
+
+  private _lastFilteredEngBaseRef: EngineSpecItem[] | null = null;
+  private _lastEngineSearch = '';
+  private _cachedFilteredEngines: EngineSpecItem[] = [];
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -618,22 +642,45 @@ export class VehicleComponent implements OnInit {
   }
 
   get filteredBrands(): string[] {
-    if (!this.brandSearch.trim()) return this.brands;
+    if (this._lastBrandsRef === this.brands && this._lastBrandSearch === this.brandSearch) {
+      return this._cachedFilteredBrands;
+    }
+    this._lastBrandsRef = this.brands;
+    this._lastBrandSearch = this.brandSearch;
+    if (!this.brandSearch.trim()) {
+      this._cachedFilteredBrands = this.brands;
+      return this._cachedFilteredBrands;
+    }
     const q = this.brandSearch.trim().toLowerCase();
-    return this.brands.filter(b => b.toLowerCase().includes(q));
+    this._cachedFilteredBrands = this.brands.filter(b => b.toLowerCase().includes(q));
+    return this._cachedFilteredBrands;
   }
 
   get filteredModels(): CatalogModelItem[] {
-    if (!this.modelSearch.trim()) return this.models;
+    if (this._lastModelsRef === this.models && this._lastModelSearch === this.modelSearch) {
+      return this._cachedFilteredModels;
+    }
+    this._lastModelsRef = this.models;
+    this._lastModelSearch = this.modelSearch;
+    if (!this.modelSearch.trim()) {
+      this._cachedFilteredModels = this.models;
+      return this._cachedFilteredModels;
+    }
     const q = this.modelSearch.trim().toLowerCase();
-    return this.models.filter(m => m.model.toLowerCase().includes(q));
+    this._cachedFilteredModels = this.models.filter(m => m.model.toLowerCase().includes(q));
+    return this._cachedFilteredModels;
   }
 
   showAllFuels = false;
 
   get availableFuelTypes(): string[] {
+    if (this._lastFuelEnginesRef === this.engines) {
+      return this._cachedAvailableFuelTypes;
+    }
+    this._lastFuelEnginesRef = this.engines;
     if (!this.engines || this.engines.length === 0) {
-      return this.fuelTypes;
+      this._cachedAvailableFuelTypes = this.fuelTypes;
+      return this._cachedAvailableFuelTypes;
     }
     // Filter fuels to only those that exist for the selected vehicle / model / year
     const matching = this.fuelTypes.filter(targetFuel => 
@@ -641,7 +688,8 @@ export class VehicleComponent implements OnInit {
     );
 
     // If none matched standard fuel types, fallback to all fuelTypes
-    return matching.length > 0 ? matching : this.fuelTypes;
+    this._cachedAvailableFuelTypes = matching.length > 0 ? matching : this.fuelTypes;
+    return this._cachedAvailableFuelTypes;
   }
 
   fuelMatches(engineFuel: string | null, targetFuel: string): boolean {
@@ -676,19 +724,42 @@ export class VehicleComponent implements OnInit {
   }
 
   get availableEnginesForFuel(): EngineSpecItem[] {
-    if (!this.vehicle.fuel || this.showAllFuels) return this.engines;
-    return this.engines.filter(e => this.fuelMatches(e.fuel, this.vehicle.fuel));
+    if (
+      this._lastEngRef === this.engines &&
+      this._lastVehFuel === this.vehicle.fuel &&
+      this._lastShowAllFuels === this.showAllFuels
+    ) {
+      return this._cachedAvailableEnginesForFuel;
+    }
+    this._lastEngRef = this.engines;
+    this._lastVehFuel = this.vehicle.fuel;
+    this._lastShowAllFuels = this.showAllFuels;
+    if (!this.vehicle.fuel || this.showAllFuels) {
+      this._cachedAvailableEnginesForFuel = this.engines;
+      return this._cachedAvailableEnginesForFuel;
+    }
+    this._cachedAvailableEnginesForFuel = this.engines.filter(e => this.fuelMatches(e.fuel, this.vehicle.fuel));
+    return this._cachedAvailableEnginesForFuel;
   }
 
   get filteredEngines(): EngineSpecItem[] {
     const list = this.availableEnginesForFuel;
-    if (!this.engineSearch.trim()) return list;
+    if (this._lastFilteredEngBaseRef === list && this._lastEngineSearch === this.engineSearch) {
+      return this._cachedFilteredEngines;
+    }
+    this._lastFilteredEngBaseRef = list;
+    this._lastEngineSearch = this.engineSearch;
+    if (!this.engineSearch.trim()) {
+      this._cachedFilteredEngines = list;
+      return this._cachedFilteredEngines;
+    }
     const q = this.engineSearch.trim().toLowerCase();
-    return list.filter(e => 
+    this._cachedFilteredEngines = list.filter(e => 
       e.name.toLowerCase().includes(q) || 
       (e.power_hp && e.power_hp.toLowerCase().includes(q)) ||
       (e.displacement && e.displacement.toLowerCase().includes(q))
     );
+    return this._cachedFilteredEngines;
   }
 
   selectBrand(brand: string): void {

@@ -288,3 +288,22 @@
 .guide-action-container {
   margin-top: 4px;
 }
+
+/* ==========================================================================
+   LAPTOP & DESKTOP LAYOUT (>= 880px)
+   ========================================================================== */
+@media (min-width: 880px) {
+  .screen-content {
+    padding: 28px 32px 44px 32px;
+    gap: 24px;
+  }
+
+  .screen-brand-title {
+    display: none;
+  }
+
+  .step-image {
+    height: 280px;
+  }
+}
+
