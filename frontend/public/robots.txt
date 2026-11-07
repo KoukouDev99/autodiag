@@ -1,0 +1,20 @@
+# AutoDiag - robots.txt
+# Domaine de production : https://[TON-DOMAINE.fr]
+
+User-agent: *
+Allow: /
+Allow: /assistant
+Allow: /vehicle
+Allow: /mentions-legales
+Allow: /confidentialite
+Allow: /cgu
+
+# Pages dynamiques de session ou privées
+Disallow: /api/
+Disallow: /diagnostic/
+Disallow: /results/
+Disallow: /garage
+Disallow: /profil
+Disallow: /404
+
+Sitemap: https://[TON-DOMAINE.fr]/sitemap.xml

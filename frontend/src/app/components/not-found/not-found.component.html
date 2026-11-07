@@ -1,0 +1,23 @@
+<div class="not-found-container">
+  <div class="not-found-card">
+    <div class="error-badge">ERREUR 404</div>
+    <div class="error-icon">🚗💨</div>
+    <h1 class="error-title">{{ 'Page introuvable sur le circuit' | translate }}</h1>
+    <p class="error-desc">
+      {{ 'L\'adresse demandée n\'existe pas, a été déplacée ou est temporairement indisponible.' | translate }}
+    </p>
+
+    <div class="actions-group">
+      <a routerLink="/" class="btn-primary">
+        <span>🏠 {{ 'Retour à l\'accueil' | translate }}</span>
+      </a>
+      <a routerLink="/assistant" class="btn-secondary">
+        <span>⚡ {{ 'Demander à AutoDiag IA' | translate }}</span>
+      </a>
+    </div>
+
+    <div class="search-hint">
+      {{ 'Vous cherchez une panne précise ? Utilisez notre diagnostic guidé ou notre conseiller mécanique.' | translate }}
+    </div>
+  </div>
+</div>

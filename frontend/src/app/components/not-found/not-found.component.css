@@ -1,0 +1,120 @@
+.not-found-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 180px);
+  padding: 2rem 1rem;
+}
+
+.not-found-card {
+  max-width: 580px;
+  width: 100%;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-card);
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.error-badge {
+  display: inline-block;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  color: var(--c-primary);
+  background: var(--c-primary-light);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+}
+
+.error-icon {
+  font-size: 4rem;
+  line-height: 1;
+  margin: 0.5rem 0;
+  animation: floatBounce 2.5s ease-in-out infinite;
+}
+
+@keyframes floatBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.error-title {
+  font-family: var(--font-heading);
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--c-text-primary);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.error-desc {
+  font-size: 1rem;
+  color: var(--c-text-secondary);
+  line-height: 1.6;
+  max-width: 440px;
+  margin: 0;
+}
+
+.actions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.btn-primary, .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--c-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: var(--c-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--c-surface-hover);
+  color: var(--c-text-primary);
+  border: 1px solid var(--c-border);
+}
+
+.btn-secondary:hover {
+  background: var(--c-border-subtle);
+  transform: translateY(-1px);
+}
+
+.search-hint {
+  font-size: 0.8125rem;
+  color: var(--c-text-secondary);
+  margin-top: 1rem;
+  border-top: 1px solid var(--c-border-subtle);
+  padding-top: 1rem;
+  width: 100%;
+}

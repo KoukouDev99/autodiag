@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { DiagnosticService } from './services/diagnostic.service';
 import { TranslationService, SupportedLang } from './services/translation.service';
 import { TranslatePipe } from './pipes/translate.pipe';
+import { SeoService } from './services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +18,7 @@ export class App implements OnInit {
   private router = inject(Router);
   diagService = inject(DiagnosticService);
   translationService = inject(TranslationService);
+  private seoService = inject(SeoService);
   currentUser = this.diagService.currentUser;
 
   // Language management
@@ -46,6 +48,7 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
+    this.seoService.init();
     const savedTheme = localStorage.getItem('autodiag-theme');
     if (savedTheme) {
       this.isDarkMode.set(savedTheme === 'dark');
