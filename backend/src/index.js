@@ -1,23 +1,132 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const { initDatabase } = require('./db/db');
+const { initDatabase, getPool } = require('./db/db');
 const apiRoutes = require('./routes/api');
+const { globalApiLimiter } = require('./middleware/rateLimiters');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
+// Trust proxy for reverse proxies (Nginx, Traefik, PaaS)
+app.set('trust proxy', 1);
+
+// HTTP Security Headers via Helmet (configured for Angular SPA + Fonts & Assets)
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
+        connectSrc: [
+          "'self'",
+          'http://localhost:3000',
+          'http://localhost:4200',
+          'https://api.groq.com',
+          'https://api.deepseek.com',
+          'https://api.openai.com'
+        ],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"]
+      }
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
+
+// CORS configuration (Localhost in dev, CORS_ORIGIN whitelist in production)
+const allowedOriginsDev = [
+  'http://localhost:4200',
+  'http://localhost:3000',
+  'http://127.0.0.1:4200',
+  'http://127.0.0.1:3000'
+];
+
+const corsOriginEnv = process.env.CORS_ORIGIN;
+const allowedOriginsProd = corsOriginEnv
+  ? corsOriginEnv.split(',').map(s => s.trim()).filter(Boolean)
+  : [];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile clients, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const isDev = process.env.NODE_ENV !== 'production';
+      if (isDev) {
+        if (
+          allowedOriginsDev.includes(origin) ||
+          origin.startsWith('http://localhost:') ||
+          origin.startsWith('http://127.0.0.1:')
+        ) {
+          return callback(null, true);
+        }
+      }
+
+      if (allowedOriginsProd.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // In production if CORS_ORIGIN is not defined yet, log warning and allow for transition
+      if (!isDev && allowedOriginsProd.length === 0) {
+        console.warn(`[CORS WARN] No CORS_ORIGIN configured in .env. Allowing origin: ${origin}`);
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  })
+);
+
+// Body parser with strict payload size limits (100kb DoS mitigation)
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+
+// Global Rate Limiting on API endpoints
+app.use('/api', globalApiLimiter);
 
 // API Routes
 app.use('/api', apiRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'AutoDiag API', timestamp: new Date() });
+// Health check with database connectivity and memory telemetry
+app.get(['/health', '/api/health'], async (req, res) => {
+  let dbStatus = 'disconnected';
+  try {
+    const pool = getPool();
+    if (pool) {
+      await pool.query('SELECT 1');
+      dbStatus = 'connected';
+    }
+  } catch (e) {
+    dbStatus = 'error: ' + (process.env.NODE_ENV === 'production' ? 'DB ping failed' : e.message);
+  }
+
+  const memory = process.memoryUsage();
+  res.json({
+    status: dbStatus === 'connected' ? 'ok' : 'degraded',
+    service: 'AutoDiag API',
+    environment: process.env.NODE_ENV || 'development',
+    database: dbStatus,
+    uptime_seconds: Math.floor(process.uptime()),
+    memory_mb: {
+      rss: Math.round(memory.rss / 1024 / 1024),
+      heapUsed: Math.round(memory.heapUsed / 1024 / 1024)
+    },
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Root welcome & API documentation page
@@ -189,6 +298,26 @@ app.get('/', (req, res) => {
       ]
     });
   }
+});
+
+// Centralized production-safe error handler
+app.use((err, req, res, next) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  console.error('[API SERVER ERROR]', {
+    timestamp: new Date().toISOString(),
+    path: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+    message: err.message,
+    stack: isProd ? undefined : err.stack
+  });
+
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({
+    error: isProd
+      ? 'Une erreur interne est survenue sur le serveur.'
+      : err.message || 'Internal Server Error'
+  });
 });
 
 async function startServer() {

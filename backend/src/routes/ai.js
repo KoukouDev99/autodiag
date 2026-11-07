@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getPool } = require('../db/db');
 const { appCache } = require('../utils/cache');
+const { aiChatLimiter } = require('../middleware/rateLimiters');
 
 // Circuit-breaker for optional local FastAPI AI microservice (avoids 2-3s TCP timeout per keystroke when offline)
 let aiServiceOfflineUntil = 0;
@@ -437,7 +438,7 @@ Tu dois impérativement rédiger l'intégralité de ta réponse en ${targetLangu
 }
 
 // 6. Interactive AI Chat Assistant (Compatible OpenAI / DeepSeek / Groq Gratuit / OpenRouter / Local Fallback)
-router.post(['/chat', '/ai/chat'], async (req, res) => {
+router.post(['/chat', '/ai/chat'], aiChatLimiter, async (req, res) => {
   try {
     const {
       message,
@@ -449,12 +450,17 @@ router.post(['/chat', '/ai/chat'], async (req, res) => {
       language = 'fr'
     } = req.body;
 
-    if (!message || !message.trim()) {
-      return res.status(400).json({ error: 'Message requis.' });
+    if (!message || typeof message !== 'string' || !message.trim()) {
+      return res.status(400).json({ error: 'Message requis et doit être une chaîne de caractères.' });
+    }
+
+    const cleanMessage = message.trim();
+    if (cleanMessage.length > 500) {
+      return res.status(400).json({ error: 'Le message est trop long (maximum 500 caractères autorisés).' });
     }
 
     const pool = getPool();
-    const dbContext = await retrieveDatabaseContext(pool, message, vehicle);
+    const dbContext = await retrieveDatabaseContext(pool, cleanMessage, vehicle);
     const systemPrompt = buildVehicleSystemPrompt(vehicle, dbContext, language);
 
     // 1. Resolve API key and Base URL

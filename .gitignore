@@ -20,7 +20,14 @@ frontend/.angular/
 
 # Environment and secrets
 .env
-.env.local
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 
 # Large models / weights (downloaded on demand)
 models/*.gguf

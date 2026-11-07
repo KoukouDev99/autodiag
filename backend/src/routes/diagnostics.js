@@ -4,6 +4,7 @@ const { getPool } = require('../db/db');
 const DiagnosticEngine = require('../services/diagnosticEngine');
 const { appCache } = require('../utils/cache');
 const { HybridDiagnosticOrchestrator } = require('../diagnostic/orchestrator');
+const { diagStartLimiter } = require('../middleware/rateLimiters');
 
 const orchestrator = new HybridDiagnosticOrchestrator();
 
@@ -176,7 +177,7 @@ router.post('/diagnostic/orchestrate', async (req, res) => {
 });
 
 // 2. Diagnostic flow: Start session
-router.post('/diagnostic/start', async (req, res) => {
+router.post('/diagnostic/start', diagStartLimiter, async (req, res) => {
   try {
     const pool = getPool();
     const { symptom_id, symptom_text, vehicle_id = 1, user_id = 1 } = req.body;

@@ -67,12 +67,9 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit(): void {
-    // 1. Charger les clés sauvegardées dans le navigateur
+    // 1. Charger les clés optionnelles personnalisées configurées par l'utilisateur
     const savedKey = localStorage.getItem('autodiag_ai_key');
-    this.customApiKey = savedKey || 'GROQ_API_KEY_PLACEHOLDER';
-    if (!savedKey) {
-      localStorage.setItem('autodiag_ai_key', this.customApiKey);
-    }
+    this.customApiKey = savedKey || '';
 
     const savedProvider = localStorage.getItem('autodiag_ai_provider') as any;
     if (savedProvider) this.selectedProvider = savedProvider;
