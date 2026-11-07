@@ -60,11 +60,11 @@ class MockLLMClient extends ILLMClient {
 class HttpLLMClient extends ILLMClient {
   constructor(config = {}) {
     super();
-    this.provider = config.provider || process.env.AI_PROVIDER || 'ollama'; // 'ollama' | 'openai_compatible'
-    this.baseUrl = config.baseUrl || process.env.AI_BASE_URL || (this.provider === 'ollama' ? 'http://127.0.0.1:11434' : 'https://api.openai.com/v1');
-    this.apiKey = config.apiKey || process.env.AI_API_KEY || '';
-    this.model = config.model || process.env.AI_MODEL || (this.provider === 'ollama' ? 'qwen2.5:3b' : 'gpt-4o-mini');
-    this.timeoutMs = config.timeoutMs || parseInt(process.env.AI_TIMEOUT_MS || '3000', 10);
+    this.provider = config.provider || process.env.AI_PROVIDER || 'groq'; // 'groq' | 'openai_compatible' | 'ollama'
+    this.baseUrl = config.baseUrl || process.env.AI_BASE_URL || (this.provider === 'ollama' ? 'http://127.0.0.1:11434' : 'https://api.groq.com/openai/v1');
+    this.apiKey = config.apiKey || process.env.GROQ_API_KEY || process.env.AI_API_KEY || '';
+    this.model = config.model || process.env.AI_MODEL || (this.provider === 'ollama' ? 'qwen2.5:3b' : 'openai/gpt-oss-120b');
+    this.timeoutMs = config.timeoutMs || parseInt(process.env.AI_TIMEOUT_MS || '15000', 10);
   }
 
   async complete(prompt, options = {}) {

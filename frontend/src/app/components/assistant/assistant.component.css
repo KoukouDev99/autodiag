@@ -511,6 +511,63 @@
   color: #38bdf8;
 }
 
+:host ::ng-deep .chat-quote {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-left: 3px solid #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+  border-radius: 0 8px 8px 0;
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+:host ::ng-deep .chat-hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+:host ::ng-deep .chat-table-wrapper {
+  overflow-x: auto;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-overflow-scrolling: touch;
+}
+
+:host ::ng-deep .chat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+:host ::ng-deep .chat-table th {
+  background: rgba(15, 23, 42, 0.85);
+  color: #38bdf8;
+  padding: 8px 10px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+}
+
+:host ::ng-deep .chat-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  vertical-align: top;
+  line-height: 1.4;
+}
+
+:host ::ng-deep .chat-table tr:last-child td {
+  border-bottom: none;
+}
+
+:host ::ng-deep .chat-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 :host ::ng-deep .chat-spacer {
   height: 6px;
 }

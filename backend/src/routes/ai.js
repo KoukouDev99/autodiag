@@ -463,40 +463,48 @@ router.post(['/chat', '/ai/chat'], aiChatLimiter, async (req, res) => {
     const dbContext = await retrieveDatabaseContext(pool, cleanMessage, vehicle);
     const systemPrompt = buildVehicleSystemPrompt(vehicle, dbContext, language);
 
-    // 1. Resolve API key and Base URL
+    // 1. Resolve API key, Provider, and Base URL
     let resolvedKey = (api_key && api_key.trim()) ||
-      process.env.AI_API_KEY ||
       process.env.GROQ_API_KEY ||
+      process.env.AI_API_KEY ||
       process.env.DEEPSEEK_API_KEY ||
       process.env.OPENAI_API_KEY ||
       null;
 
+    let targetProvider = provider;
+    if (!targetProvider) {
+      if (resolvedKey && resolvedKey.startsWith('gsk_')) targetProvider = 'groq';
+      else if (resolvedKey && resolvedKey.startsWith('sk-or-')) targetProvider = 'openrouter';
+      else if (resolvedKey && resolvedKey.startsWith('sk-')) targetProvider = 'deepseek';
+      else targetProvider = process.env.AI_PROVIDER || 'groq';
+    }
+
     let resolvedBaseUrl = 'https://api.groq.com/openai/v1';
     let resolvedModel = 'openai/gpt-oss-120b';
-    let providerName = 'Groq Cloud (120B Gratuit)';
+    let providerName = 'Groq Cloud (LLM 120B)';
 
-    if (provider === 'deepseek' || (resolvedKey && resolvedKey.startsWith('sk-') && !resolvedKey.startsWith('gsk_') && !resolvedKey.startsWith('sk-or-'))) {
+    if (targetProvider === 'deepseek' || (resolvedKey && resolvedKey.startsWith('sk-') && !resolvedKey.startsWith('gsk_') && !resolvedKey.startsWith('sk-or-'))) {
       resolvedBaseUrl = 'https://api.deepseek.com';
       resolvedModel = model || 'deepseek-chat';
       providerName = 'DeepSeek API';
-    }
-
-    if (provider === 'openrouter' || (resolvedKey && resolvedKey.startsWith('sk-or-'))) {
+    } else if (targetProvider === 'openrouter' || (resolvedKey && resolvedKey.startsWith('sk-or-'))) {
       resolvedBaseUrl = 'https://openrouter.ai/api/v1';
       resolvedModel = model || 'deepseek/deepseek-r1:free';
       providerName = 'OpenRouter (DeepSeek R1 Free)';
-    } else if (provider === 'openai') {
+    } else if (targetProvider === 'openai') {
       resolvedBaseUrl = 'https://api.openai.com/v1';
       resolvedModel = model || 'gpt-4o-mini';
       providerName = 'OpenAI (ChatGPT)';
-    } else if (provider === 'groq' || (resolvedKey && resolvedKey.startsWith('gsk_'))) {
+    } else if (targetProvider === 'local') {
+      resolvedBaseUrl = process.env.AI_LOCAL_BASE_URL || 'http://127.0.0.1:11434';
+      resolvedModel = model || process.env.AI_LOCAL_MODEL || 'qwen2.5:3b';
+      providerName = 'IA Locale Qwen2.5';
+    } else {
+      // Default: Groq Cloud
       resolvedBaseUrl = 'https://api.groq.com/openai/v1';
-      resolvedModel = model || 'openai/gpt-oss-120b';
-      providerName = 'Groq Cloud (120B Gratuit)';
+      resolvedModel = model || (process.env.AI_PROVIDER === 'groq' && process.env.AI_MODEL ? process.env.AI_MODEL : 'openai/gpt-oss-120b');
+      providerName = 'Groq Cloud (LLM 120B Gratuit)';
     }
-
-    if (process.env.AI_BASE_URL) resolvedBaseUrl = process.env.AI_BASE_URL;
-    if (process.env.AI_MODEL) resolvedModel = process.env.AI_MODEL;
 
     // 2. Format conversation messages
     const formattedMessages = [
@@ -507,44 +515,60 @@ router.post(['/chat', '/ai/chat'], aiChatLimiter, async (req, res) => {
 
     // 3. Try Cloud API if key is present
     if (resolvedKey) {
-      try {
-        const cloudResponse = await fetch(`${resolvedBaseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${resolvedKey}`
-          },
-          body: JSON.stringify({
-            model: resolvedModel,
-            messages: formattedMessages,
-            temperature: 0.7,
-            max_tokens: 1000
-          }),
-          signal: AbortSignal.timeout(25000)
-        });
+      const isGroq = targetProvider === 'groq' || resolvedBaseUrl.includes('groq.com');
+      const candidateModels = isGroq
+        ? Array.from(new Set([resolvedModel, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'llama-3.3-70b-versatile']))
+        : [resolvedModel];
 
-        if (cloudResponse.ok) {
-          const data = await cloudResponse.json();
-          let reply = data.choices && data.choices[0] && data.choices[0].message?.content;
-          if (reply) {
-            // Remove DeepSeek-R1 <think>...</think> reasoning tags for user-friendly output
-            reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-            return res.json({
-              reply,
-              provider: providerName,
-              model: resolvedModel,
-              vehicle_applied: !!(vehicle && vehicle.brand),
-              db_context_applied: !!(dbContext && dbContext.trim()),
-              status: 'success',
-              fallback_applied: false
-            });
+      for (const currentModel of candidateModels) {
+        try {
+          const cloudResponse = await fetch(`${resolvedBaseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${resolvedKey}`
+            },
+            body: JSON.stringify({
+              model: currentModel,
+              messages: formattedMessages,
+              temperature: 0.7,
+              max_tokens: 1000
+            }),
+            signal: AbortSignal.timeout(25000)
+          });
+
+          if (cloudResponse.ok) {
+            const data = await cloudResponse.json();
+            let reply = data.choices && data.choices[0] && (data.choices[0].message?.content || data.choices[0].message?.reasoning);
+            if (reply) {
+              // Remove DeepSeek-R1 / thinking <think>...</think> tags for clean output
+              reply = reply.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+              return res.json({
+                reply,
+                provider: providerName,
+                model: currentModel,
+                vehicle_applied: !!(vehicle && vehicle.brand),
+                db_context_applied: !!(dbContext && dbContext.trim()),
+                status: 'success',
+                fallback_applied: false
+              });
+            }
+          } else {
+            const errText = await cloudResponse.text();
+            console.warn(`[AI Chat] Cloud API (${currentModel}) returned ${cloudResponse.status}:`, errText);
+            // If model is retired or not found on this Groq tier, try next candidate model
+            if (cloudResponse.status === 404 && isGroq) {
+              continue;
+            }
+            // If 401 Unauthorized or 403 Forbidden, do not loop other models with same invalid key
+            if (cloudResponse.status === 401 || cloudResponse.status === 403) {
+              break;
+            }
           }
-        } else {
-          const errText = await cloudResponse.text();
-          console.warn('[AI Chat] Cloud API error:', cloudResponse.status, errText);
+        } catch (cloudErr) {
+          console.warn(`[AI Chat] Cloud API attempt (${currentModel}) failed:`, cloudErr.message);
+          if (!isGroq) break;
         }
-      } catch (cloudErr) {
-        console.warn('[AI Chat] Cloud API fetch failed:', cloudErr.message);
       }
     }
 

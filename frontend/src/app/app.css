@@ -53,14 +53,15 @@
   box-sizing: border-box;
 }
 
-/* --- Brand --- */
+/* --- Brand (Non-clickable static brand) --- */
 .brand-group {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
   flex-shrink: 0;
-  cursor: pointer;
+  cursor: default;
+  user-select: none;
 }
 
 .app-logo-badge {
@@ -75,12 +76,6 @@
   box-shadow: 0 4px 14px rgba(0, 168, 255, 0.28);
   border: 1px solid rgba(56, 189, 248, 0.25);
   flex-shrink: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.brand-group:hover .app-logo-badge {
-  transform: scale(1.04);
-  box-shadow: 0 6px 18px rgba(0, 195, 255, 0.42);
 }
 
 .brand-logo-img {
@@ -1012,8 +1007,7 @@
 .icon-btn:focus-visible,
 .sos-btn:focus-visible,
 .nav-item:focus-visible,
-.desktop-nav-link:focus-visible,
-.brand-group:focus-visible {
+.desktop-nav-link:focus-visible {
   outline: 2px solid var(--c-primary);
   outline-offset: 2px;
 }

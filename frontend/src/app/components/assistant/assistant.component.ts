@@ -245,8 +245,31 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
 
-    // 2. Sections Markdown (### Titre)
-    html = html.replace(/###\s*(🔍|⚠️|🛠️|💡|💶)?\s*(.*?)(?=\n|$)/g, (_match, icon, title) => {
+    // 2. Tables Markdown
+    html = html.replace(/((?:\|[^\n]+\|\r?\n)+)/g, (match) => {
+      const rows = match.trim().split(/\r?\n/).map(r => r.trim()).filter(Boolean);
+      if (rows.length < 2) return match;
+      const isSep = (r: string) => /^\|(?:\s*:?-+:?\s*\|)+$/.test(r);
+      const sepIndex = rows.findIndex((r, i) => i > 0 && isSep(r));
+      if (sepIndex > 0) {
+        const headerCells = rows[0].split('|').slice(1, -1).map(c => `<th>${c.trim()}</th>`).join('');
+        const thead = `<thead><tr>${headerCells}</tr></thead>`;
+        const bodyRows = rows.slice(sepIndex + 1).map(row => {
+          const cells = row.split('|').slice(1, -1).map(c => `<td>${c.trim()}</td>`).join('');
+          return `<tr>${cells}</tr>`;
+        }).join('');
+        const tbody = `<tbody>${bodyRows}</tbody>`;
+        return `<div class="chat-table-wrapper"><table class="chat-table">${thead}${tbody}</table></div>`;
+      }
+      return match;
+    });
+
+    // 3. Citations & Lignes de séparation
+    html = html.replace(/^>\s*(.*?)$/gm, '<blockquote class="chat-quote">$1</blockquote>');
+    html = html.replace(/^(?:---|___|\*\*\*)$/gm, '<hr class="chat-hr" />');
+
+    // 4. Sections Markdown (## ou ### Titre)
+    html = html.replace(/#{2,3}\s*(🔍|⚠️|🛠️|💡|💶|[0-9]️⃣)?\s*(.*?)(?=\n|$)/g, (_match, icon, title) => {
       const rawTitle = (title || '').trim();
       let iconSymbol = icon || '📋';
       let sectionClass = 'section-general';
@@ -254,19 +277,19 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       const lower = rawTitle.toLowerCase();
       if (lower.includes('analyse') || lower.includes('diagnostic')) {
         sectionClass = 'section-diag';
-        iconSymbol = '🔍';
-      } else if (lower.includes('urgence') || lower.includes('sécurité')) {
+        iconSymbol = icon || '🔍';
+      } else if (lower.includes('urgence') || lower.includes('sécurité') || lower.includes('danger')) {
         sectionClass = 'section-safety';
-        iconSymbol = '⚠️';
-      } else if (lower.includes('causes')) {
+        iconSymbol = icon || '⚠️';
+      } else if (lower.includes('causes') || lower.includes('éléments') || lower.includes('symptôme')) {
         sectionClass = 'section-causes';
-        iconSymbol = '🛠️';
-      } else if (lower.includes('actions') || lower.includes('conseils')) {
+        iconSymbol = icon || '🛠️';
+      } else if (lower.includes('actions') || lower.includes('conseils') || lower.includes('procédure') || lower.includes('checklist')) {
         sectionClass = 'section-advice';
-        iconSymbol = '💡';
-      } else if (lower.includes('estimation') || lower.includes('chiffrée') || lower.includes('coût')) {
+        iconSymbol = icon || '💡';
+      } else if (lower.includes('estimation') || lower.includes('chiffrée') || lower.includes('coût') || lower.includes('prix')) {
         sectionClass = 'section-cost';
-        iconSymbol = '💶';
+        iconSymbol = icon || '💶';
       }
 
       return `<div class="chat-section-header ${sectionClass}">
@@ -275,7 +298,7 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       </div>`;
     });
 
-    // 3. Badges de gravité
+    // 5. Badges de gravité
     html = html.replace(/-\s*\*\*Gravité\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       const v = (val || '').trim();
       let badgeClass = 'badge-gravity-medium';
@@ -293,7 +316,7 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       return `<div class="chat-badge-pill ${badgeClass}"><span class="badge-icon">${badgeIcon}</span><strong>Gravité :</strong>&nbsp;${v}</div>`;
     });
 
-    // 4. Statut d'aptitude à rouler
+    // 6. Statut d'aptitude à rouler
     html = html.replace(/-\s*\*\*Peut-on rouler\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       const v = (val || '').trim();
       let runClass = 'run-caution';
@@ -305,21 +328,21 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       return `<div class="chat-run-status ${runClass}"><span class="run-dot"></span><strong>Peut-on rouler :</strong>&nbsp;${v}</div>`;
     });
 
-    // 5. Carte highlight pour l'estimation chiffrée
+    // 7. Carte highlight pour l'estimation chiffrée
     html = html.replace(/-\s*\*\*Fourchette moyenne constatée\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       return `<div class="chat-cost-card"><div class="cost-header"><span class="cost-badge-icon">💶</span><span class="cost-tag">Estimation constatée d'atelier</span></div><div class="cost-val">${(val || '').trim()}</div></div>`;
     });
 
-    // 6. Formatage des puces restantes (- item)
+    // 8. Formatage des puces restantes (- item)
     html = html.replace(/^-\s+(.*?)$/gm, '<div class="chat-bullet-row"><span class="bullet-arrow">›</span><span class="bullet-text">$1</span></div>');
 
-    // 7. Formatage du texte gras **texte**
+    // 9. Formatage du texte gras **texte**
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-    // 8. Formatage du code inline `code`
+    // 10. Formatage du code inline `code`
     html = html.replace(/`([^`]+)`/g, '<code class="chat-code">$1</code>');
 
-    // 9. Sauts de ligne
+    // 11. Sauts de ligne
     html = html.replace(/\n\s*\n/g, '<div class="chat-spacer"></div>');
     html = html.replace(/\n/g, '<br>');
 
