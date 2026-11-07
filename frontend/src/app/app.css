@@ -1033,3 +1033,100 @@
   display: inline-block;
   text-transform: none;
 }
+
+/* ============================================
+   FOOTER LÉGAL & CONFORMITÉ RGPD
+   ============================================ */
+.app-footer {
+  margin-top: 2rem;
+  border-top: 1px solid var(--c-border);
+  padding: 1.75rem 0.5rem 1rem;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.footer-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.footer-logo {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  color: var(--c-text-primary);
+}
+
+.footer-tagline {
+  font-size: 0.8125rem;
+  color: var(--c-text-secondary);
+}
+
+.footer-disclaimer {
+  font-size: 0.775rem;
+  line-height: 1.45;
+  color: var(--c-warning, #d97706);
+  background: var(--c-warning-bg, rgba(217, 119, 6, 0.08));
+  border: 1px solid var(--c-warning-border, rgba(217, 119, 6, 0.25));
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  max-width: 780px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--c-border-subtle);
+  font-size: 0.8125rem;
+  color: var(--c-text-secondary);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: var(--c-text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--c-primary);
+  text-decoration: underline;
+}
+
+.footer-sep {
+  opacity: 0.4;
+}
+
+.footer-copy {
+  font-size: 0.775rem;
+}
+
+@media (max-width: 640px) {
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

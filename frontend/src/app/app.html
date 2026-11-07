@@ -181,6 +181,34 @@
     <div class="app-content-card">
       <router-outlet></router-outlet>
     </div>
+
+    <!-- FOOTER LÉGAL & CONFORMITÉ -->
+    <footer class="app-footer" role="contentinfo">
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <span class="footer-logo">AutoDiag</span>
+            <span class="footer-tagline">{{ 'Diagnostic automobile intelligent et transparent' | translate }}</span>
+          </div>
+          <div class="footer-disclaimer">
+            ⚠️ {{ 'Outil d\'aide à la décision technique et pédagogique. Ne remplace pas le diagnostic ni l\'intervention d\'un réparateur automobile agréé.' | translate }}
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <nav class="footer-links" aria-label="Liens juridiques">
+            <a routerLink="/mentions-legales" class="footer-link">{{ 'Mentions Légales' | translate }}</a>
+            <span class="footer-sep">•</span>
+            <a routerLink="/confidentialite" class="footer-link">{{ 'Confidentialité & RGPD' | translate }}</a>
+            <span class="footer-sep">•</span>
+            <a routerLink="/cgu" class="footer-link">{{ 'Conditions d\'Utilisation' | translate }}</a>
+          </nav>
+          <div class="footer-copy">
+            © 2026 AutoDiag · {{ 'Tous droits réservés' | translate }}
+          </div>
+        </div>
+      </div>
+    </footer>
   </main>
 
   <!-- BOTTOM NAV -->

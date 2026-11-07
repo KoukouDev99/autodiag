@@ -112,6 +112,42 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'mentions-legales',
+    loadComponent: () => import('./components/legal/legal-notice.component').then(m => m.LegalNoticeComponent),
+    title: 'AutoDiag · Mentions Légales',
+    data: {
+      seo: {
+        title: 'AutoDiag · Mentions Légales',
+        description: 'Mentions légales, identification de l\'éditeur et de l\'hébergeur du service AutoDiag.',
+        robots: 'index, follow'
+      }
+    }
+  },
+  {
+    path: 'confidentialite',
+    loadComponent: () => import('./components/legal/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
+    title: 'AutoDiag · Politique de Confidentialité & RGPD',
+    data: {
+      seo: {
+        title: 'AutoDiag · Politique de Confidentialité & RGPD',
+        description: 'Politique de protection des données personnelles, sous-traitants IA (Groq), cookies et droits RGPD.',
+        robots: 'index, follow'
+      }
+    }
+  },
+  {
+    path: 'cgu',
+    loadComponent: () => import('./components/legal/terms.component').then(m => m.TermsComponent),
+    title: 'AutoDiag · Conditions Générales d\'Utilisation',
+    data: {
+      seo: {
+        title: 'AutoDiag · Conditions Générales d\'Utilisation (CGU)',
+        description: 'Conditions générales d\'utilisation d\'AutoDiag et décharge de responsabilité technique automobile.',
+        robots: 'index, follow'
+      }
+    }
+  },
+  {
     path: '404',
     loadComponent: () => import('./components/not-found/not-found.component').then(m => m.NotFoundComponent),
     title: 'AutoDiag · 404 Page non trouvée',

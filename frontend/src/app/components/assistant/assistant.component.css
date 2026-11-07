@@ -699,6 +699,22 @@
   z-index: 10;
 }
 
+.chat-privacy-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.chat-privacy-notice .privacy-lock-icon {
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
 .chat-input-container {
   display: flex;
   align-items: center;
