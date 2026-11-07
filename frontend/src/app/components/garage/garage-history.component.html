@@ -24,9 +24,6 @@
     <button class="tab-btn" [class.active]="activeTab === 'maintenance'" (click)="setTab('maintenance')">
       {{ 'Carnet d’entretien' | translate }}
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'dtc'" (click)="setTab('dtc')">
-      {{ 'Codes DTC OBD2' | translate }}
-    </button>
   </div>
 
   <!-- TAB 1: Diagnostics History -->
@@ -94,78 +91,6 @@
           </div>
         }
       </div>
-    </div>
-  }
-
-  <!-- TAB 3: OBD2 DTC Scanner -->
-  @if (activeTab === 'dtc') {
-    <div class="tab-pane">
-      <div class="pane-title-row">
-        <h3 class="pane-title">{{ 'Décodeur de codes défaut (DTC)' | translate }}</h3>
-      </div>
-      <p class="dtc-intro-p">
-        {{ 'Renseignez le code lu sur votre valise OBD-II (ex: P0300, P0420, P0562) pour obtenir une explication claire sans jargon.' | translate }}
-      </p>
-
-      <!-- Search Input -->
-      <div class="dtc-search-bar">
-        <input 
-          type="text" 
-          class="form-control dtc-input" 
-          placeholder="Ex: P0300" 
-          [(ngModel)]="dtcInput"
-          (keydown.enter)="searchDtc()"
-        />
-        <button class="btn-primary dtc-search-btn" (click)="searchDtc()">
-          {{ 'Chercher' | translate }}
-        </button>
-      </div>
-
-      <!-- Quick suggestions -->
-      <div class="dtc-chips-row">
-        <span class="chip-hint">{{ 'Suggestions :' | translate }}</span>
-        <button class="dtc-chip" (click)="dtcInput = 'P0300'; searchDtc('P0300')">P0300</button>
-        <button class="dtc-chip" (click)="dtcInput = 'P0420'; searchDtc('P0420')">P0420</button>
-        <button class="dtc-chip" (click)="dtcInput = 'P0562'; searchDtc('P0562')">P0562</button>
-      </div>
-
-      <!-- Search Results Card -->
-      @if (searchedDtc) {
-        <div class="dtc-result-card">
-          <div class="dtc-result-header">
-            <div class="dtc-code-badge">{{ searchedDtc.code }}</div>
-            <span class="dtc-urgency-badge" [ngClass]="'urgency-' + searchedDtc.urgency.toLowerCase()">
-              {{ 'Urgence' | translate }} {{ searchedDtc.urgency | translate }}
-            </span>
-          </div>
-
-          <h4 class="dtc-result-title">{{ searchedDtc.title | translate }}</h4>
-          <div class="dtc-system-tag">{{ 'Système :' | translate }} {{ searchedDtc.system | translate }}</div>
-          <p class="dtc-result-desc">{{ searchedDtc.description | translate }}</p>
-
-          <!-- Causes possibles -->
-          <div class="dtc-causes-section">
-            <div class="dtc-causes-label">{{ 'Causes probables identifiées :' | translate }}</div>
-            <ul class="dtc-causes-list">
-              @for (cause of searchedDtc.possible_causes; track cause) {
-                <li>{{ cause | translate }}</li>
-              }
-            </ul>
-          </div>
-
-          <!-- Conseils garage -->
-          <div class="dtc-advice-box">
-            <div class="advice-header">{{ 'Conseil pour votre garagiste :' | translate }}</div>
-            <div class="advice-content">{{ searchedDtc.garage_advice | translate }}</div>
-          </div>
-        </div>
-      }
-
-      @if (dtcError) {
-        <div class="alert-box alert-warning">
-          <div class="alert-text">{{ dtcError | translate }}</div>
-        </div>
-      }
     </div>
   }
 </div>

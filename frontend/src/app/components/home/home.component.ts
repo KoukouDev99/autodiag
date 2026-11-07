@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DiagnosticService, Symptom, Vehicle, RecentDiagnostic, DtcCode, AiNormalizeResult, AiSafetyResult } from '../../services/diagnostic.service';
@@ -30,6 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private vehicleLogoService = inject(VehicleLogoService);
   translationService = inject(TranslationService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   private dtcSearch$ = new Subject<string>();
   private dtcSub?: Subscription;
@@ -244,6 +245,16 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadData();
+
+    this.route.fragment.subscribe(fragment => {
+      if (fragment === 'symptoms-section') {
+        setTimeout(() => {
+          const el = document.getElementById('symptoms-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+      }
+    });
+
     this.dtcSub = this.dtcSearch$.pipe(
       debounceTime(300),
       distinctUntilChanged()
@@ -382,11 +393,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   startGeneralDiagnostic(): void {
-    const firstSymptom = this.symptoms.find(s => s.code === 'start_fail') || this.symptoms[0];
-    if (firstSymptom) {
-      this.startSymptomDiagnostic(firstSymptom);
+    const el = document.getElementById('symptoms-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      this.router.navigate(['/diagnostic', 1]);
+      window.scrollTo({ top: 650, behavior: 'smooth' });
     }
   }
 

@@ -99,6 +99,12 @@ app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 // Global Rate Limiting on API endpoints
 app.use('/api', globalApiLimiter);
 
+// Enforce UTF-8 Charset on all API responses to prevent accent corruption (? or SUB)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 // API Routes
 app.use('/api', apiRoutes);
 

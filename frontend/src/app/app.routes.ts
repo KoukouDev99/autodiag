@@ -39,6 +39,10 @@ export const routes: Routes = [
     }
   },
   {
+    path: 'diagnostic',
+    redirectTo: ''
+  },
+  {
     path: 'diagnostic/:sessionId',
     loadComponent: () => import('./components/quiz/diagnostic-quiz.component').then(m => m.DiagnosticQuizComponent),
     title: 'AutoDiag · Diagnostic Guidé Interactif',

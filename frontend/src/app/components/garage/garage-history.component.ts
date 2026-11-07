@@ -18,7 +18,7 @@ export class GarageHistoryComponent implements OnInit {
   private vehicleLogoService = inject(VehicleLogoService);
   private router = inject(Router);
 
-  activeTab: 'history' | 'maintenance' | 'dtc' = 'history';
+  activeTab: 'history' | 'maintenance' = 'history';
 
   diagnostics: RecentDiagnostic[] = [];
   maintenanceRecords: any[] = [];
@@ -85,7 +85,7 @@ export class GarageHistoryComponent implements OnInit {
     });
   }
 
-  setTab(tab: 'history' | 'maintenance' | 'dtc'): void {
+  setTab(tab: 'history' | 'maintenance'): void {
     this.activeTab = tab;
   }
 

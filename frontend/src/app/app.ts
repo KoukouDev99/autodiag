@@ -104,6 +104,18 @@ export class App implements OnInit {
     this.router.navigate([path]);
   }
 
+  onDiagnosticNavClick(event?: Event): void {
+    if (this.router.url === '/' || this.router.url.startsWith('/#') || this.router.url.startsWith('/?')) {
+      if (event) event.preventDefault();
+      const el = document.getElementById('symptoms-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } else {
+      this.router.navigate(['/'], { fragment: 'symptoms-section' });
+    }
+  }
+
   getUserInitials(): string {
     const user = this.currentUser();
     if (!user || !user.name) return 'AD';

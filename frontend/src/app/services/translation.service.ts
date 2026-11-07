@@ -16,8 +16,8 @@ export interface LanguageOption {
 })
 export class TranslationService {
   readonly languages: LanguageOption[] = [
-    { code: 'fr', label: 'Français', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-    { code: 'en', label: 'English', name: 'English', nativeName: 'English', flag: '🇬🇧' }
+    { code: 'fr', label: 'Français', name: 'French', nativeName: 'Français', flag: 'FR' },
+    { code: 'en', label: 'English', name: 'English', nativeName: 'English', flag: 'EN' }
   ];
 
   currentLang = signal<SupportedLang>(this.loadSavedLang());
@@ -74,10 +74,12 @@ export class TranslationService {
 
   /**
    * Traduit automatiquement toute chaîne technique ou OBD2 restante de l'anglais vers le français
-   * et nettoie tout artefact d'encodage éventuel.
+   * et nettoie tout artefact d'encodage éventuel (? ou SUB).
    */
   private translateDynamicToFr(text: string): string {
     let s = text
+      .replace(/\uFFFD/g, '') // Nettoyage caractère de remplacement
+      .replace(/\x1A/g, '')   // Nettoyage caractère ASCII SUB
       .replace(/\?\?\?C/g, '°C')
       .replace(/\?\?C/g, '°C')
       .replace(/\?\?\?/g, '€')

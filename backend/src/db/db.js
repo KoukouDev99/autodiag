@@ -40,6 +40,11 @@ async function initDatabase() {
     // 2. Connect with database
     pool = mysql.createPool(dbConfig);
 
+    // Enforce utf8mb4 encoding on all connections in pool to prevent accent corruption
+    pool.on('connection', (connection) => {
+      connection.query("SET NAMES 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'");
+    });
+
     // 3. Apply schema
     const schemaPath = path.join(__dirname, 'schema.sql');
     if (fs.existsSync(schemaPath)) {

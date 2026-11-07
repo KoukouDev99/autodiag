@@ -113,69 +113,6 @@
           </div>
         </div>
       }
-
-      <!-- ⚡ AI Advisor Interactive Helper Button & Collapsible Drawer -->
-      <div class="ai-advisor-trigger-row">
-        <button type="button" class="btn-ai-advisor" (click)="toggleAiAdvisor()">
-          <span class="ai-advisor-pulse"></span>
-          <span>⚡ {{ (showAiAdvisor ? 'Masquer l\'aide AutoDiag IA' : 'Demander conseil à AutoDiag IA pour ce test') | translate }}</span>
-        </button>
-      </div>
-
-      @if (showAiAdvisor) {
-        <div class="ai-advisor-card">
-          <div class="ai-advisor-card-header">
-            <div class="ai-advisor-badge">
-              <span class="ai-live-dot"></span>
-              {{ 'AUTODIAG IA · ASSISTANCE CONTEXTUELLE AU TEST' | translate }}
-            </div>
-            <button type="button" class="ai-advisor-open-full" (click)="openFullAssistantWithQuestion()">
-              {{ 'Ouvrir le chat complet ↗' | translate }}
-            </button>
-          </div>
-
-          <!-- Messages in Step -->
-          <div class="ai-advisor-messages-box">
-            @for (msg of aiAdvisorMessages; track msg.content) {
-              <div class="ai-step-bubble" [class.user-bubble]="msg.role === 'user'">
-                <p>{{ msg.content | translate }}</p>
-              </div>
-            }
-            @if (aiAdvisorThinking) {
-              <div class="ai-advisor-loading">
-                <span class="ai-dot-flashing"></span> {{ 'Analyse AutoDiag IA en cours...' | translate }}
-              </div>
-            }
-          </div>
-
-          <!-- Quick Presets -->
-          <div class="ai-advisor-presets-row">
-            <button type="button" class="ai-preset-chip" (click)="askAiAdvisor('Comment tester ce point sans multimètre ni démontage ?')">
-              ❓ {{ 'Sans multimètre ?' | translate }}
-            </button>
-            <button type="button" class="ai-preset-chip" (click)="askAiAdvisor('Est-ce dangereux pour le démarreur si j\'essaie encore ?')">
-              ⚠️ {{ 'Risque mécanique ?' | translate }}
-            </button>
-            <button type="button" class="ai-preset-chip" (click)="askAiAdvisor('Que signifie si les feux faiblissent en même temps ?')">
-              💡 {{ 'Feux qui faiblissent ?' | translate }}
-            </button>
-          </div>
-
-          <!-- Quick Question Input -->
-          <div class="ai-advisor-input-row">
-            <input 
-              type="text" 
-              [(ngModel)]="aiAdvisorQuestion" 
-              [placeholder]="'Posez une question sur ce test...' | translate" 
-              (keydown.enter)="askAiAdvisor()"
-              class="ai-advisor-input"
-            />
-            <button type="button" class="ai-advisor-send-btn" (click)="askAiAdvisor()" [disabled]="!aiAdvisorQuestion.trim() || aiAdvisorThinking">
-              {{ 'assistant.send' | translate }}
-            </button>
-          </div>
-        </div>
-      }
     </div>
 
     <!-- Selectable Options List (Formatted as Workshop Verifications) -->

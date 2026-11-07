@@ -5,16 +5,22 @@
 
 :root {
   /* Default Light Theme Tokens */
-  --c-night: #101828;            /* Bleu nuit */
-  --c-primary: #2563EB;          /* Action / Bleu électrique */
+  --c-night: #101828;
+  /* Bleu nuit */
+  --c-primary: #2563EB;
+  /* Action / Bleu électrique */
   --c-primary-hover: #1d4ed8;
   --c-primary-light: #eff6ff;
-  --c-bg: #F3F5F9;               /* Fond clair */
-  --c-surface: #FFFFFF;          /* Surface blanche */
+  --c-bg: #F3F5F9;
+  /* Fond clair */
+  --c-surface: #FFFFFF;
+  /* Surface blanche */
   --c-surface-hover: #f8fafc;
   --c-text-primary: #101828;
-  --c-text-secondary: #667085;    /* Texte secondaire */
-  --c-border: #E4E8F0;           /* Bordure */
+  --c-text-secondary: #667085;
+  /* Texte secondaire */
+  --c-border: #E4E8F0;
+  /* Bordure */
   --c-border-subtle: #f1f3f7;
   --c-input-bg: #FFFFFF;
   --c-card-bg: #FFFFFF;
@@ -69,8 +75,10 @@ body.dark-theme {
   --c-primary: #3b82f6;
   --c-primary-hover: #60a5fa;
   --c-primary-light: rgba(59, 130, 246, 0.15);
-  --c-bg: #0b0f19;               /* Fond profond sombre */
-  --c-surface: #111827;          /* Carte sombre */
+  --c-bg: #0b0f19;
+  /* Fond profond sombre */
+  --c-surface: #111827;
+  /* Carte sombre */
   --c-surface-hover: #1f2937;
   --c-text-primary: #f8fafc;
   --c-text-secondary: #94a3b8;
@@ -100,7 +108,9 @@ body.dark-theme {
 }
 
 /* Global Reset & Box Sizing */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -174,7 +184,8 @@ body.dark-theme ::-webkit-scrollbar-thumb:hover {
   background: #60a5fa !important;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   max-width: 100vw;
   min-height: 100%;
@@ -188,13 +199,21 @@ html, body {
 }
 
 /* Button & form controls default font and color inheritance */
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font-family: inherit;
   color: inherit;
 }
 
 /* Base Headings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1.25;
@@ -454,6 +473,7 @@ h1, h2, h3, h4, h5, h6 {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -463,4 +483,20 @@ h1, h2, h3, h4, h5, h6 {
 :focus-visible {
   outline: 2px solid var(--c-primary) !important;
   outline-offset: 2px !important;
+}
+
+body {
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE10+/Edge */
+  user-select: none;
+  /* Syntaxe standard */
+}
+
+input, textarea, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }

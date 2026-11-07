@@ -620,7 +620,7 @@ export class VehicleComponent implements OnInit {
 
   toggleFuelDropdown(event: Event): void {
     event.stopPropagation();
-    if (!this.vehicle.brand || this.availableFuelTypes.length === 0) {
+    if (!this.vehicle.model || this.loadingEngines || this.availableFuelTypes.length === 0) {
       return;
     }
     const willOpen = !this.isFuelOpen;
@@ -679,15 +679,14 @@ export class VehicleComponent implements OnInit {
     }
     this._lastFuelEnginesRef = this.engines;
     if (!this.engines || this.engines.length === 0) {
-      this._cachedAvailableFuelTypes = this.fuelTypes;
+      this._cachedAvailableFuelTypes = this.vehicle.model ? [] : this.fuelTypes;
       return this._cachedAvailableFuelTypes;
     }
-    // Filter fuels to only those that exist for the selected vehicle / model / year
+    // Filter fuels strictly to only those available in the catalog for this specific vehicle model
     const matching = this.fuelTypes.filter(targetFuel => 
       this.engines.some(engine => this.fuelMatches(engine.fuel, targetFuel))
     );
 
-    // If none matched standard fuel types, fallback to all fuelTypes
     this._cachedAvailableFuelTypes = matching.length > 0 ? matching : this.fuelTypes;
     return this._cachedAvailableFuelTypes;
   }
