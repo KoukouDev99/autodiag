@@ -379,22 +379,64 @@ async function retrieveDatabaseContext(pool, message, vehicle) {
 
 // Helper: Build tailored system prompt based on user vehicle and database context
 function buildVehicleSystemPrompt(vehicle, dbContext = '', language = 'fr') {
+  const isEn = language === 'en';
+
+  if (isEn) {
+    let engVehDesc = 'Not specified (general advice)';
+    if (vehicle && vehicle.brand) {
+      engVehDesc = `${vehicle.brand} ${vehicle.model || ''} (${vehicle.year || 'Year unspecified'})
+- Engine : ${vehicle.engine || 'Standard'} (${vehicle.fuel || 'Not specified'})
+- Odometer : ${vehicle.mileage ? Number(vehicle.mileage).toLocaleString('en-US') + ' km' : 'Not specified'}`;
+    }
+
+    let prompt = `You are "AutoDiag Copilot", a master automotive technician and workshop diagnostic expert.
+You answer car owners' questions with technical precision, clarity, and reassurance, adapted to their specific vehicle.
+
+ACTIVE USER VEHICLE CONTEXT (FROM DATABASE):
+${engVehDesc}`;
+
+    if (dbContext && dbContext.trim()) {
+      prompt += `\n\nOFFICIAL TECHNICAL DATA RETRIEVED IN REAL-TIME FROM MYSQL AUTODIAG DATABASE:
+${dbContext}
+(Rule: Use these official technical specifications and figures to back your diagnostic findings, causes, and repair costs!)`;
+    }
+
+    prompt += `\n\nMANDATORY RESPONSE STRUCTURE (OEM WORKSHOP STANDARD):
+To make your response ultra-clear, reassuring, and immediately actionable, you MUST structure your answer with these 5 distinct markdown sections:
+
+### 🔍 Analysis & Probable Diagnosis
+Clearly, calmly, and precisely explain the mechanical phenomenon observed, citing specifically the user's vehicle (${engVehDesc.split('\n')[0]}).
+
+### ⚠️ Urgency Level & Safety
+- **Severity:** [Low | Moderate | High | Critical]
+- **Can you drive:** [Yes without immediate danger | Caution: short drive to repair shop | Immediate stop imperative]
+
+### 🛠️ Main Causes to Inspect
+- **1. [Component 1]:** [Concise description of the fault]
+- **2. [Component 2]:** [Concise description of the fault]
+
+### 💡 Recommended Actions & Advice
+- **Personal check:** [What the driver can check personally without tools or disassembly]
+- **Shop intervention:** [Precise inspection or test to request from the mechanic]
+
+### 💶 Estimated Cost (Parts & Labor)
+- **Average estimated range:** [Realistic prices in euros € or local currency, comparing independent shop vs dealership]
+
+Style guidelines: Be direct, airy, avoid massive walls of text, and use bold formatting on technical keywords.
+
+CRITICAL LANGUAGE RULE:
+You MUST write your ENTIRE response in ENGLISH. Every title, heading, bullet point, label, explanation, and recommendation MUST be strictly in English. Never use French words.`;
+
+    return prompt;
+  }
+
+  // Default: French
   let vehDesc = 'Non renseigné (conseils généralistes)';
   if (vehicle && vehicle.brand) {
     vehDesc = `${vehicle.brand} ${vehicle.model || ''} (${vehicle.year || 'Année non précisée'})
 - Motorisation : ${vehicle.engine || 'Standard'} (${vehicle.fuel || 'Non spécifié'})
 - Kilométrage compteur : ${vehicle.mileage ? Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : 'Non précisé'}`;
   }
-
-  const langMap = {
-    fr: 'français (French)',
-    en: 'anglais (English)',
-    es: 'espagnol (Spanish)',
-    it: 'italien (Italian)',
-    de: 'allemand (German)',
-    pt: 'portugais (Portuguese)'
-  };
-  const targetLanguage = langMap[language] || 'français (French)';
 
   let prompt = `Tu es "AutoDiag Copilote", un mécanicien automobile expert, courtois, pédagogue et bienveillant.
 Tu réponds aux questions des automobilistes en adaptant précisément tes explications selon le profil et le véhicule de l'utilisateur.
@@ -432,7 +474,7 @@ Explique avec clarté, bienveillance et précision le phénomène mécanique con
 Règles de style : sois direct, aéré, évite les pavés de texte indigestes et utilise du gras sur les mots clés techniques.
 
 CONSIGNE DE LANGUE STRICTE ET OBLIGATOIRE :
-Tu dois impérativement rédiger l'intégralité de ta réponse en ${targetLanguage}. Adapte la langue des titres et des explications à celle demandée.`;
+Tu dois impérativement rédiger l'intégralité de ta réponse en français. Tous les titres, puces, explications et recommandations doivent être en français.`;
 
   return prompt;
 }
@@ -573,13 +615,34 @@ router.post(['/chat', '/ai/chat'], aiChatLimiter, async (req, res) => {
     }
 
     // 4. Intelligent Local Fallback (adapted to user vehicle & strictly structured)
-    const vehName = vehicle && vehicle.brand ? `${vehicle.brand} ${vehicle.model || ''}` : 'votre véhicule';
-    const vehSpec = `${vehName} (${vehicle?.engine || 'motorisation standard'}${vehicle?.mileage ? ', ' + Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : ''})`;
+    const isEn = language === 'en';
+    const vehName = vehicle && vehicle.brand ? `${vehicle.brand} ${vehicle.model || ''}` : (isEn ? 'your vehicle' : 'votre véhicule');
+    const vehSpec = isEn
+      ? `${vehName} (${vehicle?.engine || 'standard engine'}${vehicle?.mileage ? ', ' + Number(vehicle.mileage).toLocaleString('en-US') + ' km' : ''})`
+      : `${vehName} (${vehicle?.engine || 'motorisation standard'}${vehicle?.mileage ? ', ' + Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : ''})`;
     const qLower = message.toLowerCase();
     let fallbackReply = '';
 
-    if (/frein|plaquette|disque/.test(qLower)) {
-      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+    if (/frein|plaquette|disque|brake|pad|rotor/.test(qLower)) {
+      fallbackReply = isEn
+        ? `### 🔍 Analysis & Probable Diagnosis
+On your **${vehSpec}**, abnormal brake pedal feel (spongy, sinking) or grinding noise when braking typically indicates critical friction pad wear or pressure loss in the hydraulic circuit.
+
+### ⚠️ Urgency Level & Safety
+- **Severity:** High
+- **Can you drive:** Caution: very short drive to repair shop at reduced speed, immediate stop if pedal goes all the way to the floor.
+
+### 🛠️ Main Causes to Inspect
+- **1. Worn Brake Pads:** Friction material worn down to the wear indicator or metal backing plate.
+- **2. Low DOT4 Brake Fluid:** Fluid leak on flexible lines, caliper piston seal, or master cylinder failure requiring a bleed.
+
+### 💡 Recommended Actions & Advice
+- **Personal check:** Pop the hood and inspect brake fluid reservoir level (must be between MIN and MAX). Check through wheels for pad thickness (> 3 mm).
+- **Shop intervention:** Request rotor thickness micrometer check and front brake pads replacement.
+
+### 💶 Estimated Cost (Parts & Labor)
+- **Average estimated range:** **80 € to 160 €** for front pads alone, or **220 € to 340 €** for complete rotors + pads package.`
+        : `### 🔍 Analyse & Diagnostic Probable
 Sur votre **${vehSpec}**, un comportement anormal de la pédale de frein ou des bruits métalliques au ralentissement indiquent généralement une usure critique des garnitures de friction ou une baisse de pression dans le circuit hydraulique.
 
 ### ⚠️ Niveau d'Urgence & Sécurité
@@ -596,9 +659,27 @@ Sur votre **${vehSpec}**, un comportement anormal de la pédale de frein ou des 
 
 ### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
 - **Fourchette moyenne constatée :** **80 € à 160 €** pour les plaquettes avant seules, ou **220 € à 340 €** pour le kit disques + plaquettes monté.`;
-    } else if (/courroie|distribution/.test(qLower)) {
+    } else if (/courroie|distribution|timing belt|belt/.test(qLower)) {
       const isPuretech = (vehicle?.engine || '').toLowerCase().includes('puretech');
-      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+      fallbackReply = isEn
+        ? `### 🔍 Analysis & Probable Diagnosis
+For your **${vehSpec}**, the timing belt maintains critical synchronization between valves and pistons. Belt failure leads to catastrophic engine destruction.
+
+### ⚠️ Urgency Level & Safety
+- **Severity:** High
+- **Can you drive:** Yes if no oil pressure warnings or unusual ticking sounds, but strictly adhere to scheduled age/mileage limits.
+
+### 🛠️ Main Causes to Inspect
+- **1. Age & Mileage Limit:** ${isPuretech ? 'On the 1.2 PureTech wet timing belt engine, OEM recommendation is **6 years or 100,000 km** with width gauge check at every oil change.' : 'Standard OEM recommendation is **5 to 6 years or 100,000 to 150,000 km** depending on manufacturer.'}
+- **2. Water Pump Bearing Wear:** Risk of play or coolant leakage driven by the timing belt.
+
+### 💡 Recommended Actions & Advice
+- **Personal check:** Inspect your service logbook to confirm the date and mileage of the last timing service.
+- **Shop intervention:** Order a complete timing belt kit replacement (belt + tensioner + idler pulleys + water pump + coolant flush).
+
+### 💶 Estimated Cost (Parts & Labor)
+- **Average estimated range:** **450 € to 750 €** at an independent garage (**650 € to 950 €** at official dealership).`
+        : `### 🔍 Analyse & Diagnostic Probable
 Pour votre **${vehSpec}**, la distribution assure la synchronisation vitale entre les soupapes et les pistons. Une défaillance entraîne la casse moteur instantanée.
 
 ### ⚠️ Niveau d'Urgence & Sécurité
@@ -615,8 +696,26 @@ Pour votre **${vehSpec}**, la distribution assure la synchronisation vitale entr
 
 ### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
 - **Fourchette moyenne constatée :** **450 € à 750 €** chez un garagiste indépendant (**650 € à 950 €** en réseau constructeur).`;
-    } else if (/vidange|huile|entretien/.test(qLower)) {
-      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+    } else if (/vidange|huile|entretien|oil|service/.test(qLower)) {
+      fallbackReply = isEn
+        ? `### 🔍 Analysis & Probable Diagnosis
+On your **${vehSpec}**, regular oil changes ensure high-pressure hydrodynamic lubrication of turbocharger bearings, cylinder walls, and camshafts.
+
+### ⚠️ Urgency Level & Safety
+- **Severity:** Moderate
+- **Can you drive:** Yes if oil level is between marks and red oil pressure warning light is OFF.
+
+### 🛠️ Main Causes to Inspect
+- **1. Engine Oil Degradation:** Loss of viscosity and soot accumulation (interval exceeded > 1 year or 15,000 km).
+- **2. Oil Filter Clogging:** Reduced oil flow rate to upper engine cylinder head components.
+
+### 💡 Recommended Actions & Advice
+- **Personal check:** On flat ground with a cold engine, pull the manual dipstick: oil level must be strictly between MIN and MAX.
+- **Shop intervention:** Gravity drain, replace oil filter and sump plug washer, reset maintenance interval indicator.
+
+### 💶 Estimated Cost (Parts & Labor)
+- **Average estimated range:** **75 € to 140 €** for complete synthetic oil service and OEM filter.`
+        : `### 🔍 Analyse & Diagnostic Probable
 Sur votre **${vehSpec}**, la vidange régulière garantit la lubrification sous haute pression des paliers de turbo, des cylindres et de l'arbre à cames.
 
 ### ⚠️ Niveau d'Urgence & Sécurité
@@ -633,8 +732,27 @@ Sur votre **${vehSpec}**, la vidange régulière garantit la lubrification sous 
 
 ### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
 - **Fourchette moyenne constatée :** **75 € à 140 €** pour un forfait vidange + filtre (huile 100% synthèse homologuée constructeur).`;
-    } else if (/voyant.*moteur|voyant.*orange|check engine/.test(qLower)) {
-      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+    } else if (/voyant.*moteur|voyant.*orange|check engine|dtc|warning light/.test(qLower)) {
+      const isBlinking = message.toLowerCase().includes('clignot') || message.toLowerCase().includes('blink') || message.toLowerCase().includes('flash');
+      fallbackReply = isEn
+        ? `### 🔍 Analysis & Probable Diagnosis
+The check engine light illuminated on your **${vehSpec}** signals that a Diagnostic Trouble Code (DTC) has been stored in the engine control unit (ECU).
+
+### ⚠️ Urgency Level & Safety
+- **Severity:** ${isBlinking ? 'Critical (Risk of catalytic converter destruction)' : 'Moderate to High'}
+- **Can you drive:** ${isBlinking ? 'Immediate stop required: do not drive with a flashing light.' : 'Yes cautiously at moderate speed to the nearest repair facility.'}
+
+### 🛠️ Main Causes to Inspect
+- **1. Ignition or Fuel Injection Fault:** Cylinder misfire, ignition coils or fouled spark plugs.
+- **2. Emissions / O2 Sensor:** Upstream oxygen sensor, EGR valve, or particulate filter restriction.
+
+### 💡 Recommended Actions & Advice
+- **Personal check:** Notice whether the engine shudders, runs rough, or enters limp-home mode.
+- **Shop intervention:** Complete electronic OBD-II scan to extract DTC codes (P0xxx) and freeze-frame sensor data.
+
+### 💶 Estimated Cost (Parts & Labor)
+- **Average estimated range:** **35 € to 65 €** for diagnostic code reading alone (**120 € to 380 €** depending on sensor replacement).`
+        : `### 🔍 Analyse & Diagnostic Probable
 L'allumage du témoin moteur sur votre **${vehSpec}** indique qu'un code défaut (DTC) a été mémorisé dans le calculateur d'injection (anomalie de combustion, capteur lambda, injection ou dépollution).
 
 ### ⚠️ Niveau d'Urgence & Sécurité
@@ -652,7 +770,25 @@ L'allumage du témoin moteur sur votre **${vehSpec}** indique qu'un code défaut
 ### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
 - **Fourchette moyenne constatée :** **35 € à 65 €** pour la lecture valise de diagnostic seule (**120 € à 380 €** selon le capteur à remplacer).`;
     } else {
-      fallbackReply = `### 🔍 Analyse & Diagnostic Probable
+      fallbackReply = isEn
+        ? `### 🔍 Analysis & Probable Diagnosis
+For your **${vehSpec}**, this symptom points to a mechanical or electrical anomaly requiring targeted inspection of powertrain and suspension components.
+
+### ⚠️ Urgency Level & Safety
+- **Severity:** Moderate
+- **Can you drive:** Yes with vigilance provided no red warning lights are illuminated on the instrument cluster.
+
+### 🛠️ Main Causes to Inspect
+- **1. Engine Peripheral Components:** Accessory drive belt, idler pulleys, intake air hoses or boost piping.
+- **2. Running Gear & Electrical Sensors:** Suspension bushings, wheel bearings, or engine management electronic sensors.
+
+### 💡 Recommended Actions & Advice
+- **Personal check:** Visually inspect fluid levels (coolant, oil, brake fluid) and note exact driving conditions when the issue occurs.
+- **Shop intervention:** Follow the AutoDiag guided troubleshooting workflow or have the vehicle inspected on a workshop lift.
+
+### 💶 Estimated Cost (Parts & Labor)
+- **Average estimated range:** Workshop diagnostic fee: **40 € to 70 €** depending on troubleshooting time spent.`
+        : `### 🔍 Analyse & Diagnostic Probable
 Pour votre **${vehSpec}**, ce symptôme signale une anomalie mécanique ou électrique nécessitant une identification ciblée des organes en mouvement.
 
 ### ⚠️ Niveau d'Urgence & Sécurité

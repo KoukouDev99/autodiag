@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DiagnosticService, DiagnosticResultsResponse } from '../../services/diagnostic.service';
+import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
@@ -15,6 +16,7 @@ export class DiagnosticResultsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private diagnosticService = inject(DiagnosticService);
+  translationService = inject(TranslationService);
 
   sessionId = 1;
   results: DiagnosticResultsResponse | null = null;
@@ -28,8 +30,18 @@ export class DiagnosticResultsComponent implements OnInit {
 
   // OEM Workshop Diagnostic Metadata
   reportReference = 'DIAG-OEM-2026-0842';
-  oemStandardTime = '1.20 h (Barème constructeur PSA EB2)';
-  postRepairCheck = 'Exécution de 3 cycles de démarrage consécutifs (froid / chaud), contrôle de tension de charge alternateur (14.2V), effacement et relecture mémoire DTC.';
+  
+  get oemStandardTime(): string {
+    return this.translationService.currentLang() === 'en'
+      ? '1.20 h (PSA EB2 OEM Standard Flat Rate)'
+      : '1.20 h (Barème constructeur PSA EB2)';
+  }
+
+  get postRepairCheck(): string {
+    return this.translationService.currentLang() === 'en'
+      ? 'Perform 3 consecutive cranking cycles (cold / warm), inspect alternator charging voltage (14.2V), clear and re-read DTC fault memory.'
+      : 'Exécution de 3 cycles de démarrage consécutifs (froid / chaud), contrôle de tension de charge alternateur (14.2V), effacement et relecture mémoire DTC.';
+  }
 
   get targetSubsystem(): string {
     const topName = (this.results?.top_hypothesis?.name || this.results?.hypotheses[0]?.name || '').toLowerCase();
@@ -71,25 +83,40 @@ export class DiagnosticResultsComponent implements OnInit {
   }
 
   get pedagogicalMeaning(): string {
+    const isEn = this.translationService.currentLang() === 'en';
     const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
     if (top?.name) {
-      return `L'analyse des constatations désigne « ${top.name} » comme la cause principale. L'élément ne répond plus aux spécifications nominales de fonctionnement.`;
+      const translatedName = this.translationService.t(top.name);
+      return isEn
+        ? `Diagnostic test analysis points to "${translatedName}" as the primary root cause. The component no longer meets factory operating specifications.`
+        : `L'analyse des constatations désigne « ${translatedName} » comme la cause principale. L'élément ne répond plus aux spécifications nominales de fonctionnement.`;
     }
-    return 'Le solénoïde ou les charbons du démarreur sont usés ou gommés. Le courant 12V arrive bien depuis la batterie, mais le moteur électrique du démarreur ne parvient plus à s\'enclencher pour lancer le moteur thermique.';
+    return isEn
+      ? 'The starter motor solenoid or carbon brushes are worn or sticking. 12V battery power is delivered properly, but the starter electrical motor fails to engage and crank the engine.'
+      : 'Le solénoïde ou les charbons du démarreur sont usés ou gommés. Le courant 12V arrive bien depuis la batterie, mais le moteur électrique du démarreur ne parvient plus à s\'enclencher pour lancer le moteur thermique.';
   }
 
   get immediateAction(): string {
+    const isEn = this.translationService.currentLang() === 'en';
     const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
     if (top?.is_danger) {
-      return 'Arrêt impératif du véhicule. Ne prenez pas la route avant vérification par un réparateur qualifié.';
+      return isEn
+        ? 'Immediate vehicle stop required. Do not drive until inspected by a certified automotive technician.'
+        : 'Arrêt impératif du véhicule. Ne prenez pas la route avant vérification par un réparateur qualifié.';
     }
-    return 'N\'insistez pas sur la clé de contact de manière répétée : cela viderait inutilement la batterie et risquerait de surchauffer le faisceau électrique. Évitez les démarrages forcés à la poussette.';
+    return isEn
+      ? 'Do not repeatedly crank the ignition key: this will unnecessarily drain the 12V battery and risk overheating the starter wiring harness. Avoid push starting.'
+      : 'N\'insistez pas sur la clé de contact de manière répétée : cela viderait inutilement la batterie et risquerait de surchauffer le faisceau électrique. Évitez les démarrages forcés à la poussette.';
   }
 
   get counterTestVerdict(): string {
+    const isEn = this.translationService.currentLang() === 'en';
     const top = this.results?.top_hypothesis || this.results?.hypotheses[0];
-    const name = top?.name || 'l\'organe';
-    return `Si la mesure ou l'observation confirme l'anomalie, la défaillance de ${name} est confirmée pour le devis de remise en état.`;
+    const rawName = top?.name || 'l\'organe';
+    const translatedName = this.translationService.t(rawName);
+    return isEn
+      ? `If measurement or visual inspection confirms the anomaly, failure of ${translatedName} is validated for repair estimate preparation.`
+      : `Si la mesure ou l'observation confirme l'anomalie, la défaillance de ${translatedName} est confirmée pour le devis de remise en état.`;
   }
 
   ngOnInit(): void {

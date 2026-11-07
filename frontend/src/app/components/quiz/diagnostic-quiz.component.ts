@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DiagnosticService, Question, QuestionOption } from '../../services/diagnostic.service';
+import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
@@ -16,6 +17,7 @@ export class DiagnosticQuizComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private diagnosticService = inject(DiagnosticService);
+  translationService = inject(TranslationService);
 
   sessionId = 1;
   sessionData: any = null;
@@ -46,11 +48,14 @@ export class DiagnosticQuizComponent implements OnInit {
   }
 
   initAiAdvisorTip(): void {
-    const qTitle = this.currentQuestion?.title || 'ce test';
+    const isEn = this.translationService.currentLang() === 'en';
+    const qTitle = this.translationService.t(this.currentQuestion?.title || 'ce test');
     this.aiAdvisorMessages = [
       {
         role: 'assistant',
-        content: `💡 **Conseil AutoDiag IA :** Pour ce test (« ${qTitle} »), privilégiez une observation douce sans forcer. Si vous hésitez entre deux constatations, décrivez-moi ce que vous entendez ou ressentez ci-dessous.`
+        content: isEn
+          ? `💡 **AutoDiag AI Tip:** For this test ("${qTitle}"), prioritize gentle observation without forcing. If you hesitate between two observations, describe what you hear or feel below.`
+          : `💡 **Conseil AutoDiag IA :** Pour ce test (« ${qTitle} »), privilégiez une observation douce sans forcer. Si vous hésitez entre deux constatations, décrivez-moi ce que vous entendez ou ressentez ci-dessous.`
       }
     ];
   }
@@ -63,8 +68,13 @@ export class DiagnosticQuizComponent implements OnInit {
     this.aiAdvisorQuestion = '';
     this.aiAdvisorThinking = true;
 
+    const isEn = this.translationService.currentLang() === 'en';
+    const qTitle = this.translationService.t(this.currentQuestion?.title || '');
+
     const payload = {
-      message: `Sur mon véhicule (${this.sessionData?.vehicle_brand || 'Peugeot'} ${this.sessionData?.vehicle_model || '208'}), lors du test "${this.currentQuestion?.title || ''}", voici mon interrogation : ${query.trim()}`,
+      message: isEn
+        ? `On my vehicle (${this.sessionData?.vehicle_brand || 'Peugeot'} ${this.sessionData?.vehicle_model || '208'}), during the test "${qTitle}", here is my question: ${query.trim()}`
+        : `Sur mon véhicule (${this.sessionData?.vehicle_brand || 'Peugeot'} ${this.sessionData?.vehicle_model || '208'}), lors du test "${qTitle}", voici mon interrogation : ${query.trim()}`,
       vehicle: {
         id: 1,
         user_id: 1,
@@ -76,29 +86,38 @@ export class DiagnosticQuizComponent implements OnInit {
         mileage: 68420,
         license_plate: '',
         is_primary: true
-      }
+      },
+      language: this.translationService.currentLang()
     };
 
     this.diagnosticService.chatWithAssistant(payload).subscribe({
       next: (res) => {
         this.aiAdvisorThinking = false;
+        const defaultReply = isEn
+          ? 'Practical advice: Take no mechanical risks. If you are unsure, select "Inspection not possible without tools".'
+          : 'Conseil pratique : Ne prenez aucun risque mécanique. Si vous n’êtes pas certain(e), sélectionnez « Contrôle impossible sans outillage ».';
         this.aiAdvisorMessages.push({
           role: 'assistant',
-          content: res.reply || 'Conseil pratique : Ne prenez aucun risque mécanique. Si vous n’êtes pas certain(e), sélectionnez « Contrôle impossible sans outillage ».'
+          content: res.reply || defaultReply
         });
       },
       error: () => {
         this.aiAdvisorThinking = false;
+        const errReply = isEn
+          ? 'Practical advice: Take no mechanical risks. If the test is ambiguous, choose "Inspection not possible / Insufficient data" to preserve diagnostic integrity.'
+          : 'Conseil pratique : Ne prenez aucun risque mécanique. Si le test est ambigu, choisissez « Contrôle impossible / Données insuffisantes » pour préserver l’intégrité du diagnostic.';
         this.aiAdvisorMessages.push({
           role: 'assistant',
-          content: 'Conseil pratique : Ne prenez aucun risque mécanique. Si le test est ambigu, choisissez « Contrôle impossible / Données insuffisantes » pour préserver l’intégrité du diagnostic.'
+          content: errReply
         });
       }
     });
   }
 
   openFullAssistantWithQuestion(q?: string): void {
-    const text = q || `Je suis sur l'étape de diagnostic : ${this.currentQuestion?.title || ''}`;
+    const isEn = this.translationService.currentLang() === 'en';
+    const qTitle = this.translationService.t(this.currentQuestion?.title || '');
+    const text = q || (isEn ? `I am on diagnostic step: ${qTitle}` : `Je suis sur l'étape de diagnostic : ${qTitle}`);
     this.router.navigate(['/assistant'], { queryParams: { prompt: text } });
   }
 

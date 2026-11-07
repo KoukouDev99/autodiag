@@ -143,7 +143,10 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
 
   clearChat(): void {
     if (this.messages.length <= 1) return;
-    if (confirm('Réinitialiser la conversation avec AutoDiag IA ?')) {
+    const confirmMsg = this.translationService.currentLang() === 'en'
+      ? 'Reset conversation with AutoDiag AI?'
+      : 'Réinitialiser la conversation avec AutoDiag IA ?';
+    if (confirm(confirmMsg)) {
       this.initWelcomeMessage();
     }
   }
@@ -199,6 +202,8 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       content: m.content
     }));
 
+    const isEn = this.translationService.currentLang() === 'en';
+
     // 3. Appel de l'API
     this.diagnosticService.chatWithAssistant({
       message: text,
@@ -210,9 +215,10 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     }).subscribe({
       next: (res) => {
         this.isThinking = false;
+        const noReplyFallback = isEn ? 'Sorry, I could not formulate a response.' : 'Désolé, je n\'ai pas pu formuler de réponse.';
         this.messages.push({
           role: 'assistant',
-          content: res.reply || 'Désolé, je n\'ai pas pu formuler de réponse.',
+          content: res.reply || noReplyFallback,
           timestamp: new Date(),
           provider: res.provider || this.activeModelLabel,
           model: res.model,
@@ -221,9 +227,12 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       },
       error: () => {
         this.isThinking = false;
+        const errorMsg = isEn
+          ? '⚠️ A connection error occurred. Please check your network and try again.'
+          : '⚠️ Une erreur de connexion est survenue. Veuillez vérifier votre clé API ou réessayer.';
         this.messages.push({
           role: 'assistant',
-          content: '⚠️ Une erreur de connexion est survenue. Veuillez vérifier votre clé API ou réessayer.',
+          content: errorMsg,
           timestamp: new Date(),
           provider: 'Erreur Système'
         });
@@ -238,6 +247,8 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     if (cached !== undefined) {
       return cached;
     }
+
+    const isEn = this.translationService.currentLang() === 'en';
 
     // 1. Protection contre les injections
     let html = text
@@ -268,26 +279,26 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     html = html.replace(/^>\s*(.*?)$/gm, '<blockquote class="chat-quote">$1</blockquote>');
     html = html.replace(/^(?:---|___|\*\*\*)$/gm, '<hr class="chat-hr" />');
 
-    // 4. Sections Markdown (## ou ### Titre)
+    // 4. Sections Markdown (## ou ### Titre) - Bilingue FR / EN
     html = html.replace(/#{2,3}\s*(🔍|⚠️|🛠️|💡|💶|[0-9]️⃣)?\s*(.*?)(?=\n|$)/g, (_match, icon, title) => {
       const rawTitle = (title || '').trim();
       let iconSymbol = icon || '📋';
       let sectionClass = 'section-general';
 
       const lower = rawTitle.toLowerCase();
-      if (lower.includes('analyse') || lower.includes('diagnostic')) {
+      if (lower.includes('analyse') || lower.includes('analysis') || lower.includes('diagnostic') || lower.includes('diagnosis')) {
         sectionClass = 'section-diag';
         iconSymbol = icon || '🔍';
-      } else if (lower.includes('urgence') || lower.includes('sécurité') || lower.includes('danger')) {
+      } else if (lower.includes('urgence') || lower.includes('urgency') || lower.includes('sécurité') || lower.includes('safety') || lower.includes('danger')) {
         sectionClass = 'section-safety';
         iconSymbol = icon || '⚠️';
-      } else if (lower.includes('causes') || lower.includes('éléments') || lower.includes('symptôme')) {
+      } else if (lower.includes('causes') || lower.includes('éléments') || lower.includes('components') || lower.includes('symptôme') || lower.includes('symptom')) {
         sectionClass = 'section-causes';
         iconSymbol = icon || '🛠️';
-      } else if (lower.includes('actions') || lower.includes('conseils') || lower.includes('procédure') || lower.includes('checklist')) {
+      } else if (lower.includes('actions') || lower.includes('conseils') || lower.includes('advice') || lower.includes('recommend') || lower.includes('procédure') || lower.includes('checklist')) {
         sectionClass = 'section-advice';
         iconSymbol = icon || '💡';
-      } else if (lower.includes('estimation') || lower.includes('chiffrée') || lower.includes('coût') || lower.includes('prix')) {
+      } else if (lower.includes('estimation') || lower.includes('estimate') || lower.includes('chiffrée') || lower.includes('coût') || lower.includes('cost') || lower.includes('prix') || lower.includes('price')) {
         sectionClass = 'section-cost';
         iconSymbol = icon || '💶';
       }
@@ -298,39 +309,42 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       </div>`;
     });
 
-    // 5. Badges de gravité
-    html = html.replace(/-\s*\*\*Gravité\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
+    // 5. Badges de gravité (Bilingue FR / EN)
+    html = html.replace(/-\s*\*\*(?:Gravité|Severity)\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       const v = (val || '').trim();
       let badgeClass = 'badge-gravity-medium';
       let badgeIcon = 'ℹ️';
-      if (/critique|danger/i.test(v)) {
+      if (/critique|critical|danger/i.test(v)) {
         badgeClass = 'badge-gravity-critical';
         badgeIcon = '🚨';
-      } else if (/élevée|haute|important/i.test(v)) {
+      } else if (/élevée|haute|high|important/i.test(v)) {
         badgeClass = 'badge-gravity-high';
         badgeIcon = '⚠️';
-      } else if (/faible|mineur/i.test(v)) {
+      } else if (/faible|low|minor|mineur/i.test(v)) {
         badgeClass = 'badge-gravity-low';
         badgeIcon = '✅';
       }
-      return `<div class="chat-badge-pill ${badgeClass}"><span class="badge-icon">${badgeIcon}</span><strong>Gravité :</strong>&nbsp;${v}</div>`;
+      const label = isEn ? 'Severity :' : 'Gravité :';
+      return `<div class="chat-badge-pill ${badgeClass}"><span class="badge-icon">${badgeIcon}</span><strong>${label}</strong>&nbsp;${v}</div>`;
     });
 
-    // 6. Statut d'aptitude à rouler
-    html = html.replace(/-\s*\*\*Peut-on rouler\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
+    // 6. Statut d'aptitude à rouler (Bilingue FR / EN)
+    html = html.replace(/-\s*\*\*(?:Peut-on rouler|Can you drive|Can I drive|Drivability)\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       const v = (val || '').trim();
       let runClass = 'run-caution';
-      if (/arrêt immédiat|ne pas rouler|interdit/i.test(v)) {
+      if (/arrêt immédiat|immediate stop|ne pas rouler|do not drive|interdit/i.test(v)) {
         runClass = 'run-stop';
-      } else if (/oui sans danger|aucun risque/i.test(v)) {
+      } else if (/oui sans danger|yes without|yes, without|aucun risque|safe to drive/i.test(v)) {
         runClass = 'run-ok';
       }
-      return `<div class="chat-run-status ${runClass}"><span class="run-dot"></span><strong>Peut-on rouler :</strong>&nbsp;${v}</div>`;
+      const label = isEn ? 'Can you drive :' : 'Peut-on rouler :';
+      return `<div class="chat-run-status ${runClass}"><span class="run-dot"></span><strong>${label}</strong>&nbsp;${v}</div>`;
     });
 
-    // 7. Carte highlight pour l'estimation chiffrée
-    html = html.replace(/-\s*\*\*Fourchette moyenne constatée\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
-      return `<div class="chat-cost-card"><div class="cost-header"><span class="cost-badge-icon">💶</span><span class="cost-tag">Estimation constatée d'atelier</span></div><div class="cost-val">${(val || '').trim()}</div></div>`;
+    // 7. Carte highlight pour l'estimation chiffrée (Bilingue FR / EN)
+    html = html.replace(/-\s*\*\*(?:Fourchette moyenne constatée|Average estimated range|Estimated range|Average range)\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
+      const tag = isEn ? 'Workshop Estimated Cost' : 'Estimation constatée d\'atelier';
+      return `<div class="chat-cost-card"><div class="cost-header"><span class="cost-badge-icon">💶</span><span class="cost-tag">${tag}</span></div><div class="cost-val">${(val || '').trim()}</div></div>`;
     });
 
     // 8. Formatage des puces restantes (- item)

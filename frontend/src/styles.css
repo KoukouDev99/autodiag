@@ -104,6 +104,74 @@ body.dark-theme {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  /* Suppression du curseur pointer sur toutes les pages du site */
+  cursor: default !important;
+}
+
+/* Conserver le curseur de saisie pour les champs texte et zones de saisie */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="password"],
+input[type="email"],
+textarea,
+[contenteditable="true"] {
+  cursor: text !important;
+}
+
+/* Conserver le curseur disabled pour les éléments désactivés */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[disabled] {
+  cursor: not-allowed !important;
+}
+
+html {
+  /* Barre de défilement permanente et stylisée sur toutes les pages */
+  overflow-y: scroll !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-primary, #2563eb) var(--c-bg, #f3f5f9);
+}
+
+body.dark-theme html,
+body.dark-theme {
+  scrollbar-color: #38bdf8 #0b0f19;
+}
+
+/* Barre de défilement moderne pour les navigateurs WebKit (Chrome, Edge, Safari, Opera) */
+::-webkit-scrollbar {
+  width: 10px !important;
+  height: 10px !important;
+  display: block !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--c-bg, #f3f5f9) !important;
+}
+
+body.dark-theme ::-webkit-scrollbar-track {
+  background: #0b0f19 !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8 !important;
+  border-radius: 9999px !important;
+  border: 2px solid var(--c-bg, #f3f5f9) !important;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+  background: #38bdf8 !important;
+  border: 2px solid #0b0f19 !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-primary, #2563eb) !important;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: #60a5fa !important;
 }
 
 html, body {
