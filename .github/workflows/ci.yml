@@ -66,3 +66,4 @@ jobs:
           DB_PASSWORD: root
           DB_NAME: autodiag_dev
           NODE_ENV: test
+

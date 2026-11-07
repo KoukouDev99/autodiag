@@ -1160,6 +1160,223 @@
   }
 }
 
+/* ==========================================================================
+   🌙 COMPLETE DARK MODE STYLES FOR RESULTS (body.dark-theme)
+   ========================================================================== */
+:host-context(body.dark-theme) .screen-brand-title {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .back-btn,
+:host-context(body.dark-theme) .help-btn {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .back-btn:hover,
+:host-context(body.dark-theme) .help-btn:hover {
+  background-color: #1e293b;
+}
+
+:host-context(body.dark-theme) .oem-badge {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+:host-context(body.dark-theme) .header-pre-tag {
+  color: #38bdf8;
+}
+
+:host-context(body.dark-theme) .page-title {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .v-pill {
+  background: #111827;
+  color: #94a3b8;
+  border-color: #1f2937;
+}
+
+:host-context(body.dark-theme) .disclaimer-card {
+  background-color: rgba(30, 58, 138, 0.2);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+:host-context(body.dark-theme) .disclaimer-title {
+  color: #93c5fd;
+}
+
+:host-context(body.dark-theme) .disclaimer-desc {
+  color: #bfdbfe;
+}
+
+:host-context(body.dark-theme) .causes-count-title {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .causes-order-hint {
+  color: #94a3b8;
+}
+
+:host-context(body.dark-theme) .hypothesis-card {
+  background: #111827;
+  border-color: #1f2937;
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.5);
+}
+
+:host-context(body.dark-theme) .hypothesis-card.primary-border {
+  border-color: #38bdf8;
+  box-shadow: 0 4px 20px -2px rgba(56, 189, 248, 0.15);
+}
+
+:host-context(body.dark-theme) .hypo-name {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .hypo-desc {
+  color: #cbd5e1;
+}
+
+:host-context(body.dark-theme) .badge-label-pill {
+  background-color: #1e293b;
+  color: #94a3b8;
+}
+
+:host-context(body.dark-theme) .check-action-box {
+  background-color: #0b0f19;
+  border-color: #1e293b;
+}
+
+:host-context(body.dark-theme) .check-action-text {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .eliminated-section {
+  background: #111827;
+  border-color: #334155;
+}
+
+:host-context(body.dark-theme) .eliminated-badge {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+:host-context(body.dark-theme) .eliminated-title {
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .eliminated-desc {
+  color: #94a3b8;
+}
+
+:host-context(body.dark-theme) .eliminated-item {
+  background: #0b0f19;
+  border-color: #1e293b;
+}
+
+:host-context(body.dark-theme) .elim-name {
+  color: #64748b;
+}
+
+:host-context(body.dark-theme) .elim-reason {
+  color: #94a3b8;
+}
+
+:host-context(body.dark-theme) .btn-feedback {
+  background: #111827;
+  border-color: #1f2937;
+  color: #f8fafc;
+}
+
+:host-context(body.dark-theme) .btn-feedback.confirm:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34d399;
+  color: #34d399;
+}
+
+:host-context(body.dark-theme) .btn-feedback.deny:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #f87171;
+  color: #f87171;
+}
+
+:host-context(body.dark-theme) .ai-explain-card {
+  background: linear-gradient(145deg, #111827, #0b0f19);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+:host-context(body.dark-theme) .ai-guidance-box {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: #1e293b;
+}
+
+/* ==========================================================================
+   📱 SMARTPHONE RESPONSIVE (RESULTS PAGE)
+   ========================================================================== */
+@media (max-width: 640px) {
+  .screen-content {
+    padding: 8px 10px calc(var(--bottom-nav-height) + 16px) 10px;
+    gap: 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .analysis-hero-card {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  .analysis-title {
+    font-size: 16px;
+  }
+
+  .amdec-details-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .amdec-item {
+    padding: 6px 8px;
+  }
+
+  .amdec-value {
+    font-size: 12.5px;
+  }
+
+  .hypothesis-card {
+    padding: 14px 12px;
+    border-radius: 12px;
+    gap: 8px;
+  }
+
+  .hypo-name {
+    font-size: 15px;
+  }
+
+  .ai-explain-card {
+    padding: 14px 12px;
+  }
+
+  .ai-guidance-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .feedback-buttons-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-feedback {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
 
 
 

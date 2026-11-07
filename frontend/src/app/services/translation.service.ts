@@ -416,7 +416,20 @@ export class TranslationService {
       'profile.title': 'Mon Profil Utilisateur',
       'profile.subtitle': 'Gérez vos informations personnelles, vos préférences de langue et vos paramètres de sécurité.',
       'profile.save': 'Enregistrer les modifications',
-      'profile.language': 'Langue de l\'application'
+      'profile.language': 'Langue de l\'application',
+
+      // Footer
+      'footer.brand': 'AutoDiag',
+      'footer.tagline': 'Diagnostic automobile intelligent et transparent',
+      'footer.disclaimer': 'Outil d\'aide à la décision technique et pédagogique. Ne remplace pas le diagnostic ni l\'intervention d\'un réparateur automobile agréé.',
+      'footer.legal': 'Mentions Légales',
+      'footer.privacy': 'Confidentialité & RGPD',
+      'footer.terms': 'Conditions d\'Utilisation',
+      'footer.rights': 'Tous droits réservés',
+      'footer.oem_standard': 'Arbre Décisionnel Garagiste & Norme ISO 14229',
+      'footer.quick_nav': 'Navigation Rapide',
+      'footer.safety_reminder': 'Rappel de Sécurité',
+      'footer.emergency_text': 'En cas d\'anomalie sur le freinage, la direction ou de voyant rouge critique (STOP/Huile), immobilisez immédiatement le véhicule.'
     },
 
     en: {
@@ -1205,7 +1218,26 @@ export class TranslationService {
       'Le nom et l\'email sont requis.': 'Name and email are required.',
       'Vos informations personnelles ont été mises à jour !': 'Your personal information has been updated!',
       'Impossible d\'enregistrer les modifications.': 'Unable to save changes.',
-      'Vous avez été déconnecté avec succès.': 'You have been signed out successfully.'
+      'Vous avez été déconnecté avec succès.': 'You have been signed out successfully.',
+
+      // Footer
+      'footer.brand': 'AutoDiag',
+      'footer.tagline': 'Smart, transparent automotive diagnostics',
+      'footer.disclaimer': 'Technical & educational decision-support tool. Does not replace physical diagnosis or service by a certified automotive technician.',
+      'footer.legal': 'Legal Notice',
+      'footer.privacy': 'Privacy & GDPR',
+      'footer.terms': 'Terms of Service',
+      'footer.rights': 'All rights reserved',
+      'footer.oem_standard': 'Workshop Decision Tree & ISO 14229 Standard',
+      'footer.quick_nav': 'Quick Navigation',
+      'footer.safety_reminder': 'Safety Advisory',
+      'footer.emergency_text': 'In case of brake or steering failure, or if a critical red warning light illuminates (STOP, Oil pressure), pull over and turn off the engine immediately.',
+      'Mentions Légales': 'Legal Notice',
+      'Confidentialité & RGPD': 'Privacy & GDPR',
+      'Conditions d\'Utilisation': 'Terms of Service',
+      'Diagnostic automobile intelligent et transparent': 'Smart, transparent automotive diagnostics',
+      'Outil d\'aide à la décision technique et pédagogique. Ne remplace pas le diagnostic ni l\'intervention d\'un réparateur automobile agréé.': 'Technical & educational decision-support tool. Does not replace physical diagnosis or service by a certified automotive technician.',
+      'Tous droits réservés': 'All rights reserved'
     }
   };
 }

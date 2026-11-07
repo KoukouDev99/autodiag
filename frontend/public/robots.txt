@@ -18,3 +18,4 @@ Disallow: /profil
 Disallow: /404
 
 Sitemap: https://[TON-DOMAINE.fr]/sitemap.xml
+

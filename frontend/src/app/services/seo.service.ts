@@ -82,3 +82,4 @@ export class SeoService {
     link.setAttribute('href', url);
   }
 }
+
