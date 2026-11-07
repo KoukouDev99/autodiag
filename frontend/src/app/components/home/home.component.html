@@ -112,6 +112,7 @@
         [placeholder]="'Décrivez votre panne... Ex: ma pédale de frein est molle, de la fumée blanche au démarrage' | translate" 
         class="ai-input"
         id="ai-natural-search-input"
+        [attr.aria-label]="'Décrivez votre panne avec vos propres mots' | translate"
       />
       @if (isAnalyzingAi) {
         <div class="ai-spinner" title="Analyse IA en cours..."></div>
@@ -226,14 +227,15 @@
           (input)="onDtcSearchInput()" 
           placeholder="Ex: P0420, P0300, P1120, U0100..." 
           class="dtc-input"
+          [attr.aria-label]="'Rechercher un code défaut OBD' | translate"
         />
         @if (dtcSearchQuery) {
-          <button type="button" class="dtc-clear-btn" (click)="dtcSearchQuery = ''; dtcSearchResults = []">✕</button>
+          <button type="button" class="dtc-clear-btn" (click)="dtcSearchQuery = ''; dtcSearchResults = []" [attr.aria-label]="'Effacer' | translate">✕</button>
         }
       </div>
 
       <div class="dtc-make-select-wrapper">
-        <select [(ngModel)]="dtcSelectedMake" (change)="onDtcSearchInput()" class="dtc-make-select">
+        <select [(ngModel)]="dtcSelectedMake" (change)="onDtcSearchInput()" class="dtc-make-select" [attr.aria-label]="'Filtrer par marque constructeur' | translate">
           @for (m of makesList; track m) {
             <option [value]="m">{{ m === 'TOUTES' ? ('Toutes marques' | translate) : m }}</option>
           }
@@ -327,6 +329,7 @@
           [(ngModel)]="symptomSearchQuery" 
           [placeholder]="'Filtrer un symptôme ou bruit (ex: claquement, fumée, frein, vibration...)' | translate" 
           class="symptom-search-input"
+          [attr.aria-label]="'Filtrer un symptôme ou bruit' | translate"
         />
         @if (symptomSearchQuery) {
           <button type="button" class="symptom-search-clear" (click)="symptomSearchQuery = ''" [attr.aria-label]="'Effacer' | translate">✕</button>

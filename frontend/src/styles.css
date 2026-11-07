@@ -390,3 +390,9 @@ h1, h2, h3, h4, h5, h6 {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Accessible keyboard navigation focus ring (WCAG 2.1 AA 2.4.7) */
+:focus-visible {
+  outline: 2px solid var(--c-primary) !important;
+  outline-offset: 2px !important;
+}

@@ -161,7 +161,7 @@
         </button>
 
         <!-- Profil -->
-        <a routerLink="/profil" class="icon-btn profile-btn" [title]="'header.profile' | translate">
+        <a routerLink="/profil" class="icon-btn profile-btn" [title]="'header.profile' | translate" [attr.aria-label]="'header.profile' | translate">
           @if (currentUser()) {
           <span class="header-avatar-circle">{{ getUserInitials() }}</span>
           } @else {
