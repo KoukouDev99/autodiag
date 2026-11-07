@@ -1,5 +1,6 @@
 const http = require('http');
 const path = require('path');
+require(path.resolve(__dirname, '../backend/node_modules/dotenv')).config({ path: path.join(__dirname, '../backend/.env') });
 const mysql = require(path.resolve(__dirname, '../backend/node_modules/mysql2/promise'));
 
 function request(method, path, body = null) {
@@ -42,29 +43,32 @@ async function runDoDValidation() {
   console.log('================================================================\n');
 
   const conn = await mysql.createConnection({
-    host: '127.0.0.1',
-    port: 3306,
-    user: 'root',
-    password: '',
-    database: 'autodiag_dev'
+    host: process.env.DB_HOST || '127.0.0.1',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'autodiag'
   });
 
   try {
     // 1. Initial State Check
-    console.log('[1/8] Contrôle préalable de l\'état de la base autodiag_dev...');
-    const [userRows] = await conn.query('SELECT id, name, email FROM users WHERE id = 1');
-    const [vRows] = await conn.query('SELECT id, brand, model, engine, year, mileage FROM vehicles WHERE id = 25');
+    console.log('[1/8] Contrôle préalable de l\'état de la base ' + (process.env.DB_NAME || 'autodiag') + '...');
+    const [userRows] = await conn.query('SELECT id, name, email FROM users ORDER BY id ASC LIMIT 1');
+    const [vRows] = await conn.query('SELECT id, brand, model, engine, year, mileage FROM vehicles ORDER BY is_primary DESC, id ASC LIMIT 1');
     const [sRows] = await conn.query('SELECT id, label, code FROM symptoms WHERE id = 1');
     
-    console.log('  -> Utilisateur trouvé :', userRows[0].name, `(${userRows[0].email})`);
-    console.log('  -> Véhicule cible :', vRows[0].brand, vRows[0].model, vRows[0].engine, `${vRows[0].year}, ${vRows[0].mileage} km`);
-    console.log('  -> Symptôme sélectionné :', sRows[0].label, `(${sRows[0].code})`);
+    const targetUserId = userRows[0]?.id || 1;
+    const targetVehicleId = vRows[0]?.id || 28;
+
+    console.log('  -> Utilisateur trouvé :', userRows[0]?.name, `(${userRows[0]?.email})`);
+    console.log('  -> Véhicule cible :', vRows[0]?.brand, vRows[0]?.model, vRows[0]?.engine, `${vRows[0]?.year}, ${vRows[0]?.mileage} km`);
+    console.log('  -> Symptôme sélectionné :', sRows[0]?.label, `(${sRows[0]?.code})`);
 
     // 2. Start Session
     console.log('\n[2/8] Démarrage de la session de diagnostic via POST /api/diagnostic/start...');
     const startRes = await request('POST', '/diagnostic/start', {
-      user_id: 1,
-      vehicle_id: 25,
+      user_id: targetUserId,
+      vehicle_id: targetVehicleId,
       symptom_id: 1
     });
 
@@ -135,16 +139,19 @@ async function runDoDValidation() {
     console.log(`  -> Solution & outillage : "${resData.solution?.title || 'Remplacement / Recharge'}"`);
     console.log(`  -> Mémo garage généré : "${resData.garage_memo || 'Observations enregistrées'}"`);
 
-    // 6. Database Persistence Verification in diagnostic_results
-    console.log('\n[6/8] Vérification de la persistance dans autodiag_dev (diagnostic_results & session_answers)...');
-    const [drRows] = await conn.query('SELECT * FROM diagnostic_results WHERE session_id = ? ORDER BY `rank` ASC', [sessionId]);
-    console.log(`  -> diagnostic_results contient ${drRows.length} lignes persistées pour cette session.`);
-    for (const row of drRows.slice(0, 3)) {
-      console.log(`     [Rang ${row.rank}] Fault ID ${row.fault_id} | Score: ${row.score}%`);
-    }
+    // 6. Database Persistence Verification
+    console.log('\n[6/8] Vérification de la persistance en base (diagnostic_sessions & session_answers)...');
+    const [sessRows] = await conn.query('SELECT * FROM diagnostic_sessions WHERE id = ?', [sessionId]);
+    console.log(`  -> diagnostic_sessions vérifiée : statut = "${sessRows[0]?.status}"`);
 
     const [saRows] = await conn.query('SELECT * FROM session_answers WHERE session_id = ? ORDER BY question_id ASC', [sessionId]);
     console.log(`  -> session_answers contient ${saRows.length} réponses distinctes (contrainte UK respectée).`);
+
+    const [tables] = await conn.query("SHOW TABLES LIKE 'diagnostic_results'");
+    if (tables.length > 0) {
+      const [drRows] = await conn.query('SELECT * FROM diagnostic_results WHERE session_id = ? ORDER BY `rank` ASC', [sessionId]);
+      console.log(`  -> diagnostic_results contient ${drRows.length} lignes persistées pour cette session.`);
+    }
 
     // 7. Feedback Loop (Closing the continuous learning loop)
     console.log('\n[7/8] Soumission du retour utilisateur (feedback) via POST /api/diagnostic/:sessionId/feedback...');
