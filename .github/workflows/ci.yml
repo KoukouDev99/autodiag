@@ -1,0 +1,68 @@
+name: AutoDiag CI Pre-Production Pipeline
+
+on:
+  push:
+    branches: [ main, master, pre-prod-audit ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build & Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: autodiag_dev
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install backend dependencies
+        run: npm --prefix backend ci
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Build frontend for production
+        run: npm --prefix frontend run build
+
+      - name: Initialize Database Schema & Seed Data
+        run: |
+          mysql -h 127.0.0.1 -u root -proot autodiag_dev < database/schema.sql || true
+          mysql -h 127.0.0.1 -u root -proot autodiag_dev < database/init_data.sql || true
+        env:
+          MYSQL_PWD: root
+
+      - name: Run Backend Functional Edge Case Tests
+        run: node tests/test_functional_edge_cases.js
+        env:
+          PORT: 3000
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: root
+          DB_NAME: autodiag_dev
+          NODE_ENV: test
+
+      - name: Run Definition of Done (DoD) Journey Test
+        run: node tests/test_dod_validation_journey.js
+        env:
+          PORT: 3000
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: root
+          DB_NAME: autodiag_dev
+          NODE_ENV: test
