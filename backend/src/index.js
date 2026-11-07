@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const compression = require('compression');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
@@ -14,6 +15,9 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy for reverse proxies (Nginx, Traefik, PaaS)
 app.set('trust proxy', 1);
 
+// HTTP Compression (gzip / deflate) for API payloads & static responses
+app.use(compression());
+
 // HTTP Security Headers via Helmet (configured for Angular SPA + Fonts & Assets)
 app.use(
   helmet({
@@ -21,16 +25,13 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        fontSrc: ["'self'", 'data:'],
         imgSrc: ["'self'", 'data:', 'https:', 'blob:'],
         connectSrc: [
           "'self'",
           'http://localhost:3000',
-          'http://localhost:4200',
-          'https://api.groq.com',
-          'https://api.deepseek.com',
-          'https://api.openai.com'
+          'http://localhost:4200'
         ],
         objectSrc: ["'none'"],
         frameAncestors: ["'none'"],

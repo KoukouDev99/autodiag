@@ -53,6 +53,7 @@
               }
             ],
             "styles": [
+              "public/assets/fonts/fonts.css",
               "src/styles.css"
             ]
           },
