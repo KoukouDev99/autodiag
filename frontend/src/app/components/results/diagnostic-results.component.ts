@@ -4,11 +4,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DiagnosticService, DiagnosticResultsResponse } from '../../services/diagnostic.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../ui/icon.component';
 
 @Component({
   selector: 'app-diagnostic-results',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, IconComponent],
   templateUrl: './diagnostic-results.component.html',
   styleUrls: ['./diagnostic-results.component.css']
 })

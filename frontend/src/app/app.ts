@@ -6,11 +6,12 @@ import { DiagnosticService } from './services/diagnostic.service';
 import { TranslationService, SupportedLang } from './services/translation.service';
 import { TranslatePipe } from './pipes/translate.pipe';
 import { SeoService } from './services/seo.service';
+import { IconComponent } from './components/ui/icon.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, IconComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
@@ -27,8 +28,8 @@ export class App implements OnInit {
   currentLangInfo = this.translationService.currentLangInfo;
   showLangDropdown = signal(false);
 
-  // Dark Mode state: default to true (Dark mode) or stored preference
-  isDarkMode = signal(true);
+  // Theme state: follows prefers-color-scheme by default, or manual stored preference
+  isDarkMode = signal(false);
   showSosModal = signal(false);
   showNotificationsModal = signal(false);
   activeUrl = signal('/');
@@ -50,11 +51,17 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.seoService.init();
     const savedTheme = localStorage.getItem('autodiag-theme');
-    if (savedTheme) {
+    if (savedTheme === 'dark' || savedTheme === 'light') {
       this.isDarkMode.set(savedTheme === 'dark');
-    } else {
-      // Default to Dark Mode as requested
-      this.isDarkMode.set(true);
+    } else if (typeof window !== 'undefined' && window.matchMedia) {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      this.isDarkMode.set(mediaQuery.matches);
+      mediaQuery.addEventListener('change', (e) => {
+        if (!localStorage.getItem('autodiag-theme')) {
+          this.isDarkMode.set(e.matches);
+          this.applyTheme();
+        }
+      });
     }
     this.applyTheme();
   }
@@ -67,10 +74,12 @@ export class App implements OnInit {
 
   private applyTheme(): void {
     if (typeof document !== 'undefined') {
-      if (this.isDarkMode()) {
-        document.body.classList.add('dark-theme');
-      } else {
-        document.body.classList.remove('dark-theme');
+      const dark = this.isDarkMode();
+      document.body.classList.toggle('dark-theme', dark);
+      document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute('content', dark ? '#0F141C' : '#F4F6F8');
       }
     }
   }

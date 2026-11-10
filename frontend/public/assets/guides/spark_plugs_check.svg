@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a101d"/>
+      <stop offset="100%" stop-color="#141e33"/>
+    </linearGradient>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+    <linearGradient id="ceramicGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <filter id="sparkGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <pattern id="grid2" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="0.5" stroke-opacity="0.6"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="450" fill="url(#bgGrad2)"/>
+  <rect width="800" height="450" fill="url(#grid2)"/>
+
+  <!-- Technical Header Tag -->
+  <g transform="translate(40, 36)">
+    <rect width="250" height="28" rx="6" fill="#7c2d12" fill-opacity="0.4" stroke="#ea580c" stroke-width="1.2"/>
+    <circle cx="16" cy="14" r="5" fill="#f97316"/>
+    <text x="30" y="19" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" font-weight="700" fill="#fdba74" letter-spacing="1.2">ALLUMAGE &amp; BOUGIES</text>
+  </g>
+
+  <!-- Spec Badge -->
+  <g transform="translate(550, 36)">
+    <rect width="210" height="28" rx="6" fill="#1e3a8a" fill-opacity="0.4" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="105" y="18" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11" font-weight="700" fill="#93c5fd" letter-spacing="0.8">ÉCARTEMENT : 0.8 - 1.0 MM</text>
+  </g>
+
+  <!-- Left: Ignition Coil Pack Diagram -->
+  <g transform="translate(70, 110)">
+    <!-- Coil Body -->
+    <rect x="20" y="30" width="120" height="180" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+    <rect x="35" y="10" width="90" height="25" rx="4" fill="#0f172a" stroke="#64748b" stroke-width="1.5"/>
+    <!-- 3-Pin Electrical Connector -->
+    <rect x="50" y="15" width="16" height="8" fill="#38bdf8"/>
+    <rect x="72" y="15" width="16" height="8" fill="#38bdf8"/>
+    <rect x="94" y="15" width="16" height="8" fill="#38bdf8"/>
+    
+    <!-- Rubber Boot Extender (Pencil Coil) -->
+    <path d="M 50 210 L 60 320 L 100 320 L 110 210 Z" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+    <circle cx="80" cy="325" r="14" fill="#020617" stroke="#ef4444" stroke-width="2"/>
+    
+    <text x="80" y="125" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="800" fill="#f8fafc">BOBINE</text>
+    <text x="80" y="145" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="600" fill="#94a3b8">Crayon (Pencil)</text>
+    <text x="80" y="165" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="700" fill="#38bdf8">20 000 V</text>
+  </g>
+
+  <!-- Spark Arc between Coil and Plug -->
+  <path d="M 150 280 Q 220 220 270 240" fill="none" stroke="#60a5fa" stroke-width="3" stroke-dasharray="6 3" filter="url(#sparkGlow)"/>
+
+  <!-- Center/Right: Spark Plug Detailed Schematic -->
+  <g transform="translate(320, 100)">
+    <!-- Terminal Nut -->
+    <rect x="110" y="15" width="20" height="22" rx="3" fill="url(#metalGrad)" stroke="#475569" stroke-width="1.5"/>
+    
+    <!-- Ceramic Insulator with Ribs -->
+    <path d="M 105 37 L 135 37 L 140 135 L 100 135 Z" fill="url(#ceramicGrad)" stroke="#94a3b8" stroke-width="1.5"/>
+    <!-- Ceramic Ribs -->
+    <rect x="98" y="55" width="44" height="8" rx="4" fill="url(#ceramicGrad)" stroke="#94a3b8" stroke-width="1"/>
+    <rect x="98" y="75" width="44" height="8" rx="4" fill="url(#ceramicGrad)" stroke="#94a3b8" stroke-width="1"/>
+    <rect x="98" y="95" width="44" height="8" rx="4" fill="url(#ceramicGrad)" stroke="#94a3b8" stroke-width="1"/>
+    <text x="120" y="122" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="800" fill="#64748b" letter-spacing="1">ISOLANT</text>
+
+    <!-- Metal Shell &amp; Hex Nut (Clé à bougie 16mm) -->
+    <polygon points="90,135 150,135 158,165 145,190 95,190 82,165" fill="url(#metalGrad)" stroke="#334155" stroke-width="2"/>
+    <text x="120" y="168" text-anchor="middle" font-family="sans-serif" font-size="11" font-weight="800" fill="#1e293b">HEX 16</text>
+
+    <!-- Gasket Washer -->
+    <rect x="90" y="190" width="60" height="6" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+
+    <!-- Threaded Body (Filetage M14) -->
+    <rect x="96" y="196" width="48" height="65" fill="#475569" stroke="#334155" stroke-width="1.5"/>
+    <!-- Threads -->
+    <line x1="94" y1="206" x2="146" y2="206" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="94" y1="216" x2="146" y2="216" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="94" y1="226" x2="146" y2="226" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="94" y1="236" x2="146" y2="236" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="94" y1="246" x2="146" y2="246" stroke="#94a3b8" stroke-width="2.5"/>
+    <line x1="94" y1="256" x2="146" y2="256" stroke="#94a3b8" stroke-width="2.5"/>
+
+    <!-- Insulator Nose &amp; Center Electrode -->
+    <polygon points="108,261 132,261 126,280 114,280" fill="#ffffff" stroke="#94a3b8" stroke-width="1"/>
+    <rect x="117" y="280" width="6" height="14" fill="#f8fafc" stroke="#334155" stroke-width="1"/>
+
+    <!-- Ground Electrode (L-shaped) -->
+    <path d="M 98 261 L 98 304 L 126 304" fill="none" stroke="url(#metalGrad)" stroke-width="4.5" stroke-linecap="square"/>
+
+    <!-- High-Voltage Plasma Spark Arc (Blue/Violet) -->
+    <path d="M 120 294 L 118 298 L 122 301 L 120 304" fill="none" stroke="#67e8f9" stroke-width="3" filter="url(#sparkGlow)"/>
+    <circle cx="120" cy="299" r="7" fill="#38bdf8" fill-opacity="0.7" filter="url(#sparkGlow)"/>
+    <circle cx="120" cy="299" r="2.5" fill="#ffffff"/>
+
+    <!-- Spark Gap Indicator Arrow -->
+    <g transform="translate(145, 290)">
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#f59e0b" stroke-width="1.5"/>
+      <polygon points="0,0 6,-3 6,3" fill="#f59e0b"/>
+      <text x="46" y="4" font-family="sans-serif" font-size="11" font-weight="800" fill="#fbbf24">GAP 0.9 mm</text>
+    </g>
+  </g>
+
+  <!-- Right: Inspection Diagnosis Box -->
+  <g transform="translate(540, 110)">
+    <rect width="210" height="230" rx="10" fill="#111827" stroke="#1f2937" stroke-width="1.5"/>
+    <text x="16" y="30" font-family="sans-serif" font-size="12" font-weight="800" fill="#f8fafc">DIAGNOSTIC VISUEL :</text>
+    
+    <!-- State 1: Normal -->
+    <circle cx="26" cy="65" r="7" fill="#10b981"/>
+    <text x="42" y="62" font-family="sans-serif" font-size="11" font-weight="700" fill="#f1f5f9">Brun clair / Grisâtre</text>
+    <text x="42" y="76" font-family="sans-serif" font-size="9.5" font-weight="500" fill="#94a3b8">Combustion optimale (OK)</text>
+
+    <!-- State 2: Carbon -->
+    <circle cx="26" cy="115" r="7" fill="#ef4444"/>
+    <text x="42" y="112" font-family="sans-serif" font-size="11" font-weight="700" fill="#f1f5f9">Dépôt noir suie</text>
+    <text x="42" y="126" font-family="sans-serif" font-size="9.5" font-weight="500" fill="#94a3b8">Mélange trop riche / Ratés</text>
+
+    <!-- State 3: Oily -->
+    <circle cx="26" cy="165" r="7" fill="#f59e0b"/>
+    <text x="42" y="162" font-family="sans-serif" font-size="11" font-weight="700" fill="#f1f5f9">Dépôt huileux luisant</text>
+    <text x="42" y="176" font-family="sans-serif" font-size="9.5" font-weight="500" fill="#94a3b8">Joints de queue ou segments</text>
+
+    <!-- State 4: Melted -->
+    <circle cx="26" cy="205" r="7" fill="#e11d48"/>
+    <text x="42" y="202" font-family="sans-serif" font-size="11" font-weight="700" fill="#f1f5f9">Électrode fondue / Blanche</text>
+    <text x="42" y="216" font-family="sans-serif" font-size="9.5" font-weight="500" fill="#94a3b8">Surchauffe / Prise d'air</text>
+  </g>
+
+  <!-- Technical Callout Footnote -->
+  <g transform="translate(40, 395)">
+    <text x="0" y="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="12" font-weight="600" fill="#94a3b8">
+      Point de contrôle : Déposez la bougie à froid. Vérifiez l’étincelle bleue franche et mesurez l’écartement des électrodes.
+    </text>
+  </g>
+</svg>

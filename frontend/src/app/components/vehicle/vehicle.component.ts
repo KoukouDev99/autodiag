@@ -6,6 +6,7 @@ import { DiagnosticService, Vehicle, EngineSpecItem } from '../../services/diagn
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../ui/icon.component';
 
 export interface CatalogModelItem {
   id: number;
@@ -28,7 +29,7 @@ export interface PlateCountryConfig {
 @Component({
   selector: 'app-vehicle',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent],
   templateUrl: './vehicle.component.html',
   styleUrls: ['./vehicle.component.css']
 })
@@ -76,7 +77,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'F',
       name: 'France',
-      flag: '🇫🇷',
+      flag: 'FR',
       placeholder: 'AA-123-BB',
       example: 'AA-123-BB',
       description: 'Format SIV (AA-123-BB) ou FNI (1234 AB 75)',
@@ -85,7 +86,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'D',
       name: 'Allemagne',
-      flag: '🇩🇪',
+      flag: 'DE',
       placeholder: 'B-MW 1234',
       example: 'B-MW 1234',
       description: 'Format allemand : Ville (1-3 let.) + 1-2 let. + 1-4 chiffres (ex: B-MW 1234)',
@@ -94,7 +95,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'B',
       name: 'Belgique',
-      flag: '🇧🇪',
+      flag: 'BE',
       placeholder: '1-ABC-123',
       example: '1-ABC-123',
       description: 'Format belge : Chiffre index + 3 let. + 3 chiffres (ex: 1-ABC-123)',
@@ -103,7 +104,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'CH',
       name: 'Suisse',
-      flag: '🇨🇭',
+      flag: 'CH',
       placeholder: 'GE 123456',
       example: 'GE 123456',
       description: 'Format suisse : Canton (GE, VD, ZH...) + 1-6 chiffres (ex: GE 123456)',
@@ -113,7 +114,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'I',
       name: 'Italie',
-      flag: '🇮🇹',
+      flag: 'IT',
       placeholder: 'AB-123-CD',
       example: 'AB-123-CD',
       description: 'Format italien : 2 let., 3 chiffres, 2 let. (ex: AB-123-CD)',
@@ -122,7 +123,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'E',
       name: 'Espagne',
-      flag: '🇪🇸',
+      flag: 'ES',
       placeholder: '1234-BCD',
       example: '1234-BCD',
       description: 'Format espagnol : 4 chiffres + 3 consonnes (ex: 1234-BCD)',
@@ -131,7 +132,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'P',
       name: 'Portugal',
-      flag: '🇵🇹',
+      flag: 'PT',
       placeholder: 'AA-12-BB',
       example: 'AA-12-BB',
       description: 'Format portugais : 2 let. + 2 chif. + 2 let. (ex: AA-12-BB)',
@@ -140,7 +141,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'NL',
       name: 'Pays-Bas',
-      flag: '🇳🇱',
+      flag: 'NL',
       placeholder: '12-ABC-3',
       example: '12-ABC-3',
       description: 'Format néerlandais : 6 caractères en 3 blocs (ex: 12-ABC-3)',
@@ -149,7 +150,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'L',
       name: 'Luxembourg',
-      flag: '🇱🇺',
+      flag: 'LU',
       placeholder: 'AB 1234',
       example: 'AB 1234',
       description: 'Format luxembourgeois : 2 let. + 4 chiffres (ex: AB 1234)',
@@ -158,7 +159,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'A',
       name: 'Autriche',
-      flag: '🇦🇹',
+      flag: 'AT',
       placeholder: 'W-12345X',
       example: 'W-12345X',
       description: 'Format autrichien : District (1-2 let.) + numéros (ex: W-12345X)',
@@ -167,7 +168,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'PL',
       name: 'Pologne',
-      flag: '🇵🇱',
+      flag: 'PL',
       placeholder: 'WA 12345',
       example: 'WA 12345',
       description: 'Format polonais : Voïvodie (2-3 let.) + 4-5 caractères (ex: WA 12345)',
@@ -176,7 +177,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'RO',
       name: 'Roumanie',
-      flag: '🇷🇴',
+      flag: 'RO',
       placeholder: 'B 123 ABC',
       example: 'B 123 ABC',
       description: 'Format roumain : Comté (1-2 let.) + 2-3 chif. + 3 let. (ex: B 123 ABC)',
@@ -185,7 +186,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'S',
       name: 'Suède',
-      flag: '🇸🇪',
+      flag: 'SE',
       placeholder: 'ABC 123',
       example: 'ABC 123',
       description: 'Format suédois : 3 let. + 3 chiffres ou 2 chif.+1 let. (ex: ABC 123)',
@@ -194,7 +195,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'N',
       name: 'Norvège',
-      flag: '🇳🇴',
+      flag: 'NO',
       placeholder: 'AB 12345',
       example: 'AB 12345',
       description: 'Format norvégien : 2 lettres + 5 chiffres (ex: AB 12345)',
@@ -203,7 +204,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'DK',
       name: 'Danemark',
-      flag: '🇩🇰',
+      flag: 'DK',
       placeholder: 'AB 12 345',
       example: 'AB 12 345',
       description: 'Format danois : 2 lettres + 5 chiffres (ex: AB 12 345)',
@@ -212,7 +213,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'IRL',
       name: 'Irlande',
-      flag: '🇮🇪',
+      flag: 'IE',
       placeholder: '181-D-12345',
       example: '181-D-12345',
       description: 'Format irlandais : Année - Comté - Numéro (ex: 181-D-12345)',
@@ -221,7 +222,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'UK',
       name: 'Royaume-Uni',
-      flag: '🇬🇧',
+      flag: 'GB',
       placeholder: 'AB12 CDE',
       example: 'AB12 CDE',
       description: 'Format britannique : 2 let., 2 chiffres, 3 let. (ex: AB12 CDE)',
@@ -230,7 +231,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'DZ',
       name: 'Algérie',
-      flag: '🇩🇿',
+      flag: 'DZ',
       placeholder: '12345-119-16',
       example: '12345-119-16',
       description: 'Format algérien : Numéro - Année - Wilaya (ex: 12345-119-16)',
@@ -240,7 +241,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'MA',
       name: 'Maroc',
-      flag: '🇲🇦',
+      flag: 'MA',
       placeholder: '12345-A-26',
       example: '12345-A-26',
       description: 'Format marocain : Numéro - Série - Wilaya (ex: 12345-A-26)',
@@ -250,7 +251,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'TN',
       name: 'Tunisie',
-      flag: '🇹🇳',
+      flag: 'TN',
       placeholder: '123 TU 4567',
       example: '123 TU 4567',
       description: 'Format tunisien : Série TU Numéro (ex: 123 TU 4567)',
@@ -260,7 +261,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'TR',
       name: 'Turquie',
-      flag: '🇹🇷',
+      flag: 'TR',
       placeholder: '34 ABC 123',
       example: '34 ABC 123',
       description: 'Format turc : Province (2 chif.) + lettres + chiffres (ex: 34 ABC 123)',
@@ -270,7 +271,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'US',
       name: 'USA / Canada',
-      flag: '🇺🇸',
+      flag: 'US',
       placeholder: '7XYZ123',
       example: '7XYZ123',
       description: 'Format nord-américain : 3 à 8 caractères alphanumériques (ex: 7XYZ123)',
@@ -280,7 +281,7 @@ export class VehicleComponent implements OnInit {
     {
       code: 'INT',
       name: 'Autre / International',
-      flag: '🌐',
+      flag: 'INT',
       placeholder: 'ABC-1234',
       example: 'ABC-1234',
       description: 'Format international libre : min 3 caractères alphanumériques',
@@ -517,6 +518,13 @@ export class VehicleComponent implements OnInit {
   engines: EngineSpecItem[] = [];
   selectedEngineSpec: EngineSpecItem | null = null;
 
+  // Multi-source vehicle API integration (NHTSA vPIC, gor3a, MeterApp)
+  catalogSource: 'auto' | 'internal' | 'nhtsa' | 'gor3a' | 'meterapp' = 'auto';
+  vinInput = '';
+  isDecodingVin = false;
+  vinError: string | null = null;
+  vinSuccess: string | null = null;
+
   loadingBrands = false;
   loadingModels = false;
   loadingYears = false;
@@ -607,7 +615,7 @@ export class VehicleComponent implements OnInit {
   }
 
   get isEngineDisabled(): boolean {
-    return !this.vehicle.brand || !this.vehicle.model || !this.vehicle.year || !this.vehicle.fuel;
+    return !this.vehicle.brand || !this.vehicle.model || !this.vehicle.fuel;
   }
 
   toggleYearDropdown(event: Event): void {
@@ -679,7 +687,7 @@ export class VehicleComponent implements OnInit {
     }
     this._lastFuelEnginesRef = this.engines;
     if (!this.engines || this.engines.length === 0) {
-      this._cachedAvailableFuelTypes = this.vehicle.model ? [] : this.fuelTypes;
+      this._cachedAvailableFuelTypes = this.fuelTypes;
       return this._cachedAvailableFuelTypes;
     }
     // Filter fuels strictly to only those available in the catalog for this specific vehicle model
@@ -697,21 +705,21 @@ export class VehicleComponent implements OnInit {
     const tf = targetFuel.toLowerCase().trim();
 
     if (tf === 'essence') {
-      return ef === 'essence' || ef.includes('gasoline') || ef.includes('petrol');
+      return ef === 'essence' || ef.includes('gasoline') || ef.includes('petrol') || ef.includes('benzin');
     }
     if (tf === 'diesel') {
-      return ef === 'diesel';
+      return ef === 'diesel' || ef.includes('diesel') || ef.includes('hdi') || ef.includes('tdi') || ef.includes('dci');
     }
     if (tf === 'hybride') {
       return ef === 'hybride' || ef.includes('hybrid') || ef.includes('mhev') || ef.includes('phev');
     }
     if (tf === 'électrique') {
-      return ef === 'électrique' || ef.includes('electric') || ef.includes('bev');
+      return ef === 'électrique' || ef.includes('electr') || ef.includes('bev') || ef.includes('kwh');
     }
     if (tf === 'gpl') {
-      return ef === 'gpl' || ef.includes('lpg') || ef.includes('gas');
+      return ef === 'gpl' || ef.includes('lpg') || ef.includes('gas') || ef.includes('cng') || ef.includes('methane');
     }
-    return ef.includes(tf);
+    return ef.includes(tf) || tf.includes(ef);
   }
 
   normalizeFuel(rawFuel: string): string {
@@ -1058,9 +1066,67 @@ export class VehicleComponent implements OnInit {
     }, 3500);
   }
 
+  setCatalogSource(source: 'auto' | 'internal' | 'nhtsa' | 'gor3a' | 'meterapp'): void {
+    this.catalogSource = source;
+    this.models = [];
+    this.loadCatalogBrands();
+  }
+
+  decodeVin(): void {
+    const raw = (this.vinInput || '').trim().toUpperCase();
+    if (!raw || raw.length < 8) {
+      this.vinError = 'Le numéro VIN doit comporter au moins 8 caractères (ex: 1HGCR2F83HA... ou VF3...)';
+      this.vinSuccess = null;
+      return;
+    }
+
+    this.isDecodingVin = true;
+    this.vinError = null;
+    this.vinSuccess = null;
+
+    this.diagnosticService.decodeVin(raw).subscribe({
+      next: (res) => {
+        this.isDecodingVin = false;
+        if (!res || !res.brand) {
+          this.vinError = 'Aucun véhicule identifié pour ce numéro VIN sur le registre NHTSA vPIC.';
+          return;
+        }
+
+        // Auto-fill vehicle form fields
+        this.vehicle.brand = res.brand;
+        this.vehicle.model = res.model || this.vehicle.model;
+        if (res.year) this.vehicle.year = res.year;
+        if (res.fuel) this.vehicle.fuel = this.normalizeFuel(res.fuel);
+        if (res.engine) this.vehicle.engine = res.engine;
+
+        // Ensure brand is present in the dropdown list
+        if (this.vehicle.brand && !this.brands.includes(this.vehicle.brand)) {
+          this.brands.unshift(this.vehicle.brand);
+        }
+
+        this.loadModelsForBrand(this.vehicle.brand, false);
+        this.loadYearsForModel(this.vehicle.brand, this.vehicle.model, false);
+        this.loadEnginesForVehicle(this.vehicle.brand, this.vehicle.model, this.vehicle.year);
+
+        const decodedDesc = `${res.brand} ${res.model}${res.year ? ' (' + res.year + ')' : ''}`;
+        this.vinSuccess = `Véhicule décodé avec succès via NHTSA vPIC : ${decodedDesc}`;
+        this.showFeedback(this.vinSuccess, 'success');
+      },
+      error: (err) => {
+        this.isDecodingVin = false;
+        this.vinError = 'Erreur lors du décodage du VIN via NHTSA vPIC. Veuillez vérifier le code saisi.';
+      }
+    });
+  }
+
+  setVinAndDecode(sampleVin: string): void {
+    this.vinInput = sampleVin;
+    this.decodeVin();
+  }
+
   loadCatalogBrands(): void {
     this.loadingBrands = true;
-    this.diagnosticService.getCatalogMakes().subscribe({
+    this.diagnosticService.getCatalogMakes(this.catalogSource).subscribe({
       next: (makes) => {
         this.loadingBrands = false;
         this.brands = makes || [];
@@ -1092,7 +1158,7 @@ export class VehicleComponent implements OnInit {
 
   loadModelsForBrand(make: string, resetSelection = false): void {
     this.loadingModels = true;
-    this.diagnosticService.getCatalogModels(make).subscribe({
+    this.diagnosticService.getCatalogModels(make, this.catalogSource).subscribe({
       next: (models) => {
         this.loadingModels = false;
         this.models = models || [];
@@ -1199,10 +1265,14 @@ export class VehicleComponent implements OnInit {
         }
         this.engines = uniqueEngines;
 
-        // Harmonize vehicle fuel with available engines only if already chosen
+        // Harmonize vehicle fuel with available engines only if already chosen or single fuel
         const availableFuels = this.availableFuelTypes;
-        if (this.vehicle.fuel && availableFuels.length > 0 && !availableFuels.includes(this.vehicle.fuel)) {
+        if (availableFuels.length === 1 && !this.vehicle.fuel) {
           this.vehicle.fuel = availableFuels[0];
+          this.onFuelChange();
+        } else if (this.vehicle.fuel && availableFuels.length > 0 && !availableFuels.includes(this.vehicle.fuel)) {
+          this.vehicle.fuel = availableFuels[0];
+          this.onFuelChange();
         }
 
         // 2. Ne rien sélectionner par défaut en bleu ! Uniquement si l'utilisateur a cliqué ou existant

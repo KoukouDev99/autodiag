@@ -586,6 +586,82 @@ router.post('/diagnostic/:sessionId/feedback', async (req, res) => {
   }
 });
 
+function resolveStepImageUrl(step, hypothesisName = '', guideTitle = '') {
+  if (step.image_url && !step.image_url.includes('battery_check.jpg') && !step.image_url.includes('icons/')) {
+    return step.image_url;
+  }
+
+  const titleAndHypo = `${step.title || ''} ${hypothesisName || ''} ${guideTitle || ''}`.toLowerCase();
+  // Filter out boilerplate safety phrasing from description (e.g. "serrez le frein à main")
+  const cleanDesc = (step.description || '')
+    .toLowerCase()
+    .replace(/frein [aà] main/g, '')
+    .replace(/frein de stationnement/g, '');
+  const fullText = `${titleAndHypo} ${cleanDesc}`;
+
+  // 1. Allumage & Bougies
+  if (fullText.includes('bougie') || fullText.includes('allumage') || fullText.includes('bobine') || fullText.includes('spark') || fullText.includes('raté')) {
+    return 'assets/guides/spark_plugs_check.svg';
+  }
+  // 2. Démarreur & Solénoïde
+  if (fullText.includes('démarreur') || fullText.includes('demarreur') || fullText.includes('starter') || fullText.includes('solénoïde') || fullText.includes('solenoide') || fullText.includes('neiman') || fullText.includes('bendix')) {
+    return 'assets/guides/starter_check.svg';
+  }
+  // 3. Alternateur & Charge
+  if (fullText.includes('alternateur') || fullText.includes('alternator') || fullText.includes('charge batterie') || fullText.includes('régulateur de tension')) {
+    return 'assets/guides/alternator_check.svg';
+  }
+  // 4. Carburant & Pompe de gavage
+  if (fullText.includes('carburant') || fullText.includes('gavage') || fullText.includes('essence') || fullText.includes('gazole') || fullText.includes('injecteur') || (fullText.includes('pompe') && !fullText.includes('pompe à eau'))) {
+    return 'assets/guides/fuel_pump_check.svg';
+  }
+  // 5. Freins
+  if (fullText.includes('plaquette') || fullText.includes('disque') || fullText.includes('étrier') || fullText.includes('etrier') || fullText.includes('liquide de frein') || fullText.includes('mastervac') || fullText.includes('garniture') || titleAndHypo.includes('frein')) {
+    return 'assets/guides/brakes_check.svg';
+  }
+  // 6. Refroidissement & Surchauffe
+  if (fullText.includes('refroidissement') || fullText.includes('radiateur') || fullText.includes('calorstat') || fullText.includes('thermostat') || fullText.includes('vase d\'expansion') || fullText.includes('pompe à eau') || fullText.includes('surchauffe') || fullText.includes('durite')) {
+    return 'assets/guides/coolant_check.svg';
+  }
+  // 7. ABS & Capteurs de roue
+  if (fullText.includes('abs') || fullText.includes('capteur de roue') || fullText.includes('capteur de vitesse') || fullText.includes('esp')) {
+    return 'assets/guides/abs_sensor_check.svg';
+  }
+  // 8. Fusibles & Relais
+  if (fullText.includes('fusible') || fullText.includes('fuse') || fullText.includes('relais') || fullText.includes('court-circuit') || fullText.includes('boîtier bsi')) {
+    return 'assets/guides/fuse_box_check.svg';
+  }
+  // 9. Filtre à air & Débitmètre
+  if (fullText.includes('filtre à air') || fullText.includes('filtre a air') || fullText.includes('débitmètre') || fullText.includes('debitmetre') || fullText.includes('admission') || fullText.includes('boîtier papillon')) {
+    return 'assets/guides/air_filter_check.svg';
+  }
+  // 10. Huile moteur
+  if (fullText.includes('huile') || fullText.includes('jauge') || fullText.includes('lubrification')) {
+    return 'assets/guides/engine_oil_check.svg';
+  }
+  // 11. Pneus & Géométrie
+  if (fullText.includes('pneu') || fullText.includes('pneumatique') || fullText.includes('gonflage') || fullText.includes('tpms') || fullText.includes('roulement') || fullText.includes('twi')) {
+    return 'assets/guides/tires_check.svg';
+  }
+  // 12. Échappement & FAP / Sonde lambda
+  if (fullText.includes('échappement') || fullText.includes('echappement') || fullText.includes('lambda') || fullText.includes('catalyseur') || fullText.includes('fap') || fullText.includes('fumée') || fullText.includes('egr')) {
+    return 'assets/guides/exhaust_check.svg';
+  }
+  // 13. Courroies
+  if (fullText.includes('courroie') || fullText.includes('serpentine') || fullText.includes('galet tendeur') || fullText.includes('distribution')) {
+    return 'assets/guides/belt_check.svg';
+  }
+  // 14. Multimètre & Contrôle électrique
+  if (fullText.includes('multimètre') || fullText.includes('multimetre') || fullText.includes('voltmètre') || fullText.includes('ohmmètre') || fullText.includes('continuité')) {
+    return 'assets/guides/multimeter_check.svg';
+  }
+  // 15. Batterie & Cosses
+  if (fullText.includes('batterie') || fullText.includes('cosse') || fullText.includes('12v')) {
+    return 'assets/guides/battery_check.svg';
+  }
+  return step.step_num === 3 ? 'assets/guides/multimeter_check.svg' : 'assets/guides/battery_check.svg';
+}
+
 // 7. Repair & Inspection Guide (Cached for 10 min)
 router.get('/diagnostic/guide/:hypothesisId', async (req, res) => {
   try {
@@ -625,10 +701,15 @@ router.get('/diagnostic/guide/:hypothesisId', async (req, res) => {
       tools = ['Lampe de poche', 'Notice du véhicule'];
     }
 
+    const resolvedSteps = (steps || []).map(s => ({
+      ...s,
+      image_url: resolveStepImageUrl(s, guide.hypothesis_name, guide.title)
+    }));
+
     const result = {
       ...guide,
       tools_needed: tools,
-      steps
+      steps: resolvedSteps
     };
     appCache.set(cacheKey, result, 600);
     res.json(result);

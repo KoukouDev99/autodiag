@@ -1,7 +1,9 @@
 <div class="not-found-container">
   <div class="not-found-card">
     <div class="error-badge">ERREUR 404</div>
-    <div class="error-icon">🚗💨</div>
+    <div class="error-icon">
+      <app-icon name="alert-triangle" [size]="42"></app-icon>
+    </div>
     <h1 class="error-title">{{ 'Page introuvable sur le circuit' | translate }}</h1>
     <p class="error-desc">
       {{ 'L\'adresse demandée n\'existe pas, a été déplacée ou est temporairement indisponible.' | translate }}
@@ -9,10 +11,12 @@
 
     <div class="actions-group">
       <a routerLink="/" class="btn-primary">
-        <span>🏠 {{ 'Retour à l\'accueil' | translate }}</span>
+        <app-icon name="home" [size]="16"></app-icon>
+        <span>{{ 'Retour à l\'accueil' | translate }}</span>
       </a>
       <a routerLink="/assistant" class="btn-secondary">
-        <span>⚡ {{ 'Demander à AutoDiag IA' | translate }}</span>
+        <app-icon name="bot" [size]="16"></app-icon>
+        <span>{{ 'Demander à AutoDiag IA' | translate }}</span>
       </a>
     </div>
 
@@ -21,4 +25,3 @@
     </div>
   </div>
 </div>
-

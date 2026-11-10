@@ -1,117 +1,109 @@
 <div class="screen-content">
   <!-- Top Navigation Bar -->
   <div class="screen-top-bar">
-    <button class="back-btn" (click)="goBack()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
+    <button type="button" class="back-btn" (click)="goBack()" aria-label="Retour à l'accueil">
+      <app-icon name="arrow-left" [size]="20"></app-icon>
     </button>
-    <div class="screen-brand-title">Design System</div>
+    <div class="screen-brand-title">Planche d’icônes & Design System</div>
     <div class="help-btn-placeholder"></div>
   </div>
 
   <!-- Header -->
   <div class="page-header">
-    <div class="version-tag">MVP · Version 1.0</div>
-    <h1 class="page-title">Design System</h1>
-    <p class="page-subtitle">
-      Une interface automobile claire, rassurante et accessible. Fondations et éléments sources réutilisables pour iOS
-      et Android.
+    <div class="version-tag">Phase 2 · Système d’icônes unifié &lt;app-icon&gt;</div>
+    <h1 class="page-title">Planche de validation des icônes (24px &amp; 48px)</h1>
+    <p class="page-subtitle prose-measure">
+      Grille unique 24×24 px, épaisseur de trait constante 1.75 px, terminaisons arrondies (round cap/join) et héritage chromatique via currentColor.
     </p>
   </div>
 
-  <!-- Fondations Visuelles: Palette -->
-  <div class="ds-section">
-    <h3 class="ds-section-title">Fondations visuelles</h3>
-    <p class="ds-section-sub">Une palette sobre. Le bleu électrique guide l’action ; les couleurs de statut portent
-      toujours un libellé.</p>
-
-    <div class="color-swatches-grid">
-      @for (c of colors; track c.hex) {
-      <div class="color-swatch-card">
-        <div class="color-preview" [style.background-color]="c.hex"
-          [class.border-preview]="c.hex === '#FFFFFF' || c.hex === '#F3F5F9'"></div>
-        <div class="color-name">{{ c.name }}</div>
-        <div class="color-hex">{{ c.hex }}</div>
-        <div class="color-role">{{ c.role }}</div>
+  <!-- PLANCHE 1 : ICÔNES MÉCANIQUES & AUTOMOBILES SUR MESURE -->
+  <section class="ds-section" id="custom-icons-board">
+    <div class="ds-section-header">
+      <div>
+        <h2 class="ds-section-title">1. Icônes Automobiles &amp; Mécaniques sur mesure (12 créations)</h2>
+        <p class="ds-section-sub">
+          Dessinées spécifiquement pour le domaine mécanique sur le gabarit exact de Lucide Icons (marge interne 2 px, trait 1.75 px). Chaque vignette présente le rendu réel à 24 px et 48 px côte à côte.
+        </p>
       </div>
+      <span class="badge badge-primary">Grille 24px · Trait 1.75px</span>
+    </div>
+
+    <div class="icon-specimen-grid">
+      @for (item of customAutomotiveIcons; track item.name) {
+        <div class="icon-specimen-card">
+          <div class="icon-stage-row">
+            <div class="icon-stage-box stage-24" title="Rendu 24px">
+              <app-icon [name]="item.name" [size]="24"></app-icon>
+              <span class="stage-dim-tag tabular-nums">24px</span>
+            </div>
+            <div class="icon-stage-box stage-48" title="Rendu 48px">
+              <app-icon [name]="item.name" [size]="48"></app-icon>
+              <span class="stage-dim-tag tabular-nums">48px</span>
+            </div>
+          </div>
+          <div class="icon-specimen-meta">
+            <div class="icon-specimen-title-row">
+              <span class="icon-specimen-title">{{ item.title }}</span>
+              <code class="icon-specimen-code">{{ item.name }}</code>
+            </div>
+            <p class="icon-specimen-usage">{{ item.usage }}</p>
+          </div>
+        </div>
       }
     </div>
-  </div>
+  </section>
 
-  <!-- Typographie & Grille -->
-  <div class="ds-section">
-    <h3 class="ds-section-title">Typographie & Grille</h3>
-    <div class="ds-card">
-      <div class="typo-sample">
-        <span class="typo-meta">Titre · 28 px / 700 · Interligne 122 %</span>
-        <div class="typo-h1">Comprendre la panne.</div>
+  <!-- PLANCHE 2 : BASE LUCIDE ICONS (COMPARAISON DE COHÉRENCE DU TRAIT) -->
+  <section class="ds-section" id="lucide-icons-board">
+    <div class="ds-section-header">
+      <div>
+        <h2 class="ds-section-title">2. Icônes Base Lucide Icons (Référence de cohérence optique)</h2>
+        <p class="ds-section-sub">
+          Icônes issues de Lucide Icons intégrées dans &lt;app-icon&gt; avec le même trait 1.75 px pour vérifier l’homogénéité visuelle avec les 12 icônes mécaniques sur mesure ci-dessus.
+        </p>
       </div>
-      <div class="typo-sample">
-        <span class="typo-meta">Corps · 14 px / 400 · Interligne 150 %</span>
-        <div class="typo-body">Des phrases courtes et des informations prudentes, faciles à comprendre.</div>
-      </div>
-      <div class="grid-specs-box">
-        <strong>Largeur mobile de référence :</strong> 402 px · Contenu flexible et marges sûres.<br>
-        <strong>Marges :</strong> 20 px · <strong>Espacement :</strong> 4 / 8 / 12 / 16 / 24 / 32 px.<br>
-        <strong>Rayons de bordure :</strong> Contrôle 12 px · Carte 18 px · Hero 24 px.
-      </div>
+      <span class="badge badge-gray">Lucide 24px · Trait 1.75px</span>
     </div>
-  </div>
 
-  <!-- Boutons & Champs -->
-  <div class="ds-section">
-    <h3 class="ds-section-title">Boutons & Champs d'action</h3>
-    <div class="ds-card space-y-3">
-      <button class="btn-primary">
-        <span>Commencer un diagnostic</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </button>
-
-      <button class="btn-secondary w-full">Retour</button>
-
-      <div class="form-group mb-0">
-        <label class="form-label">Champ renseigné</label>
-        <input type="text" class="form-control" value="Peugeot 208" readonly />
-      </div>
+    <div class="icon-specimen-grid">
+      @for (item of lucideBaseIcons; track item.name) {
+        <div class="icon-specimen-card">
+          <div class="icon-stage-row">
+            <div class="icon-stage-box stage-24" title="Rendu 24px">
+              <app-icon [name]="item.name" [size]="24"></app-icon>
+              <span class="stage-dim-tag tabular-nums">24px</span>
+            </div>
+            <div class="icon-stage-box stage-48" title="Rendu 48px">
+              <app-icon [name]="item.name" [size]="48"></app-icon>
+              <span class="stage-dim-tag tabular-nums">48px</span>
+            </div>
+          </div>
+          <div class="icon-specimen-meta">
+            <div class="icon-specimen-title-row">
+              <span class="icon-specimen-title">{{ item.title }}</span>
+              <code class="icon-specimen-code">{{ item.name }}</code>
+            </div>
+            <p class="icon-specimen-usage">{{ item.usage }}</p>
+          </div>
+        </div>
+      }
     </div>
-  </div>
+  </section>
 
-  <!-- Cartes de réponse & Messages -->
-  <div class="ds-section">
-    <h3 class="ds-section-title">Cartes de réponse & Étiquettes de sécurité</h3>
-    <div class="ds-card space-y-3">
-      <div class="option-card selected" (click)="selectedCard = 1">
-        <div class="option-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" />
-          </svg>
+  <!-- Fondations Visuelles: Palette -->
+  <section class="ds-section">
+    <h2 class="ds-section-title">3. Tokens de couleur &amp; Contrastes WCAG</h2>
+    <div class="color-swatches-grid">
+      @for (c of colors; track c.hex) {
+        <div class="color-swatch-card">
+          <div class="color-preview" [style.background-color]="c.hex"
+            [class.border-preview]="c.hex === '#FFFFFF' || c.hex === '#F4F6F8'"></div>
+          <div class="color-name">{{ c.name }}</div>
+          <div class="color-hex tabular-nums">{{ c.hex }}</div>
+          <div class="color-role">{{ c.role }}</div>
         </div>
-        <div class="option-content">
-          <div class="option-title">Des clics au démarrage</div>
-          <div class="option-subtitle">Les voyants faiblissent. (État sélectionné)</div>
-        </div>
-        <div class="option-radio">
-          <div class="option-radio-dot"></div>
-        </div>
-      </div>
-
-      <div class="alert-box alert-info">
-        <div class="alert-text">
-          <strong>Une piste, pas une certitude</strong><br>
-          Un professionnel doit confirmer la cause avant toute réparation.
-        </div>
-      </div>
-
-      <div class="alert-box alert-danger">
-        <div class="alert-text">
-          <strong>Arrêtez en cas de danger</strong><br>
-          Fumée, fuite ou odeur inhabituelle : éloignez-vous et appelez l’assistance.
-        </div>
-      </div>
+      }
     </div>
-  </div>
+  </section>
 </div>

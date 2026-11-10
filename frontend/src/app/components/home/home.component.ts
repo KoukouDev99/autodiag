@@ -8,6 +8,7 @@ import { DiagnosticService, Symptom, Vehicle, RecentDiagnostic, DtcCode, AiNorma
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../ui/icon.component';
 
 export interface SymptomCategoryGroup {
   id: string;
@@ -20,7 +21,7 @@ export interface SymptomCategoryGroup {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -179,39 +180,63 @@ export class HomeComponent implements OnInit, OnDestroy {
   private resolveCategoryMeta(categoryRaw: string | undefined): { id: string; name: string; icon: string } {
     const c = (categoryRaw || '').toLowerCase();
     if (c.includes('start') || c.includes('démarrage') || c.includes('starter') || c.includes('battery') || c.includes('batterie') || c.includes('electr')) {
-      return { id: 'electrique', name: 'Démarrage & Électrique', icon: '⚡' };
+      return { id: 'electrique', name: 'Démarrage & Électrique', icon: 'battery-auto' };
     }
     if (c.includes('brak') || c.includes('frein') || c.includes('abs') || c.includes('sécurité') || c.includes('security')) {
-      return { id: 'freinage', name: 'Freinage & Sécurité', icon: '🛑' };
+      return { id: 'freinage', name: 'Freinage & Sécurité', icon: 'disc-brake' };
     }
     if (c.includes('cool') || c.includes('refroidiss') || c.includes('surchauff') || c.includes('overheat') || c.includes('radiator')) {
-      return { id: 'refroidissement', name: 'Refroidissement & Température', icon: '🌡️' };
+      return { id: 'refroidissement', name: 'Refroidissement & Température', icon: 'thermometer' };
     }
     if (c.includes('exhaust') || c.includes('échapp') || c.includes('emiss') || c.includes('smoke') || c.includes('fumée') || c.includes('pollution')) {
-      return { id: 'echappement', name: 'Échappement & Antipollution', icon: '💨' };
+      return { id: 'echappement', name: 'Échappement & Antipollution', icon: 'exhaust' };
     }
     if (c.includes('fuel') || c.includes('carbur') || c.includes('intake') || c.includes('inject') || c.includes('essence') || c.includes('diesel')) {
-      return { id: 'carburant', name: 'Carburant & Injection', icon: '⛽' };
+      return { id: 'carburant', name: 'Carburant & Injection', icon: 'fuel' };
     }
     if (c.includes('transm') || c.includes('boite') || c.includes('boîte') || c.includes('clutch') || c.includes('embray') || c.includes('drivetrain')) {
-      return { id: 'transmission', name: 'Transmission & Boîte', icon: '🔄' };
+      return { id: 'transmission', name: 'Transmission & Boîte', icon: 'gearbox' };
     }
     if (c.includes('steer') || c.includes('direct') || c.includes('volant')) {
-      return { id: 'direction', name: 'Direction & Tenue de route', icon: '🎯' };
+      return { id: 'direction', name: 'Direction & Tenue de route', icon: 'steering' };
     }
     if (c.includes('wheel') || c.includes('tire') || c.includes('roue') || c.includes('pneu') || c.includes('bearing') || c.includes('roulem')) {
-      return { id: 'roues', name: 'Roues, Pneus & Roulements', icon: '🛞' };
+      return { id: 'roues', name: 'Roues, Pneus & Roulements', icon: 'tire' };
     }
     if (c.includes('air cond') || c.includes('climat') || c.includes('heater') || c.includes('chauffage') || c.includes('climate')) {
-      return { id: 'climatisation', name: 'Climatisation & Chauffage', icon: '❄️' };
+      return { id: 'climatisation', name: 'Climatisation & Chauffage', icon: 'snowflake' };
     }
     if (c.includes('moteur') || c.includes('engine') || c.includes('valv') || c.includes('oil') || c.includes('huile')) {
-      return { id: 'moteur', name: 'Moteur & Allumage', icon: '⚙️' };
+      return { id: 'moteur', name: 'Moteur & Allumage', icon: 'engine' };
     }
     if (c.includes('sound') || c.includes('bruit') || c.includes('mécaniq') || c.includes('mechanic')) {
-      return { id: 'moteur', name: 'Moteur & Mécanique', icon: '🔧' };
+      return { id: 'moteur', name: 'Moteur & Mécanique', icon: 'wrench' };
     }
-    return { id: 'autre', name: categoryRaw ? (categoryRaw.charAt(0).toUpperCase() + categoryRaw.slice(1)) : 'Autres anomalies', icon: '🔧' };
+    return { id: 'autre', name: categoryRaw ? (categoryRaw.charAt(0).toUpperCase() + categoryRaw.slice(1)) : 'Autres anomalies', icon: 'wrench' };
+  }
+
+  getSymptomIcon(symptom: Symptom): string {
+    const cat = (symptom.category || '').toLowerCase();
+    const lbl = (symptom.label || '').toLowerCase();
+    if (lbl.includes('huile')) return 'oil-can';
+    if (cat.includes('climat') || lbl.includes('climatisation')) return 'snowflake';
+    if (cat.includes('direction') || lbl.includes('volant')) return 'steering';
+    if (cat.includes('roue') || cat.includes('pneu') || lbl.includes('pneu')) return 'tire';
+    if (cat.includes('transm') || cat.includes('embray') || lbl.includes('embrayage') || lbl.includes('boîte')) return 'gearbox';
+    switch (symptom.icon) {
+      case 'key': return 'starter';
+      case 'battery': return 'battery-auto';
+      case 'brakes': return 'disc-brake';
+      case 'smoke': return 'exhaust';
+      case 'engine':
+      case 'alert': return 'engine';
+      case 'thermometer': return 'thermometer';
+      case 'fuel': return 'fuel';
+      case 'sound': return 'sound';
+      case 'zap': return 'zap';
+      case 'rotate': return 'suspension';
+      default: return 'wrench';
+    }
   }
 
   // DTC Quick Search & Inspector

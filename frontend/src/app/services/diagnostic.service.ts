@@ -380,7 +380,12 @@ export class DiagnosticService {
     );
   }
 
-  getCatalogMakes(): Observable<string[]> {
+  getCatalogMakes(source: string = 'auto'): Observable<string[]> {
+    if (source && source !== 'auto') {
+      return this.http.get<string[]>(`${this.apiUrl}/catalog/makes?source=${encodeURIComponent(source)}`).pipe(
+        catchError(() => this.getFallbackMakes$())
+      );
+    }
     if (!this.catalogMakesCache$) {
       this.catalogMakesCache$ = this.http.get<string[]>(`${this.apiUrl}/catalog/makes`).pipe(
         switchMap(makes => (makes && makes.length > 0) ? of(makes) : this.getFallbackMakes$()),
@@ -391,13 +396,15 @@ export class DiagnosticService {
     return this.catalogMakesCache$.pipe(map(makes => [...makes]));
   }
 
-  getCatalogModels(make: string): Observable<{ id: number; model: string; year_start: number | null; year_end: number | null }[]> {
-    const key = make.trim().toLowerCase();
+  getCatalogModels(make: string, source: string = 'auto'): Observable<{ id: number; model: string; year_start: number | null; year_end: number | null }[]> {
+    const key = `${make.trim().toLowerCase()}:${source}`;
     let cached$ = this.catalogModelsCache.get(key);
     if (!cached$) {
-      cached$ = this.http.get<{ id: number; model: string; year_start: number | null; year_end: number | null }[]>(
-        `${this.apiUrl}/catalog/models?make=${encodeURIComponent(make)}`
-      ).pipe(
+      let url = `${this.apiUrl}/catalog/models?make=${encodeURIComponent(make)}`;
+      if (source && source !== 'auto') {
+        url += `&source=${encodeURIComponent(source)}`;
+      }
+      cached$ = this.http.get<{ id: number; model: string; year_start: number | null; year_end: number | null }[]>(url).pipe(
         switchMap(models => (models && models.length > 0) ? of(models) : this.getFallbackModels$(make)),
         catchError(() => this.getFallbackModels$(make)),
         shareReplay(1)
@@ -405,6 +412,29 @@ export class DiagnosticService {
       this.catalogModelsCache.set(key, cached$);
     }
     return cached$.pipe(map(models => [...models]));
+  }
+
+  decodeVin(vin: string): Observable<{
+    vin: string;
+    brand: string;
+    model: string;
+    year: number | null;
+    fuel: string;
+    engine: string;
+    displacement_l?: number | null;
+    cylinders?: number | null;
+    power_hp?: number | null;
+    vehicle_type?: string;
+    body_class?: string;
+    drive_type?: string;
+  }> {
+    return this.http.get<any>(`${this.apiUrl}/catalog/nhtsa/vin/${encodeURIComponent(vin.trim().toUpperCase())}`);
+  }
+
+  getCatalogProviders(): Observable<{ active_sources: any[]; status: string }> {
+    return this.http.get<{ active_sources: any[]; status: string }>(`${this.apiUrl}/catalog/providers`).pipe(
+      catchError(() => of({ active_sources: [], status: 'error' }))
+    );
   }
 
   getCatalogYears(make: string, model: string): Observable<number[]> {

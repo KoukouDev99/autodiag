@@ -1,0 +1,994 @@
+{
+  "dataset": "gor3a/vehicle-makes-models",
+  "license": "ODbL v1.0",
+  "totalMakes": 164,
+  "totalSizeBytes": 81499941,
+  "totalSizeMB": "77.72",
+  "downloadedAt": "2026-11-08T17:51:33.447Z",
+  "makes": [
+    {
+      "name": "AC",
+      "slug": "ac",
+      "file": "ac.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Acura",
+      "slug": "acura",
+      "file": "acura.json",
+      "modelsCount": 19
+    },
+    {
+      "name": "Alfa Romeo",
+      "slug": "alfa-romeo",
+      "file": "alfa-romeo.json",
+      "modelsCount": 43
+    },
+    {
+      "name": "Alpine",
+      "slug": "alpine",
+      "file": "alpine.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Arcfox",
+      "slug": "arcfox",
+      "file": "arcfox.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Ariel",
+      "slug": "ariel",
+      "file": "ariel.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Aro",
+      "slug": "aro",
+      "file": "aro.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Artega",
+      "slug": "artega",
+      "file": "artega.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Aston Martin",
+      "slug": "aston-martin",
+      "file": "aston-martin.json",
+      "modelsCount": 39
+    },
+    {
+      "name": "Audi",
+      "slug": "audi",
+      "file": "audi.json",
+      "modelsCount": 78
+    },
+    {
+      "name": "Aurus",
+      "slug": "aurus",
+      "file": "aurus.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "BAIC",
+      "slug": "baic",
+      "file": "baic.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Bentley",
+      "slug": "bentley",
+      "file": "bentley.json",
+      "modelsCount": 16
+    },
+    {
+      "name": "Bestune",
+      "slug": "bestune",
+      "file": "bestune.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "BMW",
+      "slug": "bmw",
+      "file": "bmw.json",
+      "modelsCount": 65
+    },
+    {
+      "name": "Borgward",
+      "slug": "borgward",
+      "file": "borgward.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Brilliance",
+      "slug": "brilliance",
+      "file": "brilliance.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Bristol",
+      "slug": "bristol",
+      "file": "bristol.json",
+      "modelsCount": 7
+    },
+    {
+      "name": "Bufori",
+      "slug": "bufori",
+      "file": "bufori.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Bugatti",
+      "slug": "bugatti",
+      "file": "bugatti.json",
+      "modelsCount": 13
+    },
+    {
+      "name": "Buick",
+      "slug": "buick",
+      "file": "buick.json",
+      "modelsCount": 27
+    },
+    {
+      "name": "BYD",
+      "slug": "byd",
+      "file": "byd.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Cadillac",
+      "slug": "cadillac",
+      "file": "cadillac.json",
+      "modelsCount": 39
+    },
+    {
+      "name": "Caterham",
+      "slug": "caterham",
+      "file": "caterham.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Changan",
+      "slug": "changan",
+      "file": "changan.json",
+      "modelsCount": 12
+    },
+    {
+      "name": "Chery",
+      "slug": "chery",
+      "file": "chery.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Chevrolet",
+      "slug": "chevrolet",
+      "file": "chevrolet.json",
+      "modelsCount": 58
+    },
+    {
+      "name": "Chrysler",
+      "slug": "chrysler",
+      "file": "chrysler.json",
+      "modelsCount": 17
+    },
+    {
+      "name": "Citroën",
+      "slug": "citroen",
+      "file": "citroen.json",
+      "modelsCount": 52
+    },
+    {
+      "name": "Cupra",
+      "slug": "cupra",
+      "file": "cupra.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Dacia",
+      "slug": "dacia",
+      "file": "dacia.json",
+      "modelsCount": 28
+    },
+    {
+      "name": "Daewoo",
+      "slug": "daewoo",
+      "file": "daewoo.json",
+      "modelsCount": 16
+    },
+    {
+      "name": "Daihatsu",
+      "slug": "daihatsu",
+      "file": "daihatsu.json",
+      "modelsCount": 17
+    },
+    {
+      "name": "Datsun",
+      "slug": "datsun",
+      "file": "datsun.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "DMC",
+      "slug": "dmc",
+      "file": "dmc.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Dodge",
+      "slug": "dodge",
+      "file": "dodge.json",
+      "modelsCount": 24
+    },
+    {
+      "name": "Dongfeng",
+      "slug": "dongfeng",
+      "file": "dongfeng.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Donkervoort",
+      "slug": "donkervoort",
+      "file": "donkervoort.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "DR",
+      "slug": "dr",
+      "file": "dr.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "DS",
+      "slug": "ds",
+      "file": "ds.json",
+      "modelsCount": 9
+    },
+    {
+      "name": "Eagle",
+      "slug": "eagle",
+      "file": "eagle.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "El Nasr",
+      "slug": "el-nasr",
+      "file": "el-nasr.json",
+      "modelsCount": 9
+    },
+    {
+      "name": "Ferrari",
+      "slug": "ferrari",
+      "file": "ferrari.json",
+      "modelsCount": 56
+    },
+    {
+      "name": "Fiat",
+      "slug": "fiat",
+      "file": "fiat.json",
+      "modelsCount": 74
+    },
+    {
+      "name": "Fisker",
+      "slug": "fisker",
+      "file": "fisker.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Ford",
+      "slug": "ford",
+      "file": "ford.json",
+      "modelsCount": 85
+    },
+    {
+      "name": "Foton",
+      "slug": "foton",
+      "file": "foton.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "FSO",
+      "slug": "fso",
+      "file": "fso.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "GAC",
+      "slug": "gac",
+      "file": "gac.json",
+      "modelsCount": 11
+    },
+    {
+      "name": "GAZ",
+      "slug": "gaz",
+      "file": "gaz.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Geely",
+      "slug": "geely",
+      "file": "geely.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Genesis",
+      "slug": "genesis",
+      "file": "genesis.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "GMC",
+      "slug": "gmc",
+      "file": "gmc.json",
+      "modelsCount": 21
+    },
+    {
+      "name": "Gordon Murray Automotive",
+      "slug": "gordon-murray-automotive",
+      "file": "gordon-murray-automotive.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Great Wall",
+      "slug": "great-wall",
+      "file": "great-wall.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "GTA",
+      "slug": "gta",
+      "file": "gta.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Haval",
+      "slug": "haval",
+      "file": "haval.json",
+      "modelsCount": 7
+    },
+    {
+      "name": "Hindustan",
+      "slug": "hindustan",
+      "file": "hindustan.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Holden",
+      "slug": "holden",
+      "file": "holden.json",
+      "modelsCount": 31
+    },
+    {
+      "name": "Honda",
+      "slug": "honda",
+      "file": "honda.json",
+      "modelsCount": 52
+    },
+    {
+      "name": "Hongqi",
+      "slug": "hongqi",
+      "file": "hongqi.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Hummer",
+      "slug": "hummer",
+      "file": "hummer.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Hyundai",
+      "slug": "hyundai",
+      "file": "hyundai.json",
+      "modelsCount": 51
+    },
+    {
+      "name": "Ineos",
+      "slug": "ineos",
+      "file": "ineos.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Infiniti",
+      "slug": "infiniti",
+      "file": "infiniti.json",
+      "modelsCount": 22
+    },
+    {
+      "name": "Iran Khodro",
+      "slug": "iran-khodro",
+      "file": "iran-khodro.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Isuzu",
+      "slug": "isuzu",
+      "file": "isuzu.json",
+      "modelsCount": 10
+    },
+    {
+      "name": "JAC",
+      "slug": "jac",
+      "file": "jac.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Jaguar",
+      "slug": "jaguar",
+      "file": "jaguar.json",
+      "modelsCount": 19
+    },
+    {
+      "name": "Jeep",
+      "slug": "jeep",
+      "file": "jeep.json",
+      "modelsCount": 14
+    },
+    {
+      "name": "Jetour",
+      "slug": "jetour",
+      "file": "jetour.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Karma",
+      "slug": "karma",
+      "file": "karma.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "KGM",
+      "slug": "kgm",
+      "file": "kgm.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Kia",
+      "slug": "kia",
+      "file": "kia.json",
+      "modelsCount": 47
+    },
+    {
+      "name": "Koenigsegg",
+      "slug": "koenigsegg",
+      "file": "koenigsegg.json",
+      "modelsCount": 11
+    },
+    {
+      "name": "KTM",
+      "slug": "ktm",
+      "file": "ktm.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Lada",
+      "slug": "lada",
+      "file": "lada.json",
+      "modelsCount": 9
+    },
+    {
+      "name": "Lamborghini",
+      "slug": "lamborghini",
+      "file": "lamborghini.json",
+      "modelsCount": 22
+    },
+    {
+      "name": "Lancia",
+      "slug": "lancia",
+      "file": "lancia.json",
+      "modelsCount": 27
+    },
+    {
+      "name": "Land Rover",
+      "slug": "land-rover",
+      "file": "land-rover.json",
+      "modelsCount": 16
+    },
+    {
+      "name": "Leapmotor",
+      "slug": "leapmotor",
+      "file": "leapmotor.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Lexus",
+      "slug": "lexus",
+      "file": "lexus.json",
+      "modelsCount": 22
+    },
+    {
+      "name": "Li Auto",
+      "slug": "li-auto",
+      "file": "li-auto.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Lightyear",
+      "slug": "lightyear",
+      "file": "lightyear.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Lincoln",
+      "slug": "lincoln",
+      "file": "lincoln.json",
+      "modelsCount": 15
+    },
+    {
+      "name": "Lotus",
+      "slug": "lotus",
+      "file": "lotus.json",
+      "modelsCount": 14
+    },
+    {
+      "name": "Lucid",
+      "slug": "lucid",
+      "file": "lucid.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Lynk & Co",
+      "slug": "lynk-co",
+      "file": "lynk-co.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Mahindra",
+      "slug": "mahindra",
+      "file": "mahindra.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Marussia",
+      "slug": "marussia",
+      "file": "marussia.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Maruti Suzuki",
+      "slug": "maruti-suzuki",
+      "file": "maruti-suzuki.json",
+      "modelsCount": 9
+    },
+    {
+      "name": "Maserati",
+      "slug": "maserati",
+      "file": "maserati.json",
+      "modelsCount": 19
+    },
+    {
+      "name": "Maybach",
+      "slug": "maybach",
+      "file": "maybach.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Mazda",
+      "slug": "mazda",
+      "file": "mazda.json",
+      "modelsCount": 39
+    },
+    {
+      "name": "McLaren",
+      "slug": "mclaren",
+      "file": "mclaren.json",
+      "modelsCount": 23
+    },
+    {
+      "name": "Mercedes-AMG",
+      "slug": "mercedes-amg",
+      "file": "mercedes-amg.json",
+      "modelsCount": 26
+    },
+    {
+      "name": "Mercedes-Benz",
+      "slug": "mercedes-benz",
+      "file": "mercedes-benz.json",
+      "modelsCount": 88
+    },
+    {
+      "name": "Mercury",
+      "slug": "mercury",
+      "file": "mercury.json",
+      "modelsCount": 10
+    },
+    {
+      "name": "MG",
+      "slug": "mg",
+      "file": "mg.json",
+      "modelsCount": 17
+    },
+    {
+      "name": "MINI",
+      "slug": "mini",
+      "file": "mini.json",
+      "modelsCount": 10
+    },
+    {
+      "name": "Mitsubishi",
+      "slug": "mitsubishi",
+      "file": "mitsubishi.json",
+      "modelsCount": 28
+    },
+    {
+      "name": "Morgan",
+      "slug": "morgan",
+      "file": "morgan.json",
+      "modelsCount": 12
+    },
+    {
+      "name": "Moskvitch",
+      "slug": "moskvitch",
+      "file": "moskvitch.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "NIO",
+      "slug": "nio",
+      "file": "nio.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Nissan",
+      "slug": "nissan",
+      "file": "nissan.json",
+      "modelsCount": 58
+    },
+    {
+      "name": "Oldsmobile",
+      "slug": "oldsmobile",
+      "file": "oldsmobile.json",
+      "modelsCount": 7
+    },
+    {
+      "name": "Omoda",
+      "slug": "omoda",
+      "file": "omoda.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Opel",
+      "slug": "opel",
+      "file": "opel.json",
+      "modelsCount": 50
+    },
+    {
+      "name": "Ora",
+      "slug": "ora",
+      "file": "ora.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Pagani",
+      "slug": "pagani",
+      "file": "pagani.json",
+      "modelsCount": 7
+    },
+    {
+      "name": "Panoz",
+      "slug": "panoz",
+      "file": "panoz.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Perodua",
+      "slug": "perodua",
+      "file": "perodua.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Peugeot",
+      "slug": "peugeot",
+      "file": "peugeot.json",
+      "modelsCount": 55
+    },
+    {
+      "name": "Pininfarina",
+      "slug": "pininfarina",
+      "file": "pininfarina.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Plymouth",
+      "slug": "plymouth",
+      "file": "plymouth.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Polestar",
+      "slug": "polestar",
+      "file": "polestar.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Pontiac",
+      "slug": "pontiac",
+      "file": "pontiac.json",
+      "modelsCount": 18
+    },
+    {
+      "name": "Porsche",
+      "slug": "porsche",
+      "file": "porsche.json",
+      "modelsCount": 99
+    },
+    {
+      "name": "Proton",
+      "slug": "proton",
+      "file": "proton.json",
+      "modelsCount": 14
+    },
+    {
+      "name": "Qoros",
+      "slug": "qoros",
+      "file": "qoros.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Ram",
+      "slug": "ram",
+      "file": "ram.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Renault",
+      "slug": "renault",
+      "file": "renault.json",
+      "modelsCount": 65
+    },
+    {
+      "name": "Rimac",
+      "slug": "rimac",
+      "file": "rimac.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Rivian",
+      "slug": "rivian",
+      "file": "rivian.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Rolls-Royce",
+      "slug": "rolls-royce",
+      "file": "rolls-royce.json",
+      "modelsCount": 17
+    },
+    {
+      "name": "Rover",
+      "slug": "rover",
+      "file": "rover.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "Saab",
+      "slug": "saab",
+      "file": "saab.json",
+      "modelsCount": 13
+    },
+    {
+      "name": "Saipa",
+      "slug": "saipa",
+      "file": "saipa.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Saleen",
+      "slug": "saleen",
+      "file": "saleen.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Samsung",
+      "slug": "samsung",
+      "file": "samsung.json",
+      "modelsCount": 3
+    },
+    {
+      "name": "Santana",
+      "slug": "santana",
+      "file": "santana.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Saturn",
+      "slug": "saturn",
+      "file": "saturn.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Scion",
+      "slug": "scion",
+      "file": "scion.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Scout",
+      "slug": "scout",
+      "file": "scout.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "SEAT",
+      "slug": "seat",
+      "file": "seat.json",
+      "modelsCount": 29
+    },
+    {
+      "name": "Škoda",
+      "slug": "skoda",
+      "file": "skoda.json",
+      "modelsCount": 36
+    },
+    {
+      "name": "Smart",
+      "slug": "smart",
+      "file": "smart.json",
+      "modelsCount": 14
+    },
+    {
+      "name": "Speranza",
+      "slug": "speranza",
+      "file": "speranza.json",
+      "modelsCount": 8
+    },
+    {
+      "name": "Spyker",
+      "slug": "spyker",
+      "file": "spyker.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "SsangYong",
+      "slug": "ssangyong",
+      "file": "ssangyong.json",
+      "modelsCount": 10
+    },
+    {
+      "name": "Subaru",
+      "slug": "subaru",
+      "file": "subaru.json",
+      "modelsCount": 29
+    },
+    {
+      "name": "Suzuki",
+      "slug": "suzuki",
+      "file": "suzuki.json",
+      "modelsCount": 25
+    },
+    {
+      "name": "Tank",
+      "slug": "tank",
+      "file": "tank.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Tata",
+      "slug": "tata",
+      "file": "tata.json",
+      "modelsCount": 11
+    },
+    {
+      "name": "Tesla",
+      "slug": "tesla",
+      "file": "tesla.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Togg",
+      "slug": "togg",
+      "file": "togg.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Toyota",
+      "slug": "toyota",
+      "file": "toyota.json",
+      "modelsCount": 69
+    },
+    {
+      "name": "Trabant",
+      "slug": "trabant",
+      "file": "trabant.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "TVR",
+      "slug": "tvr",
+      "file": "tvr.json",
+      "modelsCount": 10
+    },
+    {
+      "name": "UAZ",
+      "slug": "uaz",
+      "file": "uaz.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Vauxhall",
+      "slug": "vauxhall",
+      "file": "vauxhall.json",
+      "modelsCount": 33
+    },
+    {
+      "name": "VinFast",
+      "slug": "vinfast",
+      "file": "vinfast.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Volkswagen",
+      "slug": "volkswagen",
+      "file": "volkswagen.json",
+      "modelsCount": 82
+    },
+    {
+      "name": "Volvo",
+      "slug": "volvo",
+      "file": "volvo.json",
+      "modelsCount": 53
+    },
+    {
+      "name": "Wartburg",
+      "slug": "wartburg",
+      "file": "wartburg.json",
+      "modelsCount": 2
+    },
+    {
+      "name": "Wiesmann",
+      "slug": "wiesmann",
+      "file": "wiesmann.json",
+      "modelsCount": 7
+    },
+    {
+      "name": "Wuling",
+      "slug": "wuling",
+      "file": "wuling.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Xiaomi",
+      "slug": "xiaomi",
+      "file": "xiaomi.json",
+      "modelsCount": 1
+    },
+    {
+      "name": "XPeng",
+      "slug": "xpeng",
+      "file": "xpeng.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Yugo",
+      "slug": "yugo",
+      "file": "yugo.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Zastava",
+      "slug": "zastava",
+      "file": "zastava.json",
+      "modelsCount": 5
+    },
+    {
+      "name": "Zeekr",
+      "slug": "zeekr",
+      "file": "zeekr.json",
+      "modelsCount": 4
+    },
+    {
+      "name": "Zender",
+      "slug": "zender",
+      "file": "zender.json",
+      "modelsCount": 6
+    },
+    {
+      "name": "Zenvo",
+      "slug": "zenvo",
+      "file": "zenvo.json",
+      "modelsCount": 4
+    }
+  ]
+}

@@ -34,16 +34,16 @@
   color: var(--c-night);
 }
 
-/* Hero Copilote Card */
+/* Hero Card — Token-driven Light & Dark Workshop Surface */
 .hero-card {
-  background: linear-gradient(145deg, #0e1726, #0a0f1d);
+  background-color: var(--c-surface-subtle);
   border-radius: var(--radius-hero);
   padding: 22px 20px 18px 20px;
-  color: #ffffff;
-  box-shadow: 0 14px 28px -6px rgba(16, 24, 40, 0.4);
+  color: var(--c-text-primary);
+  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--c-border);
 }
 
 .hero-card-grid {
@@ -60,16 +60,16 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #38bdf8;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--c-primary);
   text-transform: uppercase;
   margin-bottom: 10px;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: var(--c-primary-light);
+  border: 1px solid var(--c-primary-border);
   padding: 4px 10px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   width: fit-content;
 }
 
@@ -77,39 +77,35 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: #38bdf8;
-  box-shadow: 0 0 8px #38bdf8;
-  animation: pulse 1.8s infinite;
+  background-color: var(--c-primary);
 }
 
 .hero-title {
   font-size: 20px;
-  font-weight: 800;
-  line-height: 1.3;
-  color: #ffffff;
-  margin-bottom: 6px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--c-text-primary);
+  margin-bottom: 8px;
 }
 
 .hero-title-accent {
-  background: linear-gradient(135deg, #38bdf8, #818cf8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--c-primary);
 }
 
 .hero-subtext {
-  font-size: 13px;
-  color: #94a3b8;
-  line-height: 1.4;
+  font-size: 14px;
+  color: var(--c-text-secondary);
+  line-height: 1.5;
   margin-bottom: 16px;
 }
 
 .hero-image-wrapper {
   width: 100%;
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   margin-bottom: 16px;
-  background-color: #030712;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border);
   position: relative;
 }
 
@@ -121,10 +117,7 @@
 }
 
 .hero-image-ambient-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.08), transparent 70%);
-  pointer-events: none;
+  display: none;
 }
 
 .hero-cta-group {
@@ -146,15 +139,17 @@
 }
 
 .hero-ai-btn {
-  padding: 12px 18px;
-  border-radius: var(--radius-pill, 9999px);
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
-  font-weight: 700;
-  font-size: 13.5px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border-radius: var(--radius-control);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-primary);
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,15 +157,15 @@
 }
 
 .hero-ai-btn:hover {
-  background: rgba(56, 189, 248, 0.25);
-  border-color: #38bdf8;
-  color: #ffffff;
+  background: var(--c-surface-hover);
+  border-color: var(--c-primary);
+  color: var(--c-primary);
 }
 
 .hero-footer-text {
   text-align: center;
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: 12.5px;
+  color: var(--c-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -423,34 +418,34 @@
 }
 
 .category-pill.active {
-  background: linear-gradient(135deg, var(--c-primary), #1d4ed8);
+  background: var(--c-primary);
   color: #ffffff;
   border-color: var(--c-primary);
-  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
 }
 
 :host-context(body.dark-theme) .category-pill {
-  background: #111827;
-  border-color: #1f2937;
-  color: #94a3b8;
+  background: var(--c-surface);
+  border-color: var(--c-border);
+  color: var(--c-text-secondary);
 }
 
 :host-context(body.dark-theme) .category-pill:hover {
-  background: #1e293b;
-  color: #f1f5f9;
-  border-color: #38bdf8;
+  background: var(--c-surface-hover);
+  color: var(--c-text-primary);
+  border-color: var(--c-primary);
 }
 
 :host-context(body.dark-theme) .category-pill.active {
-  background: linear-gradient(135deg, #0284c7, #2563eb);
-  color: #ffffff;
-  border-color: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+  background: var(--c-primary);
+  color: #0F141C;
+  border-color: var(--c-primary);
 }
 
 .pill-icon {
-  font-size: 13px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
 }
 
 .pill-title {
@@ -557,7 +552,10 @@
 }
 
 .cat-group-icon {
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-primary);
 }
 
 .cat-group-title {
@@ -751,85 +749,41 @@
 }
 
 .symptom-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: background-color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
   position: relative;
-  background-color: var(--c-primary-light);
+  background-color: var(--c-primary-subtle);
   color: var(--c-primary);
+  border: 1px solid var(--c-primary-border);
+}
+
+.symptom-icon-box.icon-critical {
+  background-color: var(--c-danger-bg);
+  color: var(--c-danger);
+  border-color: var(--c-danger-border);
 }
 
 .symptom-card:hover .symptom-icon-box {
-  transform: scale(1.08) translateY(-2px);
-  filter: brightness(1.18);
+  background-color: var(--c-primary);
+  color: #ffffff;
+  border-color: var(--c-primary);
 }
 
-/* Realistic Automotive Color Palettes & Cockpit Glows */
-.symptom-icon-box.icon-key {
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(14, 165, 233, 0.25));
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  box-shadow: 0 2px 10px rgba(14, 165, 233, 0.18);
+:host-context(body.dark-theme) .symptom-card:hover .symptom-icon-box {
+  color: #0F141C;
 }
 
-.symptom-icon-box.icon-engine {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.28));
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
-}
-
-.symptom-icon-box.icon-sound {
-  background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(180, 83, 9, 0.25));
-  color: #f59e0b;
-  border: 1px solid rgba(217, 119, 6, 0.35);
-  box-shadow: 0 2px 10px rgba(217, 119, 6, 0.18);
-}
-
-.symptom-icon-box.icon-smoke {
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.16), rgba(100, 116, 139, 0.28));
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  box-shadow: 0 2px 10px rgba(100, 116, 139, 0.18);
-}
-
-.symptom-icon-box.icon-thermometer {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.16), rgba(185, 28, 28, 0.28));
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.22);
-}
-
-.symptom-icon-box.icon-brakes {
-  background: linear-gradient(135deg, rgba(244, 63, 94, 0.16), rgba(190, 18, 60, 0.28));
-  color: #fb7185;
-  border: 1px solid rgba(244, 63, 94, 0.4);
-  box-shadow: 0 2px 10px rgba(244, 63, 94, 0.22);
-}
-
-.symptom-icon-box.icon-battery {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(5, 150, 105, 0.28));
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
-}
-
-.symptom-icon-box.icon-zap {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(126, 34, 206, 0.28));
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.22);
-}
-
-.symptom-icon-box.icon-fuel {
-  background: linear-gradient(135deg, rgba(249, 115, 22, 0.16), rgba(194, 65, 12, 0.28));
-  color: #fb923c;
-  border: 1px solid rgba(249, 115, 22, 0.4);
-  box-shadow: 0 2px 10px rgba(249, 115, 22, 0.2);
+.symptom-card:hover .symptom-icon-box.icon-critical {
+  background-color: var(--c-danger);
+  color: #ffffff;
+  border-color: var(--c-danger);
 }
 
 /* Realistic Icon Elements */
@@ -1456,9 +1410,9 @@
   .hero-image-wrapper {
     margin-bottom: 0;
     height: 240px;
-    border-radius: 18px;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(56, 189, 248, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--c-border);
   }
 
   .hero-image {

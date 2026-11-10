@@ -5,11 +5,12 @@ import { Router, RouterLink } from '@angular/router';
 import { DiagnosticService, UserProfile, Vehicle } from '../../services/diagnostic.service';
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../ui/icon.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, TranslatePipe, IconComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

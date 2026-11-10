@@ -1,24 +1,14 @@
 <div class="screen-content">
   <!-- Top Navigation Bar -->
   <div class="screen-top-bar">
-    <button class="back-btn" (click)="goBack()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+    <button type="button" class="back-btn" (click)="goBack()" [attr.aria-label]="'Retour' | translate">
+      <app-icon name="arrow-left" [size]="20"></app-icon>
     </button>
     <div class="screen-brand-group">
       <div class="screen-brand-title">AutoDiag</div>
       <span class="oem-badge">{{ 'DÉPANNAGE GUIDÉ OEM' | translate }}</span>
     </div>
-    <div class="help-btn-placeholder">
-      <button class="help-btn" [title]="'Aide méthodologique' | translate">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-      </button>
-    </div>
+    <div class="help-btn-placeholder" aria-hidden="true"></div>
   </div>
 
   <!-- Header Title & Vehicle Context -->
@@ -26,9 +16,18 @@
     <div class="header-pre-tag">{{ 'ARBRE DE DÉCISION CONSTRUCTEUR · ISO 14229' | translate }}</div>
     <h1 class="page-title">{{ 'Diagnostic Guidé d\'Atelier' | translate }}</h1>
     <div class="vehicle-subline">
-      <span class="v-pill">🚗 {{ sessionData?.vehicle_brand || 'Peugeot' }} {{ sessionData?.vehicle_model || '208' }}</span>
-      <span class="v-pill">⛽ {{ (sessionData?.vehicle_fuel || 'Essence') | translate }}</span>
-      <span class="v-pill">⚡ {{ sessionData?.vehicle_engine || '1.2 PureTech' }}</span>
+      <span class="v-pill">
+        <app-icon name="car" [size]="14"></app-icon>
+        <span>{{ sessionData?.vehicle_brand || 'Peugeot' }} {{ sessionData?.vehicle_model || '208' }}</span>
+      </span>
+      <span class="v-pill">
+        <app-icon name="fuel" [size]="14"></app-icon>
+        <span>{{ (sessionData?.vehicle_fuel || 'Essence') | translate }}</span>
+      </span>
+      <span class="v-pill">
+        <app-icon name="engine" [size]="14"></app-icon>
+        <span>{{ sessionData?.vehicle_engine || '1.2 PureTech' }}</span>
+      </span>
     </div>
   </div>
 
@@ -48,9 +47,7 @@
         >
           <div class="phase-indicator">
             @if (phase.id < currentPhase) {
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
+              <app-icon name="check" [size]="12"></app-icon>
             } @else {
               <span>{{ phase.id }}</span>
             }
@@ -93,11 +90,7 @@
       <!-- Target Specification / Pass-Fail Criteria Box -->
       <div class="target-spec-box">
         <div class="spec-header">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="16" x2="12" y2="12"/>
-            <line x1="12" y1="8" x2="12.01" y2="8"/>
-          </svg>
+          <app-icon name="info" [size]="16"></app-icon>
           <span class="spec-title">{{ 'CRITÈRE DE CONFORMITÉ CONSTRUCTEUR (TARGET SPEC)' | translate }}</span>
         </div>
         <p class="spec-detail">{{ targetSpecification | translate }}</p>
@@ -106,7 +99,9 @@
       <!-- Direct Sensory Observation Protocol if available -->
       @if (currentQuestion.test_action) {
         <div class="sensory-action-tip">
-          <div class="sensory-tip-icon">🔧</div>
+          <div class="sensory-tip-icon">
+            <app-icon name="wrench" [size]="18"></app-icon>
+          </div>
           <div class="sensory-tip-text">
             <span class="sensory-tip-tag">{{ 'PROTOCOLE DE VÉRIFICATION SUR VÉHICULE' | translate }}</span>
             <p>{{ currentQuestion.test_action | translate }}</p>
@@ -116,37 +111,36 @@
     </div>
 
     <!-- Selectable Options List (Formatted as Workshop Verifications) -->
-    <div class="options-section-label">{{ 'RÉSULTAT DE L\'OBSERVATION OU MESURE SUR LE VÉHICULE :' | translate }}</div>
-    <div class="options-list">
+    <div 
+      #observationsSection 
+      id="observationsSection" 
+      class="options-section-label" 
+      tabindex="-1"
+    >
+      {{ 'RÉSULTAT DE L\'OBSERVATION OU MESURE SUR LE VÉHICULE :' | translate }}
+    </div>
+    <div class="options-list" role="radiogroup" [attr.aria-label]="currentQuestion.title | translate">
       @for (opt of currentQuestion.options; track opt.id) {
         <div 
           class="option-card" 
+          role="radio"
+          tabindex="0"
+          [attr.aria-checked]="selectedOptionId === opt.id"
           [class.selected]="selectedOptionId === opt.id"
           [class.is-unknown-card]="opt.icon === 'help' || opt.title.toLowerCase().includes('impossible') || opt.title.toLowerCase().includes('insuffisante')"
           (click)="selectOption(opt)"
+          (keydown.enter)="selectOption(opt)"
+          (keydown.space)="selectOption(opt); $event.preventDefault()"
         >
           <div class="option-icon">
             @if (opt.icon === 'speaker') {
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>
-              </svg>
+              <app-icon name="sound" [size]="20"></app-icon>
             } @else if (opt.icon === 'rotate') {
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                <path d="M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-                <path d="M16 21h5v-5"/>
-              </svg>
+              <app-icon name="suspension" [size]="20"></app-icon>
             } @else if (opt.icon === 'power' || opt.icon === 'zap') {
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-              </svg>
+              <app-icon name="zap" [size]="20"></app-icon>
             } @else {
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                <line x1="12" y1="17" x2="12.01" y2="17"/>
-              </svg>
+              <app-icon name="help-circle" [size]="20"></app-icon>
             }
           </div>
 
@@ -164,7 +158,7 @@
             <div class="option-subtitle">{{ opt.subtitle | translate }}</div>
           </div>
 
-          <div class="option-radio">
+          <div class="option-radio" aria-hidden="true">
             <div class="option-radio-dot"></div>
           </div>
         </div>
@@ -175,23 +169,24 @@
     @if (isUnknownSelected) {
       <div class="unknown-helper-box">
         <div class="unknown-helper-header">
-          <span class="helper-icon">🛡️</span>
+          <app-icon name="shield" [size]="16" class="helper-icon"></app-icon>
           <span class="helper-title">{{ 'Procédure en cas de contrôle impossible sans outillage :' | translate }}</span>
         </div>
         <p class="helper-reformulation">
           {{ (currentQuestion.reformulation || defaultReformulation) | translate }}
         </p>
         <div class="helper-reassurance">
-          ✓ {{ 'Règle déterministe : Cette inconnue ne pénalise aucune hypothèse et sera relayée dans l\'ordre de réparation (OR) d\'atelier.' | translate }}
+          <app-icon name="check-circle" [size]="14"></app-icon>
+          <span>{{ 'Règle déterministe : Cette inconnue ne pénalise aucune hypothèse et sera relayée dans l\'ordre de réparation (OR) d\'atelier.' | translate }}</span>
         </div>
       </div>
     }
 
     <!-- "Logique d'Élimination de l'Arbre" Explanation Box -->
     <div class="why-ask-box">
-      <div class="why-ask-header" (click)="toggleWhyAsk()">
+      <div class="why-ask-header" role="button" tabindex="0" [attr.aria-expanded]="showWhyAsk" (click)="toggleWhyAsk()" (keydown.enter)="toggleWhyAsk()" (keydown.space)="toggleWhyAsk(); $event.preventDefault()">
         <div class="why-ask-title">
-          <span class="why-icon">📐</span>
+          <app-icon name="info" [size]="16" class="why-icon"></app-icon>
           <span>{{ 'Logique d\'élimination dans l\'arbre de décision' | translate }}</span>
         </div>
         <span class="why-toggle-btn">{{ (showWhyAsk ? 'Masquer' : 'Examiner la règle') | translate }}</span>
@@ -210,11 +205,7 @@
     <!-- Workshop Safety Caution Box -->
     <div class="alert-box alert-warning">
       <div class="alert-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
+        <app-icon name="alert-triangle" [size]="20"></app-icon>
       </div>
       <div class="alert-text">
         <strong>{{ 'Consigne de sécurité atelier :' | translate }}</strong><br>
@@ -224,21 +215,16 @@
 
     <!-- Bottom Actions Row -->
     <div class="quiz-actions-row">
-      <button class="btn-secondary" (click)="goBack()">{{ 'Annuler' | translate }}</button>
-      <button class="btn-primary" (click)="continue()" [disabled]="!selectedOptionId || submitting">
+      <button type="button" class="btn-secondary" (click)="goBack()">{{ 'Annuler' | translate }}</button>
+      <button type="button" class="btn-primary" (click)="continue()" [disabled]="!selectedOptionId || submitting">
         <span>{{ (submitting ? 'Évaluation de l\'arbre...' : 'Enregistrer le résultat & Étape suivante') | translate }}</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <app-icon name="arrow-right" [size]="18"></app-icon>
       </button>
     </div>
 
     <!-- Standard Compliance Footer -->
     <div class="obd-subtext">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="m9 12 2 2 4-4"/>
-      </svg>
+      <app-icon name="shield" [size]="16"></app-icon>
       <span>{{ 'Moteur Déterministe ISO 14229 · Zéro Hallucination · Traçabilité Intégrale' | translate }}</span>
     </div>
   }

@@ -1,24 +1,14 @@
 <div class="screen-content">
   <!-- Top Navigation Bar -->
   <div class="screen-top-bar">
-    <button class="back-btn" (click)="goBack()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+    <button type="button" class="back-btn" (click)="goBack()" [attr.aria-label]="'Retour' | translate">
+      <app-icon name="arrow-left" [size]="20"></app-icon>
     </button>
     <div class="screen-brand-group">
       <div class="screen-brand-title">AutoDiag</div>
       <span class="oem-badge">{{ 'RAPPORT D\'EXPERTISE OEM' | translate }}</span>
     </div>
-    <div class="help-btn-placeholder">
-      <button class="help-btn" [title]="'Aide' | translate">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-      </button>
-    </div>
+    <div class="help-btn-placeholder" aria-hidden="true"></div>
   </div>
 
   <!-- Header Title & Workshop Cartridge -->
@@ -26,10 +16,22 @@
     <div class="header-pre-tag">{{ 'DOSSIER TECHNIQUE D\'ATELIER' | translate }} · {{ reportReference }}</div>
     <h1 class="page-title">{{ 'Rapport d\'Expertise & Dépannage' | translate }}</h1>
     <div class="vehicle-subline">
-      <span class="v-pill">🚗 {{ results?.vehicle?.brand || 'Peugeot' }} {{ results?.vehicle?.model || '208' }}</span>
-      <span class="v-pill">⚡ {{ results?.vehicle?.engine || '1.2 PureTech' }}</span>
-      <span class="v-pill">📍 {{ results?.vehicle?.mileage || 68420 }} km</span>
-      <span class="v-pill">📋 {{ (results?.symptom?.label || 'Démarrage impossible') | translate }}</span>
+      <span class="v-pill">
+        <app-icon name="car" [size]="14"></app-icon>
+        <span>{{ results?.vehicle?.brand || 'Peugeot' }} {{ results?.vehicle?.model || '208' }}</span>
+      </span>
+      <span class="v-pill">
+        <app-icon name="engine" [size]="14"></app-icon>
+        <span>{{ results?.vehicle?.engine || '1.2 PureTech' }}</span>
+      </span>
+      <span class="v-pill">
+        <app-icon name="gauge" [size]="14"></app-icon>
+        <span>{{ results?.vehicle?.mileage || 68420 }} km</span>
+      </span>
+      <span class="v-pill">
+        <app-icon name="clipboard-check" [size]="14"></app-icon>
+        <span>{{ (results?.symptom?.label || 'Démarrage impossible') | translate }}</span>
+      </span>
     </div>
   </div>
 
@@ -38,19 +40,20 @@
     <div class="analysis-hero-card" [attr.data-level]="results.output_level || 2">
       <div class="analysis-header-row">
         <div class="analysis-badge">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-          </svg>
+          <app-icon name="wrench" [size]="15"></app-icon>
           <span>{{ 'CAUSE RACINE IDENTIFIÉE (ARBRE DE DÉCISION)' | translate }}</span>
         </div>
 
         <span class="confidence-pill" [attr.data-level]="results.output_level || 2">
           @if (results.output_level === 1) {
-            ✅ {{ 'Diagnostic Formel' | translate }} · {{ results.top_confidence }}%
+            <app-icon name="check-circle" [size]="14"></app-icon>
+            <span>{{ 'Diagnostic Formel' | translate }} · {{ results.top_confidence }}%</span>
           } @else if (results.output_level === 3) {
-            🔍 {{ 'Diagnostic Différentiel · À confirmer' | translate }}
+            <app-icon name="search" [size]="14"></app-icon>
+            <span>{{ 'Diagnostic Différentiel · À confirmer' | translate }}</span>
           } @else {
-            ⚠️ {{ 'Cause Hautement Probable' | translate }} · {{ results.top_confidence }}%
+            <app-icon name="alert-triangle" [size]="14"></app-icon>
+            <span>{{ 'Cause Hautement Probable' | translate }} · {{ results.top_confidence }}%</span>
           }
         </span>
       </div>
@@ -79,12 +82,12 @@
       </div>
     </div>
 
-    <!-- ⚡ AUTODIAG IA: PEDAGOGICAL TRANSLATION & IMMEDIATE ADVISOR -->
+    <!-- AUTODIAG IA: PEDAGOGICAL TRANSLATION & IMMEDIATE ADVISOR -->
     <div class="ai-explain-card">
       <div class="ai-explain-header">
         <div class="ai-explain-badge-row">
           <div class="ai-explain-badge">
-            <span class="ai-pulse-dot"></span>
+            <span class="ai-pulse-dot" aria-hidden="true"></span>
             <span>{{ 'AUTODIAG IA · EXPLICATION PÉDAGOGIQUE' | translate }}</span>
           </div>
           <span class="ai-model-tag">{{ 'Conseiller Intelligent · 0 Hallucination' | translate }}</span>
@@ -99,7 +102,7 @@
         <div class="ai-guidance-grid">
           <div class="ai-guidance-box guidance-meaning">
             <div class="guidance-head">
-              <span class="guidance-icon">💡</span>
+              <app-icon name="info" [size]="16" class="guidance-icon"></app-icon>
               <span class="guidance-label">{{ 'CE QUE CELA SIGNIFIE CONCRÈTEMENT' | translate }}</span>
             </div>
             <p class="guidance-text">
@@ -109,7 +112,7 @@
 
           <div class="ai-guidance-box guidance-caution">
             <div class="guidance-head">
-              <span class="guidance-icon">⚠️</span>
+              <app-icon name="alert-triangle" [size]="16" class="guidance-icon"></app-icon>
               <span class="guidance-label">{{ 'CONDUITE À TENIR IMMÉDIATE' | translate }}</span>
             </div>
             <p class="guidance-text">
@@ -122,9 +125,9 @@
         <div class="ai-explain-actions">
           <div class="ai-action-btn-row">
             <button type="button" class="btn-ask-ai-result" (click)="askAssistantAboutResult()">
-              <span class="btn-icon">⚡</span>
+              <app-icon name="bot" [size]="16" class="btn-icon"></app-icon>
               <span>{{ 'Discuter de cette panne avec AutoDiag IA' | translate }}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <app-icon name="arrow-right" [size]="16"></app-icon>
             </button>
           </div>
 
@@ -132,16 +135,20 @@
             <span class="ai-qq-label">{{ 'Questions fréquentes suggérées :' | translate }}</span>
             <div class="ai-qq-chips">
               <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Est-il possible de redémarrer en tapotant légèrement sur le démarreur ?')">
-                🔨 {{ 'Astuce tapoter démarreur ?' | translate }}
+                <app-icon name="wrench" [size]="13"></app-icon>
+                <span>{{ 'Astuce tapoter démarreur ?' | translate }}</span>
               </button>
               <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Quel est le devis honnête pièce et main d’œuvre pour ce remplacement ?')">
-                💶 {{ 'Devis moyen pièce & M.O. ?' | translate }}
+                <app-icon name="file-text" [size]="13"></app-icon>
+                <span>{{ 'Devis moyen pièce & M.O. ?' | translate }}</span>
               </button>
               <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Quelles questions clés poser au garagiste pour éviter les surfacturations ?')">
-                🛡️ {{ 'Pièges à éviter au garage ?' | translate }}
+                <app-icon name="shield" [size]="13"></app-icon>
+                <span>{{ 'Pièges à éviter au garage ?' | translate }}</span>
               </button>
               <button type="button" class="ai-qq-chip" (click)="askAssistantAboutResult('Faut-il changer la batterie en même temps que le démarreur ?')">
-                🔋 {{ 'Changer batterie aussi ?' | translate }}
+                <app-icon name="battery-auto" [size]="13"></app-icon>
+                <span>{{ 'Changer batterie aussi ?' | translate }}</span>
               </button>
             </div>
           </div>
@@ -153,7 +160,10 @@
     <div class="confirmation-test-card">
       <div class="test-header">
         <div class="test-badge-row">
-          <span class="test-badge">🔬 {{ 'PHASE 4 OEM : PROTOCOLE DE CONTRE-ÉPREUVE' | translate }}</span>
+          <span class="test-badge">
+            <app-icon name="multimeter" [size]="14"></app-icon>
+            <span>{{ 'PHASE 4 OEM : PROTOCOLE DE CONTRE-ÉPREUVE' | translate }}</span>
+          </span>
           <span class="test-tools-tag">{{ 'Avant remplacement de pièce' | translate }}</span>
         </div>
         <h4 class="test-title">{{ 'Validation formelle de la cause racine par contre-épreuve' | translate }}</h4>
@@ -238,7 +248,9 @@
           @for (elim of results.eliminated_hypotheses; track elim.id) {
             <div class="eliminated-item">
               <div class="elim-name-row">
-                <span class="elim-cross">✕</span>
+                <span class="elim-cross">
+                  <app-icon name="x" [size]="14"></app-icon>
+                </span>
                 <span class="elim-name">{{ elim.name | translate }}</span>
                 <span class="elim-status-tag">{{ 'ÉCARTÉE' | translate }}</span>
               </div>
@@ -256,14 +268,17 @@
       <div class="garage-memo-card">
         <div class="memo-header">
           <div class="memo-title-group">
-            <span class="memo-icon">📄</span>
+            <span class="memo-icon">
+              <app-icon name="file-text" [size]="20"></app-icon>
+            </span>
             <div>
               <h4 class="memo-headline">{{ 'Fiche d\'Ordre de Réparation pour l\'Atelier (OR)' | translate }}</h4>
               <p class="memo-sub">{{ 'Synthèse technique normée à remettre directement au réceptionnaire ou technicien.' | translate }}</p>
             </div>
           </div>
           <button type="button" class="btn-copy-memo" (click)="copyGarageMemo()">
-            {{ (copiedMemo ? '✓ Copié !' : 'Copier l\'OR') | translate }}
+            <app-icon [name]="copiedMemo ? 'check' : 'copy'" [size]="14"></app-icon>
+            <span>{{ (copiedMemo ? 'Copié !' : 'Copier l\'OR') | translate }}</span>
           </button>
         </div>
 
@@ -287,7 +302,10 @@
             <span class="checklist-title">{{ 'Checklist des contrôles à consigner sur l\'Ordre de Réparation :' | translate }}</span>
             <ul>
               @for (item of results.garage_memo.checklist; track item) {
-                <li>✓ {{ item | translate }}</li>
+                <li>
+                  <app-icon name="check" [size]="14"></app-icon>
+                  <span>{{ item | translate }}</span>
+                </li>
               }
             </ul>
           </div>
@@ -298,7 +316,9 @@
     <!-- POST-REPAIR QUALITY ASSURANCE CHECK -->
     <div class="post-repair-card">
       <div class="post-repair-header">
-        <span class="post-repair-icon">✅</span>
+        <span class="post-repair-icon">
+          <app-icon name="check-circle" [size]="20"></app-icon>
+        </span>
         <div class="post-repair-titles">
           <span class="post-repair-tag">{{ 'CONTRÔLE QUALITÉ POST-INTERVENTION' | translate }}</span>
           <h4 class="post-repair-heading">{{ 'Validation finale de remise en circulation' | translate }}</h4>
@@ -310,7 +330,9 @@
     <!-- CONTINUOUS LEARNING USER FEEDBACK -->
     <div class="feedback-learning-card">
       <div class="feedback-header">
-        <span class="feedback-icon">🎯</span>
+        <span class="feedback-icon">
+          <app-icon name="clipboard-check" [size]="20"></app-icon>
+        </span>
         <div>
           <h4 class="feedback-title">{{ 'Validation du diagnostic après passage à l\'atelier' | translate }}</h4>
           <p class="feedback-sub">{{ 'Votre confirmation permet d\'étalonner les règles de l\'arbre de décision pour ce modèle.' | translate }}</p>
@@ -320,15 +342,19 @@
       @if (!feedbackSubmitted) {
         <div class="feedback-btn-group">
           <button type="button" class="btn-feedback confirm" (click)="onFeedback(true)">
-            <span>✅ {{ 'Diagnostic d\'atelier conforme' | translate }}</span>
+            <app-icon name="check-circle" [size]="16"></app-icon>
+            <span>{{ 'Diagnostic d\'atelier conforme' | translate }}</span>
           </button>
           <button type="button" class="btn-feedback deny" (click)="onFeedback(false)">
-            <span>❌ {{ 'Autre cause constatée au démontage' | translate }}</span>
+            <app-icon name="x" [size]="16"></app-icon>
+            <span>{{ 'Autre cause constatée au démontage' | translate }}</span>
           </button>
         </div>
       } @else {
         <div class="feedback-thankyou-box">
-          <span class="thankyou-icon">✓</span>
+          <span class="thankyou-icon">
+            <app-icon name="check" [size]="16"></app-icon>
+          </span>
           <span>{{ feedbackMessage | translate }}</span>
         </div>
       }
@@ -336,11 +362,9 @@
 
     <!-- Primary Action Button -->
     <div class="results-action-container">
-      <button class="btn-primary" (click)="goToGuide()">
+      <button type="button" class="btn-primary" (click)="goToGuide()">
         <span>{{ 'Consulter la procédure de réparation guidée' | translate }}</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <app-icon name="arrow-right" [size]="18"></app-icon>
       </button>
 
       <div class="action-subtext">

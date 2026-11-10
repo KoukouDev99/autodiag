@@ -267,10 +267,10 @@
 }
 
 .assistant-avatar-sm {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(99, 102, 241, 0.28));
-  border: 1px solid rgba(56, 189, 248, 0.4);
-  color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+  background-color: var(--c-primary-soft);
+  border: 1px solid var(--c-border);
+  color: var(--c-primary);
+  border-radius: var(--radius-sm);
 }
 
 .robot-icon-svg {

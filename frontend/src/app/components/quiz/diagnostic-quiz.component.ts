@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DiagnosticService, Question, QuestionOption } from '../../services/diagnostic.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../ui/icon.component';
 
 @Component({
   selector: 'app-diagnostic-quiz',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent],
   templateUrl: './diagnostic-quiz.component.html',
   styleUrls: ['./diagnostic-quiz.component.css']
 })
@@ -25,6 +26,8 @@ export class DiagnosticQuizComponent implements OnInit {
   selectedOptionId: number | null = null;
   loading = true;
   submitting = false;
+
+  @ViewChild('observationsSection') observationsSection?: ElementRef<HTMLElement>;
 
   // Step indicator
   stepNum = 2;
@@ -54,8 +57,8 @@ export class DiagnosticQuizComponent implements OnInit {
       {
         role: 'assistant',
         content: isEn
-          ? `💡 **AutoDiag AI Tip:** For this test ("${qTitle}"), prioritize gentle observation without forcing. If you hesitate between two observations, describe what you hear or feel below.`
-          : `💡 **Conseil AutoDiag IA :** Pour ce test (« ${qTitle} »), privilégiez une observation douce sans forcer. Si vous hésitez entre deux constatations, décrivez-moi ce que vous entendez ou ressentez ci-dessous.`
+          ? `**AutoDiag AI Tip:** For this test ("${qTitle}"), prioritize gentle observation without forcing. If you hesitate between two observations, describe what you hear or feel below.`
+          : `**Conseil AutoDiag IA :** Pour ce test (« ${qTitle} »), privilégiez une observation douce sans forcer. Si vous hésitez entre deux constatations, décrivez-moi ce que vous entendez ou ressentez ci-dessous.`
       }
     ];
   }
@@ -123,10 +126,10 @@ export class DiagnosticQuizComponent implements OnInit {
 
   // OEM Guided Troubleshooting Phases
   readonly OEM_PHASES = [
-    { id: 1, code: 'context', label: '1. Contexte & Freeze Frame', icon: '❄️' },
-    { id: 2, code: 'precheck', label: '2. Pré-contrôles sensoriels', icon: '👁️' },
-    { id: 3, code: 'targeted', label: '3. Tests différentiels', icon: '⚡' },
-    { id: 4, code: 'counter', label: '4. Contre-épreuve', icon: '🔬' }
+    { id: 1, code: 'context', label: '1. Contexte & Freeze Frame', icon: 'snowflake' },
+    { id: 2, code: 'precheck', label: '2. Pré-contrôles sensoriels', icon: 'eye' },
+    { id: 3, code: 'targeted', label: '3. Tests différentiels', icon: 'zap' },
+    { id: 4, code: 'counter', label: '4. Contre-épreuve', icon: 'multimeter' }
   ];
 
   get currentPhase(): number {
@@ -189,7 +192,7 @@ export class DiagnosticQuizComponent implements OnInit {
     });
   }
 
-  loadQuestion(): void {
+  loadQuestion(scrollToObservations = false): void {
     this.loading = true;
     this.diagnosticService.getCurrentQuestion(this.sessionId).subscribe({
       next: (res) => {
@@ -205,21 +208,28 @@ export class DiagnosticQuizComponent implements OnInit {
         this.totalSteps = res.question.total_steps || 5;
         this.stepCategory = res.question.category || 'Circuit de démarrage';
 
-        // Pre-select default or first option
-        if (this.currentQuestion?.options && this.currentQuestion.options.length > 0) {
-          const defaultOpt = this.currentQuestion.options.find(o => o.is_default);
-          this.selectedOptionId = defaultOpt ? defaultOpt.id : this.currentQuestion.options[0].id;
+        if (scrollToObservations) {
+          // Sur passage à une nouvelle étape, réinitialise la sélection pour laisser l'utilisateur choisir son observation
+          this.selectedOptionId = null;
+          this.isUnknownSelected = false;
+          this.scrollToObservationsSection();
+        } else {
+          // Pré-sélection par défaut uniquement au premier chargement
+          if (this.currentQuestion?.options && this.currentQuestion.options.length > 0) {
+            const defaultOpt = this.currentQuestion.options.find(o => o.is_default);
+            this.selectedOptionId = defaultOpt ? defaultOpt.id : this.currentQuestion.options[0].id;
+          }
         }
       },
       error: (err) => {
         console.error('Error fetching question:', err);
         this.loading = false;
-        this.setupFallbackQuestion();
+        this.setupFallbackQuestion(scrollToObservations);
       }
     });
   }
 
-  setupFallbackQuestion(): void {
+  setupFallbackQuestion(scrollToObservations = false): void {
     this.sessionData = {
       vehicle_brand: 'Peugeot',
       vehicle_model: '208',
@@ -250,8 +260,14 @@ export class DiagnosticQuizComponent implements OnInit {
         { id: 4, question_id: 1, title: 'Contrôle impossible / Données insuffisantes', subtitle: 'Nécessite une mesure au voltmètre ou assistance d’atelier.', icon: 'help', is_default: false }
       ]
     };
-    this.selectedOptionId = 1;
-    this.isUnknownSelected = false;
+    if (scrollToObservations) {
+      this.selectedOptionId = null;
+      this.isUnknownSelected = false;
+      this.scrollToObservationsSection();
+    } else {
+      this.selectedOptionId = 1;
+      this.isUnknownSelected = false;
+    }
   }
 
   selectOption(option: QuestionOption): void {
@@ -286,7 +302,8 @@ export class DiagnosticQuizComponent implements OnInit {
     this.diagnosticService.submitAnswer(this.sessionId, this.currentQuestion.id, this.selectedOptionId).subscribe({
       next: () => {
         this.submitting = false;
-        this.loadQuestion();
+        // Passe scrollToObservations=true pour positionner automatiquement l'écran au niveau des choix d'observation
+        this.loadQuestion(true);
       },
       error: (err) => {
         console.error('Error submitting answer:', err);
@@ -294,6 +311,37 @@ export class DiagnosticQuizComponent implements OnInit {
         this.router.navigate(['/results', this.sessionId]);
       }
     });
+  }
+
+  /**
+   * Positionne en douceur la vue au niveau du bloc des résultats d'observation (titre et cartes de sélection)
+   * Respecte prefers-reduced-motion pour l'accessibilité
+   */
+  scrollToObservationsSection(): void {
+    const doScroll = () => {
+      const targetEl = this.observationsSection?.nativeElement || document.getElementById('observationsSection');
+      if (targetEl) {
+        const prefersReducedMotion = typeof window !== 'undefined' &&
+          window.matchMedia &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        targetEl.scrollIntoView({
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+          block: 'start'
+        });
+
+        try {
+          targetEl.focus({ preventScroll: true });
+        } catch (_) {}
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        setTimeout(doScroll, 40);
+        setTimeout(doScroll, 180);
+      });
+    }
   }
 
   goBack(): void {

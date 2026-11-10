@@ -6,11 +6,12 @@ import { DiagnosticService, Vehicle, ChatMessage } from '../../services/diagnost
 import { VehicleLogoService } from '../../services/vehicle-logo.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { IconComponent } from '../ui/icon.component';
 
 @Component({
   selector: 'app-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, IconComponent],
   templateUrl: './assistant.component.html',
   styleUrls: ['./assistant.component.css']
 })
@@ -52,9 +53,9 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
 
   // Suggestions rapides d'exemples simples
   quickPrompts = [
-    { label: 'Pédale de frein molle', icon: '🛑' },
-    { label: 'Voyant moteur allumé', icon: '⚠️' },
-    { label: 'Bruit anormal au démarrage', icon: '⚙️' }
+    { label: 'Pédale de frein molle', icon: 'disc-brake' },
+    { label: 'Voyant moteur allumé', icon: 'engine' },
+    { label: 'Bruit anormal au démarrage', icon: 'starter' }
   ];
 
   getBrandLogoUrl(brand: string | undefined): string {
@@ -228,8 +229,8 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
       error: () => {
         this.isThinking = false;
         const errorMsg = isEn
-          ? '⚠️ A connection error occurred. Please check your network and try again.'
-          : '⚠️ Une erreur de connexion est survenue. Veuillez vérifier votre clé API ou réessayer.';
+          ? 'A connection error occurred. Please check your network and try again.'
+          : 'Une erreur de connexion est survenue. Veuillez vérifier votre connexion et réessayer.';
         this.messages.push({
           role: 'assistant',
           content: errorMsg,
@@ -280,31 +281,24 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     html = html.replace(/^(?:---|___|\*\*\*)$/gm, '<hr class="chat-hr" />');
 
     // 4. Sections Markdown (## ou ### Titre) - Bilingue FR / EN
-    html = html.replace(/#{2,3}\s*(🔍|⚠️|🛠️|💡|💶|[0-9]️⃣)?\s*(.*?)(?=\n|$)/g, (_match, icon, title) => {
+    html = html.replace(/#{2,3}\s*(?:[\u2600-\u27BF]|[\uD83C-\uDBFF][\uDC00-\uDFFF]|[0-9]\uFE0F?\u20E3)?\s*(.*?)(?=\n|$)/g, (_match, title) => {
       const rawTitle = (title || '').trim();
-      let iconSymbol = icon || '📋';
       let sectionClass = 'section-general';
 
       const lower = rawTitle.toLowerCase();
       if (lower.includes('analyse') || lower.includes('analysis') || lower.includes('diagnostic') || lower.includes('diagnosis')) {
         sectionClass = 'section-diag';
-        iconSymbol = icon || '🔍';
       } else if (lower.includes('urgence') || lower.includes('urgency') || lower.includes('sécurité') || lower.includes('safety') || lower.includes('danger')) {
         sectionClass = 'section-safety';
-        iconSymbol = icon || '⚠️';
       } else if (lower.includes('causes') || lower.includes('éléments') || lower.includes('components') || lower.includes('symptôme') || lower.includes('symptom')) {
         sectionClass = 'section-causes';
-        iconSymbol = icon || '🛠️';
       } else if (lower.includes('actions') || lower.includes('conseils') || lower.includes('advice') || lower.includes('recommend') || lower.includes('procédure') || lower.includes('checklist')) {
         sectionClass = 'section-advice';
-        iconSymbol = icon || '💡';
       } else if (lower.includes('estimation') || lower.includes('estimate') || lower.includes('chiffrée') || lower.includes('coût') || lower.includes('cost') || lower.includes('prix') || lower.includes('price')) {
         sectionClass = 'section-cost';
-        iconSymbol = icon || '💶';
       }
 
       return `<div class="chat-section-header ${sectionClass}">
-        <span class="chat-section-icon">${iconSymbol}</span>
         <span class="chat-section-title">${rawTitle}</span>
       </div>`;
     });
@@ -313,19 +307,15 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     html = html.replace(/-\s*\*\*(?:Gravité|Severity)\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       const v = (val || '').trim();
       let badgeClass = 'badge-gravity-medium';
-      let badgeIcon = 'ℹ️';
       if (/critique|critical|danger/i.test(v)) {
         badgeClass = 'badge-gravity-critical';
-        badgeIcon = '🚨';
       } else if (/élevée|haute|high|important/i.test(v)) {
         badgeClass = 'badge-gravity-high';
-        badgeIcon = '⚠️';
       } else if (/faible|low|minor|mineur/i.test(v)) {
         badgeClass = 'badge-gravity-low';
-        badgeIcon = '✅';
       }
       const label = isEn ? 'Severity :' : 'Gravité :';
-      return `<div class="chat-badge-pill ${badgeClass}"><span class="badge-icon">${badgeIcon}</span><strong>${label}</strong>&nbsp;${v}</div>`;
+      return `<div class="chat-badge-pill ${badgeClass}"><strong>${label}</strong>&nbsp;${v}</div>`;
     });
 
     // 6. Statut d'aptitude à rouler (Bilingue FR / EN)
@@ -344,7 +334,7 @@ export class AssistantComponent implements OnInit, AfterViewChecked {
     // 7. Carte highlight pour l'estimation chiffrée (Bilingue FR / EN)
     html = html.replace(/-\s*\*\*(?:Fourchette moyenne constatée|Average estimated range|Estimated range|Average range)\s*:\*\*\s*(.*?)(?=\n|$)/gi, (_match, val) => {
       const tag = isEn ? 'Workshop Estimated Cost' : 'Estimation constatée d\'atelier';
-      return `<div class="chat-cost-card"><div class="cost-header"><span class="cost-badge-icon">💶</span><span class="cost-tag">${tag}</span></div><div class="cost-val">${(val || '').trim()}</div></div>`;
+      return `<div class="chat-cost-card"><div class="cost-header"><span class="cost-tag">${tag}</span></div><div class="cost-val">${(val || '').trim()}</div></div>`;
     });
 
     // 8. Formatage des puces restantes (- item)

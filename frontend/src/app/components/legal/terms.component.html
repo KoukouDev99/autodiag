@@ -7,7 +7,9 @@
 
   <!-- Avertissement de sécurité critique -->
   <div class="warning-banner">
-    <div class="warning-icon">🚨</div>
+    <div class="warning-icon">
+      <app-icon name="alert-triangle" [size]="24"></app-icon>
+    </div>
     <div class="warning-content">
       <h3>AVERTISSEMENT DE SÉCURITÉ ROUTIÈRE & SANTÉ DES PERSONNES</h3>
       <p>
@@ -20,7 +22,7 @@
   </div>
 
   <div class="legal-card">
-    <h2>🎯 1. Objet et champ d'application</h2>
+    <h2>1. Objet et champ d'application</h2>
     <p>
       Les présentes Conditions Générales d'Utilisation (ci-après les « CGU ») régissent l'accès et l'utilisation de la plateforme en ligne <strong>AutoDiag</strong>, accessible depuis le site web et l'application mobile web.
     </p>
@@ -30,7 +32,7 @@
   </div>
 
   <div class="legal-card">
-    <h2>🛠️ 2. Description des fonctionnalités</h2>
+    <h2>2. Description des fonctionnalités</h2>
     <p>AutoDiag propose à titre gratuit ou sous formule d'abonnement :</p>
     <ul>
       <li>Un questionnaire guidé d'identification des symptômes et pannes mécaniques/électroniques.</li>
@@ -42,7 +44,7 @@
   </div>
 
   <div class="legal-card">
-    <h2>🛡️ 3. Limitation de responsabilité et absence de garantie de résultat</h2>
+    <h2>3. Limitation de responsabilité et absence de garantie de résultat</h2>
     <p>
       Les analyses et pistes de pannes fournies par les algorithmes ou par l'assistant conversationnel reposent sur les seules informations déclarées par l'utilisateur et sur des modèles statistiques d'incidents récurrents.
     </p>
@@ -58,7 +60,7 @@
   </div>
 
   <div class="legal-card">
-    <h2>🚫 4. Règles d'usage et intégrité du système</h2>
+    <h2>4. Règles d'usage et intégrité du système</h2>
     <p>L'utilisateur s'engage à :</p>
     <ul>
       <li>Ne pas tenter de contourner les mécanismes de sécurité, d'authentification ou de limitation de débit (rate limiting).</li>
@@ -68,14 +70,14 @@
   </div>
 
   <div class="legal-card">
-    <h2>⚖️ 5. Droit applicable et juridiction compétente</h2>
+    <h2>5. Droit applicable et juridiction compétente</h2>
     <p>
       Les présentes CGU sont régies par le droit français. En cas de litige relatif à leur interprétation ou exécution, les parties privilégieront une résolution amiable. À défaut d'accord, les tribunaux français du ressort du siège social de l'éditeur seront seuls compétents.
     </p>
   </div>
 
   <div class="legal-card">
-    <h2>🔗 Liens légaux</h2>
+    <h2>Liens légaux</h2>
     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
       <a routerLink="/mentions-legales" class="back-link">→ Mentions Légales</a>
       <a routerLink="/confidentialite" class="back-link">→ Politique de Confidentialité (RGPD)</a>
@@ -83,4 +85,3 @@
     </div>
   </div>
 </div>
-

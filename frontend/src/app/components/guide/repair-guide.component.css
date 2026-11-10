@@ -193,13 +193,17 @@
   border-radius: 12px;
   overflow: hidden;
   background-color: #0b1120;
+  border: 1px solid var(--c-border);
 }
 
 .step-image {
   width: 100%;
-  height: 170px;
-  object-fit: cover;
+  aspect-ratio: 16 / 9;
+  max-height: 360px;
+  object-fit: contain;
+  object-position: center;
   display: block;
+  background-color: #0b1120;
 }
 
 .step-image-caption {
@@ -303,7 +307,7 @@
   }
 
   .step-image {
-    height: 280px;
+    max-height: 380px;
   }
 }
 

@@ -377,6 +377,144 @@ async function retrieveDatabaseContext(pool, message, vehicle) {
   return dbContext;
 }
 
+// Helper: Detect whether a user message is vague, imprecise, incomplete, or a simple greeting
+function isVagueOrImpreciseMessage(text) {
+  if (!text || typeof text !== 'string') return true;
+  const clean = text.trim();
+  if (clean.length < 3) return true;
+
+  // If message contains a standard automotive DTC code (e.g. P0300, P0420, C1234, U0100) -> NOT vague
+  if (/\b[PCBU][0-9]{4}\b/i.test(clean)) return false;
+
+  const lower = clean.toLowerCase();
+  const normalized = lower
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?\!]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  // 1. Direct match on common greetings & pure help cries (FR & EN)
+  const vagueExactPhrases = new Set([
+    'bonjour', 'salut', 'coucou', 'hello', 'hi', 'bonsoir', 'yo', 'slt', 'bjr', 'bsr',
+    'aide', 'aide moi', 'aidez moi', 'aidez moi svp', 'aide moi svp', 'help', 'help me', 'sos', 'au secours',
+    'ca marche pas', 'ca ne marche pas', 'marche pas', 'marche plus', 'ca marche plus',
+    'ne marche pas', 'ne fonctionne pas', 'ca ne fonctionne pas', 'ca ne fonctionne plus',
+    'en panne', 'ma voiture est en panne', 'je suis en panne', 'voiture en panne', 'mon vehicule est en panne',
+    'my car is broken', 'car is broken', 'car broken', 'not working', 'it does not work', 'my car won t start',
+    'j ai un probleme', 'jai un probleme', 'ma voiture a un probleme', 'probleme', 'un probleme', 'souci', 'un souci',
+    'j ai un souci', 'jai un souci', 'ma voiture a un souci', 'mon auto a un probleme',
+    'j ai un bruit', 'jai un bruit', 'un bruit', 'bruit', 'bruit bizarre', 'drole de bruit', 'ca fait du bruit', 'du bruit',
+    'bruit anormal', 'bruit moteur', 'bruit bizarre moteur', 'bruit voiture',
+    'strange noise', 'weird noise', 'unusual noise', 'noise in car', 'car noise',
+    'ma voiture', 'mon vehicule', 'le moteur', 'mon auto', 'my car', 'the car', 'the engine',
+    'que faire', 'quoi faire', 'comment faire', 'c est quoi', 'cest quoi', 'qu est ce qui se passe', 'quest ce qui se passe',
+    'what to do', 'what should i do', 'how to fix', 'what is happening',
+    'je sais pas', 'jsp', 'rien', 'test', 'ok', 'merci', 'non', 'oui', 'svp', 'stp', 'thanks', 'please'
+  ]);
+
+  if (vagueExactPhrases.has(normalized)) {
+    return true;
+  }
+
+  // 2. Gibberish / repetition / random characters (e.g. "aaaaaa", "asdfghjkl", "???")
+  if (/^([a-z0-9\W])\1{3,}$/i.test(clean) || /^[^a-zA-Z0-9]+$/.test(clean)) {
+    return true;
+  }
+
+  // 3. Short inputs (< 40 chars) that only consist of generic conversational words
+  const genericWords = new Set([
+    'bonjour', 'salut', 'hello', 'voiture', 'vehicule', 'auto', 'moteur', 'panne', 'probleme',
+    'souci', 'aide', 'marche', 'fonctionne', 'pas', 'plus', 'fait', 'bruit', 'mon', 'ma', 'mes',
+    'un', 'une', 'des', 'le', 'la', 'les', 'cest', 'que', 'quoi', 'comment', 'faire', 'sur', 'dans',
+    'avec', 'help', 'car', 'broken', 'issue', 'noise', 'depuis', 'hier', 'temps', 'tout', 'tous',
+    'peux', 'peut', 'savoir', 'dire', 'est', 'ai', 'jai', 'svp', 'stp', 'merci', 'bonsoir', 'moi',
+    'my', 'the', 'and', 'this', 'that', 'not', 'have', 'has', 'there', 'please', 'with', 'what', 'how'
+  ]);
+  const words = normalized.split(/\s+/).filter(w => w.length > 1);
+  if (clean.length < 40 && words.length > 0) {
+    const allGeneric = words.every(w => genericWords.has(w));
+    if (allGeneric) return true;
+  }
+
+  // 4. Missing mechanical context:
+  // Check if message contains at least one technical symptom, part, fluid, warning light, or condition:
+  const technicalKeywords = [
+    // Symptoms / Sounds / Observations (FR & EN)
+    'claqu', 'siffl', 'vibr', 'trembl', 'fumee', 'fume', 'smok', 'odeur', 'odor', 'smell',
+    'fuite', 'leak', 'coule', 'goutt', 'drip', 'demarr', 'start', 'cale', 'stall', 'calag',
+    'brout', 'rate', 'misfir', 'acoup', 'a-coup', 'hesitat', 'puissanc', 'power', 'perte', 'loss',
+    'mou', 'moll', 'spong', 'soft', 'dur', 'hard', 'stiff', 'bloqu', 'stuck', 'chauff', 'overheat',
+    'surchauff', 'voyant', 'light', 'temoin', 'clignot', 'blink', 'flash', 'bip', 'alerte',
+    'usur', 'worn', 'wear', 'crev', 'flat', 'degonfl', 'spongieux', 'patin', 'slip', 'grinc', 'grind', 'squeak', 'squeal',
+    'frott', 'rub', 'cliquet', 'click', 'tick', 'knock', 'rattl',
+    // Components (FR & EN)
+    'frein', 'brake', 'plaquett', 'pad', 'disqu', 'rotor', 'disc', 'etrier', 'caliper', 'abs', 'esp',
+    'culass', 'head gasket', 'soupap', 'valve', 'piston', 'batteri', 'battery', 'alternat',
+    'demarreur', 'starter', 'bougi', 'plug', 'bobin', 'coil', 'allumag', 'ignition',
+    'embrayag', 'clutch', 'boit', 'gearbox', 'vitess', 'gear', 'transmiss', 'cardan', 'axle', 'driveshaft',
+    'soufflet', 'boot', 'direct', 'steer', 'volant', 'wheel', 'cremailler', 'rack', 'rotul', 'tie rod', 'ball joint',
+    'suspens', 'amortiss', 'shock', 'strut', 'ressort', 'spring', 'pneu', 'tire', 'tyre',
+    'roulement', 'bearing', 'echapp', 'exhaust', 'pot', 'muffler', 'fap', 'dpf', 'catalys', 'catalytic',
+    'lambd', 'o2 sensor', 'egr', 'adblue', 'turbo', 'boost', 'inject', 'pompe', 'pump',
+    'carbur', 'fuel', 'essenc', 'gas', 'petrol', 'gasoil', 'diesel', 'filtr', 'filter',
+    'radiat', 'radiator', 'refroidiss', 'coolant', 'calorstat', 'thermostat', 'durit', 'hose',
+    'ventil', 'fan', 'huil', 'oil', 'vidang', 'courroi', 'belt', 'chain', 'distrib', 'timing',
+    'accessoir', 'serpentine', 'galet', 'pulley', 'clim', 'ac', 'compress'
+  ];
+
+  const hasTechKeyword = technicalKeywords.some(kw => normalized.includes(kw));
+  if (!hasTechKeyword) {
+    return true;
+  }
+
+  // Purely vague noise phrases without context
+  if (normalized === 'bruit' || normalized === 'bruit moteur' || normalized === 'un bruit dans le moteur' || normalized === 'moteur fait du bruit' ||
+      normalized === 'noise' || normalized === 'engine noise' || normalized === 'car noise' || normalized === 'strange noise') {
+    return true;
+  }
+
+  return false;
+}
+
+// Helper: Build polite clarification request when user input lacks precision
+function buildClarificationResponse(vehicle, cleanMessage, language = 'fr') {
+  const isEn = language === 'en';
+  const vehName = vehicle && vehicle.brand ? `${vehicle.brand} ${vehicle.model || ''}` : (isEn ? 'your vehicle' : 'votre véhicule');
+  const vehSpec = isEn
+    ? `${vehName} (${vehicle?.engine || 'standard engine'}${vehicle?.mileage ? ', ' + Number(vehicle.mileage).toLocaleString('en-US') + ' km' : ''})`
+    : `${vehName} (${vehicle?.engine || 'motorisation standard'}${vehicle?.mileage ? ', ' + Number(vehicle.mileage).toLocaleString('fr-FR') + ' km' : ''})`;
+
+  if (isEn) {
+    return `### ⚠️ Details required for your diagnosis
+
+Your description is currently **too vague or incomplete** to establish a reliable mechanical diagnosis.
+
+To prevent misdiagnosis and **avoid giving an inaccurate repair cost estimate**, you need to **provide more specific details about the issue**.
+
+Please specify:
+1. **The exact symptom observed:** (e.g. metallic knocking, high-pitched squeal, thick exhaust smoke, steering vibration, hesitation, abnormal odor...)
+2. **When it occurs:** (e.g. cold start in the morning, hot engine on highway, while braking, when turning the steering wheel, at idle...)
+3. **Dashboard warning lights:** Is any warning light illuminated on the instrument cluster? (amber, red, solid, or flashing?)
+4. **Location of the anomaly:** (engine bay, front/rear wheels, underbody exhaust, gearbox...)
+
+As soon as you provide these details, I will give you a targeted diagnostic analysis and realistic repair cost estimate for your **${vehSpec}**.`;
+  }
+
+  return `### ⚠️ Précisions nécessaires pour votre diagnostic
+
+Votre description est actuellement **trop vague ou imprécise** pour établir un diagnostic mécanique fiable.
+
+Pour éviter toute erreur d'interprétation et **ne pas vous donner une fausse estimation de coût**, il est indispensable de **préciser les symptômes constatés**.
+
+Merci de m'indiquer :
+1. **Le symptôme exact constaté :** (ex. claquement métallique, sifflement aigu, fumée à l'échappement, vibrations au volant, perte de puissance, odeur anormale...)
+2. **Le contexte d'apparition :** (ex. au démarrage à froid le matin, moteur chaud sur autoroute, lors du freinage, en braquant les roues, au ralenti...)
+3. **Les voyants au tableau de bord :** Un témoin est-il allumé ? (orange, rouge, fixe ou clignotant ?)
+4. **La localisation perçue :** (compartiment moteur, roue avant/arrière, sous le châssis, échappement, boîte de vitesses...)
+
+Dès que vous m'aurez apporté ces précisions, je pourrai vous fournir une analyse technique ciblée et une estimation chiffrée adaptée à votre **${vehSpec}**.`;
+}
+
 // Helper: Build tailored system prompt based on user vehicle and database context
 function buildVehicleSystemPrompt(vehicle, dbContext = '', language = 'fr') {
   const isEn = language === 'en';
@@ -401,8 +539,15 @@ ${dbContext}
 (Rule: Use these official technical specifications and figures to back your diagnostic findings, causes, and repair costs!)`;
     }
 
-    prompt += `\n\nMANDATORY RESPONSE STRUCTURE (OEM WORKSHOP STANDARD):
-To make your response ultra-clear, reassuring, and immediately actionable, you MUST structure your answer with these 5 distinct markdown sections:
+    prompt += `\n\nCRITICAL RULE #1: VAGUE, IMPRECISE, OR INCOMPLETE USER MESSAGES (STRICT ENFORCEMENT):
+If the user's message is vague, imprecise, incomplete, contradictory, erroneous, too short, or simply a greeting (e.g. "hello", "hi", "help me", "my car is broken", "car problem", "there is a noise", "weird noise", "not working", etc.):
+1. DO NOT INVENT A DIAGNOSIS AND DO NOT OFFER SPECULATIVE TECHNICAL EXPLANATIONS.
+2. DO NOT DISPLAY ANY REPAIR COST ESTIMATES UNDER ANY CIRCUMSTANCES: the section "### 💶 Estimated Cost" MUST NOT BE SHOWN!
+3. REPLY CLEARLY BY STATING THAT MORE DETAILS ARE REQUIRED TO ESTABLISH A RELIABLE DIAGNOSIS.
+4. Politely ask 3 or 4 targeted questions to help pinpoint the issue (exact noise/symptom, driving conditions, warning lights, location).
+
+OEM WORKSHOP RESPONSE STRUCTURE (ONLY WHEN THE USER DESCRIBES A SPECIFIC, CONCRETE SYMPTOM):
+If and only if the user has provided specific, identifiable mechanical symptoms or a fault code, use these 5 distinct markdown sections:
 
 ### 🔍 Analysis & Probable Diagnosis
 Clearly, calmly, and precisely explain the mechanical phenomenon observed, citing specifically the user's vehicle (${engVehDesc.split('\n')[0]}).
@@ -450,8 +595,19 @@ ${dbContext}
 (Consigne : Utilise ces données officielles de la base pour appuyer tes explications, tes prix et tes causes probables !)`;
   }
 
-  prompt += `\n\nSTRUCTURE DE RÉPONSE OBLIGATOIRE (STANDARD PROFESSIONNEL D'ATELIER) :
-Pour que ta réponse soit ultra-claire, rassurante, facile à lire et directement exploitable, structure OBLIGATOIREMENT ta réponse avec ces 5 sections markdown distinctes :
+  prompt += `\n\nRÈGLE ABSOLUE #1 : DÉTECTION DES DEMANDES VAGUES, IMPRÉCISES OU ERRONÉES (CRITIQUE OBLIGATOIRE) :
+Si le message de l'utilisateur est vague, imprécis, incomplet, erroné, trop court ou constitue une simple salutation (exemples : "bonjour", "aidez-moi", "ma voiture ne marche pas", "j'ai un problème", "ça fait un bruit", "bruit bizarre", "panne", etc.) :
+1. N'INVENTE AUCUN DIAGNOSTIC ET N'AFFICHE PAS D'EXPLICATION TECHNIQUE HYPOTHÉTIQUE.
+2. N'AFFICHE SOUS AUCUN PRÉTEXTE DE COÛT DE RÉPARATION : la section "### 💶 Estimation Chiffrée" ne doit JAMAIS apparaître !
+3. RÉPONDS CLAIREMENT EN INDIQUANT QU'IL FAUT PRÉCISER LA SITUATION.
+4. Pose-lui avec bienveillance les 4 questions ciblées suivantes pour pouvoir l'aider :
+   - 1. Quel est le symptôme précis (claquement, sifflement, fumée, vibration, trou à l'accélération, odeur...) ?
+   - 2. Dans quelles circonstances cela arrive-t-il (au démarrage à froid, à chaud, au freinage, à l'accélération...) ?
+   - 3. Un voyant est-il allumé au tableau de bord (couleur orange ou rouge, fixe ou clignotant) ?
+   - 4. Vers quel endroit localisez-vous le problème (moteur, roue avant/arrière, boîte de vitesses, échappement...) ?
+
+STRUCTURE DE RÉPONSE D'ATELIER (UNIQUEMENT LORSQUE LE SYMPTÔME EST PRÉCIS OU IDENTIFIÉ) :
+Si et seulement si l'utilisateur a fourni une description précise d'un symptôme ou d'une panne automobile réelle, utilise alors les 5 sections markdown professionnelles :
 
 ### 🔍 Analyse & Diagnostic Probable
 Explique avec clarté, bienveillance et précision le phénomène mécanique constaté, en citant spécifiquement le véhicule de l'utilisateur (${vehDesc.split('\n')[0]}).
@@ -499,6 +655,20 @@ router.post(['/chat', '/ai/chat'], aiChatLimiter, async (req, res) => {
     const cleanMessage = message.trim();
     if (cleanMessage.length > 500) {
       return res.status(400).json({ error: 'Le message est trop long (maximum 500 caractères autorisés).' });
+    }
+
+    // 0. Clarification Guard: if user message is vague, imprecise, erroneous, or lacks technical details
+    if (isVagueOrImpreciseMessage(cleanMessage)) {
+      const clarificationReply = buildClarificationResponse(vehicle, cleanMessage, language);
+      return res.json({
+        reply: clarificationReply,
+        provider: 'AutoDiag IA (Conseiller Mécanique)',
+        model: 'Clarification-Guard',
+        vehicle_applied: !!(vehicle && vehicle.brand),
+        db_context_applied: false,
+        status: 'clarification_needed',
+        fallback_applied: false
+      });
     }
 
     const pool = getPool();
@@ -770,41 +940,8 @@ L'allumage du témoin moteur sur votre **${vehSpec}** indique qu'un code défaut
 ### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
 - **Fourchette moyenne constatée :** **35 € à 65 €** pour la lecture valise de diagnostic seule (**120 € à 380 €** selon le capteur à remplacer).`;
     } else {
-      fallbackReply = isEn
-        ? `### 🔍 Analysis & Probable Diagnosis
-For your **${vehSpec}**, this symptom points to a mechanical or electrical anomaly requiring targeted inspection of powertrain and suspension components.
-
-### ⚠️ Urgency Level & Safety
-- **Severity:** Moderate
-- **Can you drive:** Yes with vigilance provided no red warning lights are illuminated on the instrument cluster.
-
-### 🛠️ Main Causes to Inspect
-- **1. Engine Peripheral Components:** Accessory drive belt, idler pulleys, intake air hoses or boost piping.
-- **2. Running Gear & Electrical Sensors:** Suspension bushings, wheel bearings, or engine management electronic sensors.
-
-### 💡 Recommended Actions & Advice
-- **Personal check:** Visually inspect fluid levels (coolant, oil, brake fluid) and note exact driving conditions when the issue occurs.
-- **Shop intervention:** Follow the AutoDiag guided troubleshooting workflow or have the vehicle inspected on a workshop lift.
-
-### 💶 Estimated Cost (Parts & Labor)
-- **Average estimated range:** Workshop diagnostic fee: **40 € to 70 €** depending on troubleshooting time spent.`
-        : `### 🔍 Analyse & Diagnostic Probable
-Pour votre **${vehSpec}**, ce symptôme signale une anomalie mécanique ou électrique nécessitant une identification ciblée des organes en mouvement.
-
-### ⚠️ Niveau d'Urgence & Sécurité
-- **Gravité :** Modérée
-- **Peut-on rouler :** Oui avec vigilance si aucun voyant rouge ne s'allume au combiné d'instruments.
-
-### 🛠️ Causes Principales à Contrôler
-- **1. Organes périphériques moteur :** Courroie d'accessoires, galets, durites d'admission d'air ou de suralimentation.
-- **2. Liaisons au sol ou alimentation :** Silentblocs, roulements de roues ou capteurs électroniques de gestion moteur.
-
-### 💡 Conseils & Actions Recommandées
-- **Contrôle personnel :** Contrôlez visuellement les niveaux de fluides (refroidissement, huile, freins) et notez les conditions précises du bruit (à froid, au braquage, en accélération).
-- **Intervention atelier :** Réalisez le test guidé dans AutoDiag ou confiez le véhicule pour un examen sur pont élévateur.
-
-### 💶 Estimation Chiffrée (Pièces & Main d'Œuvre)
-- **Fourchette moyenne constatée :** Diagnostic mécanique atelier : **40 € à 70 €** selon le temps passé en recherche de panne.`;
+      // If the query does not match any recognized technical fault pattern, ask for precision without inventing a cost
+      fallbackReply = buildClarificationResponse(vehicle, cleanMessage, language);
     }
 
     return res.json({

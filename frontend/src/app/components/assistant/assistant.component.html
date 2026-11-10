@@ -12,7 +12,7 @@
             class="veh-brand-logo-img"
           />
         } @else {
-          <span class="veh-car-icon">🚗</span>
+          <app-icon name="car" [size]="18" class="veh-car-icon"></app-icon>
         }
         <span class="veh-live-dot" [title]="'assistant.connected_veh' | translate"></span>
       </div>
@@ -52,9 +52,7 @@
           [title]="'assistant.new_chat' | translate"
           aria-label="Réinitialiser la discussion"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>
-          </svg>
+          <app-icon name="trash" [size]="15"></app-icon>
           <span class="action-btn-text">{{ 'assistant.new' | translate }}</span>
         </button>
       }
@@ -67,25 +65,7 @@
       <div class="message-row" [class.user-row]="msg.role === 'user'" [class.assistant-row]="msg.role === 'assistant'">
         @if (msg.role === 'assistant') {
           <div class="msg-avatar assistant-avatar-sm" aria-hidden="true" title="AutoDiag IA">
-            <svg class="robot-icon-svg" width="22" height="22" viewBox="0 0 32 32" fill="none">
-              <!-- Antenna with pulsing dot -->
-              <line x1="16" y1="2" x2="16" y2="7" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
-              <circle cx="16" cy="3" r="2.2" fill="#38bdf8"/>
-              <!-- Robot Head Shell -->
-              <rect x="5" y="7" width="22" height="18" rx="6" fill="#0c1829" stroke="#38bdf8" stroke-width="2"/>
-              <!-- Ears / Screws -->
-              <rect x="2" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
-              <rect x="27" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
-              <!-- Eye Visor Glass -->
-              <rect x="8" y="11" width="16" height="7" rx="3.5" fill="#1e293b"/>
-              <!-- High-Tech Glowing Eyes -->
-              <circle cx="12" cy="14.5" r="2" fill="#38bdf8"/>
-              <circle cx="20" cy="14.5" r="2" fill="#38bdf8"/>
-              <circle cx="12.7" cy="13.8" r="0.7" fill="#ffffff"/>
-              <circle cx="20.7" cy="13.8" r="0.7" fill="#ffffff"/>
-              <!-- Digital Smile -->
-              <path d="M11 20.5C12.5 22 19.5 22 21 20.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
+            <app-icon name="bot" [size]="18"></app-icon>
           </div>
         }
 
@@ -96,8 +76,8 @@
             @if (msg.role === 'assistant') {
               @if (msg.db_context_applied) {
                 <span class="meta-db-badge" title="Fiche technique certifiée issue de la base MySQL AutoDiag">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
-                  {{ 'assistant.mysql_badge' | translate }}
+                  <app-icon name="shield" [size]="11"></app-icon>
+                  <span>{{ 'assistant.mysql_badge' | translate }}</span>
                 </span>
               }
               
@@ -107,14 +87,12 @@
                 class="copy-msg-btn" 
                 (click)="copyMessage(msg.content, $index)" 
                 [title]="copiedIndex === $index ? ('assistant.copied' | translate) : ('assistant.copy' | translate)"
+                [attr.aria-label]="copiedIndex === $index ? ('assistant.copied' | translate) : ('assistant.copy' | translate)"
               >
                 @if (copiedIndex === $index) {
                   <span class="copied-badge">{{ 'assistant.copied' | translate }}</span>
                 } @else {
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
+                  <app-icon name="copy" [size]="13"></app-icon>
                 }
               </button>
             }
@@ -129,25 +107,7 @@
     @if (isThinking) {
       <div class="message-row assistant-row">
         <div class="msg-avatar assistant-avatar-sm" aria-hidden="true" title="AutoDiag IA">
-          <svg class="robot-icon-svg" width="22" height="22" viewBox="0 0 32 32" fill="none">
-            <!-- Antenna with pulsing dot -->
-            <line x1="16" y1="2" x2="16" y2="7" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
-            <circle cx="16" cy="3" r="2.2" fill="#38bdf8"/>
-            <!-- Robot Head Shell -->
-            <rect x="5" y="7" width="22" height="18" rx="6" fill="#0c1829" stroke="#38bdf8" stroke-width="2"/>
-            <!-- Ears / Screws -->
-            <rect x="2" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
-            <rect x="27" y="12" width="3" height="8" rx="1.5" fill="#38bdf8"/>
-            <!-- Eye Visor Glass -->
-            <rect x="8" y="11" width="16" height="7" rx="3.5" fill="#1e293b"/>
-            <!-- High-Tech Glowing Eyes -->
-            <circle cx="12" cy="14.5" r="2" fill="#38bdf8"/>
-            <circle cx="20" cy="14.5" r="2" fill="#38bdf8"/>
-            <circle cx="12.7" cy="13.8" r="0.7" fill="#ffffff"/>
-            <circle cx="20.7" cy="13.8" r="0.7" fill="#ffffff"/>
-            <!-- Digital Smile -->
-            <path d="M11 20.5C12.5 22 19.5 22 21 20.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
+          <app-icon name="bot" [size]="18"></app-icon>
         </div>
         <div class="message-bubble assistant-bubble typing-bubble">
           <div class="typing-indicator" aria-label="AutoDiag IA réfléchit">
@@ -165,7 +125,7 @@
       <span class="quick-prompts-hint">{{ 'assistant.examples_label' | translate }}</span>
       @for (p of quickPrompts; track p.label) {
         <button type="button" class="quick-prompt-btn" (click)="selectQuickPrompt(p.label)">
-          <span class="chip-icon">{{ p.icon }}</span>
+          <app-icon [name]="p.icon" [size]="14" class="chip-icon"></app-icon>
           <span class="chip-text">{{ p.label | translate }}</span>
         </button>
       }
@@ -193,41 +153,37 @@
         [title]="'assistant.send' | translate"
         [attr.aria-label]="'assistant.send' | translate"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="22" y1="2" x2="11" y2="13"/>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-        </svg>
+        <app-icon name="send" [size]="18"></app-icon>
       </button>
     </div>
     <div class="chat-privacy-notice">
-      <svg class="privacy-lock-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
+      <app-icon name="lock" [size]="12" class="privacy-lock-icon"></app-icon>
       <span>{{ 'Pour votre confidentialité, ne saisissez aucune donnée personnelle (nom, immatriculation, téléphone).' | translate }}</span>
     </div>
   </div>
 
 </div>
 
-<!-- Settings Glassmorphic Modal Overlay (Independent of chat layout) -->
+<!-- Settings Modal Overlay (Independent of chat layout) -->
 @if (showSettings) {
   <div class="settings-modal-backdrop" (click)="showSettings = false">
     <div class="settings-modal-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="settings-title">
       <div class="settings-modal-header">
         <div class="modal-title-box">
-          <span class="modal-title-icon">⚙️</span>
+          <app-icon name="wrench" [size]="20" class="modal-title-icon"></app-icon>
           <div>
             <h3 class="settings-modal-title" id="settings-title">{{ 'Configuration Moteur AutoDiag IA' | translate }}</h3>
             <p class="settings-modal-sub">{{ 'Sélectionnez le runtime d\'inférence pour votre assistant' | translate }}</p>
           </div>
         </div>
-        <button type="button" class="drawer-close-btn" (click)="showSettings = false" [attr.aria-label]="'Fermer' | translate">✕</button>
+        <button type="button" class="drawer-close-btn" (click)="showSettings = false" [attr.aria-label]="'Fermer' | translate">
+          <app-icon name="x" [size]="16"></app-icon>
+        </button>
       </div>
 
       <div class="settings-modal-body">
         <div class="settings-banner-info">
-          <span class="banner-icon">⚡</span>
+          <app-icon name="zap" [size]="16" class="banner-icon"></app-icon>
           <span>{{ 'Pour un diagnostic 100% gratuit et instantané, nous recommandons Groq Cloud (DeepSeek-R1 70B, sans carte bancaire).' | translate }}</span>
         </div>
 
@@ -303,11 +259,11 @@
             </div>
             <div class="key-help-link">
               @if (selectedProvider === 'groq') {
-                <span>💡 {{ 'Clé gratuite disponible en 30s sur' | translate }} <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></span>
+                <span>{{ 'Clé gratuite disponible en 30s sur' | translate }} <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></span>
               } @else if (selectedProvider === 'deepseek') {
-                <span>💡 {{ 'Clé disponible sur' | translate }} <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a></span>
+                <span>{{ 'Clé disponible sur' | translate }} <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a></span>
               } @else if (selectedProvider === 'openrouter') {
-                <span>💡 {{ 'Clé sur' | translate }} <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></span>
+                <span>{{ 'Clé sur' | translate }} <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></span>
               }
             </div>
           </div>

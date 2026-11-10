@@ -1,13 +1,11 @@
 <div class="screen-content">
   <!-- Top Navigation Bar -->
   <div class="screen-top-bar">
-    <button class="back-btn" (click)="goBack()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+    <button type="button" class="back-btn" (click)="goBack()" [attr.aria-label]="'Retour' | translate">
+      <app-icon name="arrow-left" [size]="20"></app-icon>
     </button>
     <div class="screen-brand-title">{{ 'Mon Garage & Outils' | translate }}</div>
-    <div class="help-btn-placeholder"></div>
+    <div class="help-btn-placeholder" aria-hidden="true"></div>
   </div>
 
   <!-- Page Header -->
@@ -17,11 +15,11 @@
   </div>
 
   <!-- Segmented Tabs Switcher -->
-  <div class="tab-switcher">
-    <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+  <div class="tab-switcher" role="tablist">
+    <button type="button" role="tab" [attr.aria-selected]="activeTab === 'history'" class="tab-btn" [class.active]="activeTab === 'history'" (click)="setTab('history')">
       {{ 'Diagnostics' | translate }}
     </button>
-    <button class="tab-btn" [class.active]="activeTab === 'maintenance'" (click)="setTab('maintenance')">
+    <button type="button" role="tab" [attr.aria-selected]="activeTab === 'maintenance'" class="tab-btn" [class.active]="activeTab === 'maintenance'" (click)="setTab('maintenance')">
       {{ 'Carnet d’entretien' | translate }}
     </button>
   </div>
@@ -73,9 +71,7 @@
         @for (record of maintenanceRecords; track record.id) {
           <div class="maintenance-item-card">
             <div class="maint-icon-box">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-              </svg>
+              <app-icon name="wrench" [size]="20"></app-icon>
             </div>
 
             <div class="maint-details">
