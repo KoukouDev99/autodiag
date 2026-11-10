@@ -45,4 +45,6 @@ Thumbs.db
 .idea/
 *.log
 backups/
+db/backups/
+*.sql
 logs/
