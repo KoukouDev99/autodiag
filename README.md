@@ -1,6 +1,71 @@
 # 🚗 AutoDiag · Copilote Mécanique Intelligent
 
-Application complète de diagnostic automobile grand public conçue fidèlement à partir du cahier des charges et du **Prototype V1** (`prototype V1.pdf` et `DiagAuto V3.txt`).
+Application web complète de diagnostic automobile grand public, combinant un **moteur décisionnel déterministe ISO 14229** (zéro hallucination), un **catalogue automobile multi-sources** (`MySQL`, `gor3a`, `NHTSA vPIC`, `@meterapp/vehicle-db`), des **guides de vérification technique avec schémas SVG dynamiques** et un **assistant mécanique IA bilingue (FR / EN)** avec garde-fou de sécurité intégré.
+
+---
+
+## 📸 Aperçu de l'Application (Mode Sombre & Mode Clair)
+
+### 1. Accueil & Grille des 64 Symptômes (`/`)
+Filtrage instantané par catégorie mécanique, recherche intelligente, véhicule actif et accès direct à l'assistant IA ou au diagnostic guidé.
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![Accueil Mode Sombre](.github/screenshots/home-dark.png) | ![Accueil Mode Clair](.github/screenshots/home-light.png) |
+
+---
+
+### 2. Mon Véhicule & Garage Multi-Sources (`/vehicle`)
+Gestion multi-véhicules avec logos constructeurs, sélection **Marque → Modèle → Année → Carburant → Motorisation** (sans filtrage abusif sur les carburants) alimentée par 164+ marques (`gor3a`, `NHTSA vPIC`, `MeterApp`).
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![Mon Véhicule Mode Sombre](.github/screenshots/vehicle-dark.png) | ![Mon Véhicule Mode Clair](.github/screenshots/vehicle-light.png) |
+
+---
+
+### 3. Diagnostic Guidé d'Atelier (`/diagnostic/:sessionId`)
+Arbre décisionnel étape par étape avec critères de conformité constructeur, protocoles de vérification sur véhicule, contrôle strict de la sécurité et défilement automatique vers le constat suivant.
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![Diagnostic Guidé Mode Sombre](.github/screenshots/quiz-dark.png) | ![Diagnostic Guidé Mode Clair](.github/screenshots/quiz-light.png) |
+
+---
+
+### 4. Rapport d'Expertise & Pistes de Panne (`/results/:sessionId`)
+Synthèse pondérée par le moteur de scoring (probabilités, sous-systèmes AMDEC, criticité opérationnelle, explication vulgarisée sans jargon et redirection directe vers l'assistant IA).
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![Résultats Mode Sombre](.github/screenshots/results-dark.png) | ![Résultats Mode Clair](.github/screenshots/results-light.png) |
+
+---
+
+### 5. Guide de Vérification & Schémas SVG Dynamiques (`/guide/:guideId`)
+15 illustrations vectorielles techniques dédiées adaptées automatiquement au composant inspecté : **batterie (12.64V), bougies d'allumage, pompe à carburant (3.8 bar), freins, démarreur, alternateur, refroidissement, capteur ABS, fusibles, filtre à air, huile moteur, pneus TPMS, échappement, courroie, multimètre**.
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![Guide SVG Mode Sombre](.github/screenshots/guide-dark.png) | ![Guide SVG Mode Clair](.github/screenshots/guide-light.png) |
+
+---
+
+### 6. Assistant Mécanique AutoDiag IA (`/assistant`)
+Conseiller conversationnel relié au contexte exact du véhicule actif et à la base technique certifiée MySQL (détection automatique des requêtes vagues/imprécises, alertes danger vital, estimation chiffrée des réparations, support Groq / DeepSeek / OpenRouter / OpenAI / Local).
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![AutoDiag IA Mode Sombre](.github/screenshots/assistant-dark.png) | ![AutoDiag IA Mode Clair](.github/screenshots/assistant-light.png) |
+
+---
+
+### 7. Historique des Diagnostics & Carnet d'Entretien (`/garage`)
+Suivi chronologique des diagnostics passés et en cours pour chaque véhicule du garage, associé au carnet d'entretien numérique.
+
+| Mode Sombre | Mode Clair |
+| :---: | :---: |
+| ![Historique Mode Sombre](.github/screenshots/garage-dark.png) | ![Historique Mode Clair](.github/screenshots/garage-light.png) |
 
 ---
 
@@ -8,110 +73,66 @@ Application complète de diagnostic automobile grand public conçue fidèlement 
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│               Frontend: Angular 20                     │
-│  • Composants Standalone & Signaux                    │
-│  • Design System V1 (Inter / Outfit / Palette sobre)   │
-│  • Mode Simulateur Mobile (402px) & Plein écran        │
-│  • Barre de navigation 5 destinations constantes       │
+│               Frontend: Angular 20.3                   │
+│  • Composants Standalone & Signaux                     │
+│  • Bilingue FR / EN dynamique                          │
+│  • Thème Sombre / Clair synchronisé + WCAG AA          │
+│  • Chatbot flottant global & Responsive Desktop/Mobile │
 └──────────────────────────┬─────────────────────────────┘
-                           │ HTTP REST
+                           │ HTTP REST API
                            ▼
 ┌────────────────────────────────────────────────────────┐
-│               Backend: Node.js + Express               │
-│  • Moteur de diagnostic & scoring dynamique            │
-│  • Règles de sécurité indépendantes (Safety Guard)     │
-│  • Endpoints REST : Véhicules, Symptômes, Guide, DTC   │
+│            Backend: Node.js + Express 5                │
+│  • Moteur de diagnostic déterministe & scoring         │
+│  • Garde-fou de sécurité (Safety Guard)                │
+│  • Catalogue multi-sources (MySQL, gor3a, NHTSA, DB)   │
+│  • Résolution sémantique des schémas de tests SVG      │
+│  • Sécurité : Helmet CSP, CORS, Rate Limiting, gzip    │
 └──────────────────────────┬─────────────────────────────┘
                            │ mysql2 / SQL
                            ▼
 ┌────────────────────────────────────────────────────────┐
 │              Base de Données: MySQL                    │
-│  • Schéma relationnel complet (`autodiag`)             │
-│  • Tables : users, vehicles, symptoms, hypotheses,     │
-│    questions, question_options, repair_guides,         │
-│    repair_steps, diagnostic_sessions, dtc_codes,       │
-│    maintenance_records                                 │
+│  • Schéma relationnel complet (`autodiag_dev`)         │
+│  • Symptômes, arbres décisionnels, hypothèses, guides, │
+│    codes défaut OBD-II, catalogue véhicules & garage   │
 └────────────────────────────────────────────────────────┘
 ```
-
----
-
-## 📱 Les 7 Écrans Implémentés (Conformes au Prototype V1)
-
-1. **Écran 1 · Accueil (`/`)**
-   - Salutation personnalisée : *"Bonjour Thomas, Comprendre la panne. Reprendre la route."*
-   - Carte Hero **Votre copilote mécanique** avec image réaliste de la Peugeot 208.
-   - Bouton d'action principal : `Commencer un diagnostic ->` (Sans jargon • ~3 min).
-   - Grille de 9 symptômes interactifs : *Ne démarre pas, Voyant moteur, Bruit inhabituel, Fumée, Surchauffe, Freins, Batterie, Problème électrique, Consommation excessive*.
-   - Carte de synthèse du véhicule principal (Peugeot 208, 2019, 1.2 PureTech 82 ch, 68 420 km).
-   - Section des diagnostics récents (*Démarrage difficile · En cours*, *Voyant moteur allumé · Archivé*).
-
-2. **Écran 2 · Mon Véhicule (`/vehicle`)**
-   - Fiche d'identification complète : Marque, Modèle, Année, Carburant, Motorisation, Kilométrage compteur.
-   - Boîte d'aide pédagogique Carte Grise.
-   - Enregistrement et mise à jour en temps réel dans la base MySQL.
-
-3. **Écran 3 · Diagnostic Guidé (`/diagnostic/:sessionId`)**
-   - Stepper d'avancement : *Question 2 sur 5 · Le démarrage*.
-   - Rappel du symptôme : *Votre symptôme : la voiture ne démarre pas*.
-   - Cartes de réponses à choix unique avec icônes dédiées et radios intégrés.
-   - Encadré de sécurité : *Inutile de réessayer plusieurs fois. Ne forcez pas le démarrage.*
-   - Mention rassurante : *Aucun lecteur OBD2 nécessaire*.
-
-4. **Écran 4 · Vos Pistes de Diagnostic (`/results/:sessionId`)**
-   - Synthèse d'analyse : *Une alimentation électrique faible est une piste à explorer.*
-   - Avertissement prudent : *Des hypothèses, pas une certitude.*
-   - Classement des causes par priorité calculée par le moteur de scoring :
-     - **PRIORITÉ 1 (Piste principale)** : Batterie faible ou déchargée (120–250 €¹, Facile · Observation)
-     - **PRIORITÉ 2 (À envisager)** : Connexion de batterie dégradée (30–90 €¹, Facile · Observation)
-     - **PRIORITÉ 3 (Autre possibilité)** : Démarreur ou circuit en défaut (250–600 €¹, Professionnel)
-   - Bouton : `Voir les étapes de réparation ->`.
-
-5. **Écran 5 · Guide de Réparation (`/guide/:guideId`)**
-   - Titre : *Contrôler sans démonter* (Facile · 5 min · 3 étapes).
-   - Encadré strict : *La sécurité avant tout* (Garez-vous hors circulation, clé retirée...).
-   - Outils nécessaires : Lampe de poche, Notice du véhicule.
-   - Étape 1 : *Repérez la batterie, sans la toucher* avec illustration du compartiment moteur.
-   - Aperçu des prochaines étapes (Observer à distance, Faire tester).
-   - Procédure d'arrêt d'urgence : *Un signe anormal ? Arrêtez le contrôle.*
-
-6. **Écran 6 · Mon Garage & Historique (`/garage`)**
-   - Historique complet des sessions de diagnostic avec états et dates.
-   - Carnet d'entretien numérique de la Peugeot 208 (Vidange, liquide de frein...).
-   - **Décodeur de codes défaut OBD2 (DTC)** : Recherche manuelle de codes (P0300, P0420, P0562, etc.) avec causes probables, niveau d'urgence et conseils pour le garagiste.
-
-7. **Écran 7 · Design System (`/design-system`)**
-   - Présentation de la palette (Bleu nuit `#101828`, Action `#2563EB`, Fond `#F3F5F9`, etc.).
-   - Spécifications typographiques (Inter / Outfit) et grille mobile 402 px.
-   - Éléments et composants réutilisables.
 
 ---
 
 ## 🚀 Démarrage Rapide
 
 ### 1. Prérequis
-- **Node.js** (v18+) & **npm**
-- **MySQL** démarré en local (ex: XAMPP, WAMP ou service MySQL standard sur le port 3306)
+- **Node.js** (v18+ recommandé) & **npm**
+- **MySQL / MariaDB** démarré en local sur le port `3306`
 
-### 2. Démarrer le Backend
+### 2. Configuration de l'environnement
+Copiez le fichier d'exemple dans `backend/` et ajustez vos identifiants si nécessaire :
+```bash
+cp backend/.env.example backend/.env
+```
+
+### 3. Démarrer le Backend
 ```bash
 cd backend
 npm install
 npm start
 ```
-Le serveur Node.js démarrera sur **`http://localhost:3000`**, créera automatiquement la base de données `autodiag`, exécutera les scripts SQL et initialisera les données de test.
+Le serveur Node.js démarre sur **`http://localhost:3000`**, vérifie/initialise automatiquement le schéma MySQL et charge les données techniques.
 
-### 3. Démarrer le Frontend Angular
+### 4. Démarrer le Frontend Angular
 ```bash
 cd frontend
 npm install
 npm start
 ```
-L'application Angular sera accessible sur **`http://localhost:4200`**.
+L'application Angular est accessible sur **`http://localhost:4200`**.
 
 ---
 
-## 🎨 Options d'Affichage
-- **Simulateur Mobile (402 px)** : Cliquez sur le bouton *"Simulateur Mobile"* dans la barre supérieure pour vivre l'expérience ergonomique exacte de l'application smartphone avec navigation tactile et Dynamic Island.
-- **Plein Écran Responsive** : Basculez en mode plein écran pour utiliser l'application de façon fluide sur tablette ou ordinateur de bureau.
-- **Bouton SOS Panne** : Déclenche les consignes d'urgence immédiate (gilet jaune, triangle, numéros utiles 112).
+## ✨ Fonctionnalités Clés
+- **Bilingue FR / EN complet** : Changement de langue instantané depuis la barre supérieure.
+- **Thème Clair / Sombre** : Persistance automatique des préférences utilisateur (`localStorage` + `prefers-color-scheme`).
+- **Bouton Urgence SOS** : Consignes d'arrêt et numéros d'urgence accessibles à tout moment.
+- **Zéro Hallucination** : Les diagnostics guidés s'appuient exclusivement sur des règles et arbres décisionnels déterministes vérifiés en base MySQL.
